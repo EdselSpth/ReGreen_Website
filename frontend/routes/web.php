@@ -9,3 +9,7 @@ Route::get('/', function () {
 Route::get('/keuntungan', function () {
     return view('page.keuntungan');
 });
+
+Route::get('/bankSampah', function () {
+    return view('page.bankSampah');
+});
