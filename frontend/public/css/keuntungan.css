@@ -1,0 +1,171 @@
+:root {
+  --hijau-tua-regreen: #558B3E;
+  --hijau-muda-regreen: #D6E6C4;
+  --kuning-edit: #ffc107;
+  --merah-hapus: #dc3545;
+  --biru-password: #72c3f5;
+  --border-hijau: #b5c7a3;
+  --abu-bg: #f8f9fa;
+  --abu-card: #e6eadf;
+}
+
+/* ================= GLOBAL ================= */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f8f9fa;
+}
+
+.container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar {
+  width: 220px;
+  background-color: #dce8c6;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px 0;
+}
+
+.logo {
+  max-width: 180px;
+  width: 80%;
+  display: block;
+  margin: 20px auto;
+}
+
+.sidebar a {
+  color: black;
+  font-weight: bold;
+  text-decoration: none;
+  display: block;
+  padding: 10px 20px;
+  border-radius: 6px;
+  transition: 0.2s;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+  background-color: #cdd9bf;
+}
+
+.logout {
+  margin-top: auto;
+  padding: 20px;
+  border-top: 1px solid #b5c7a3;
+}
+
+/* ================= CONTENT ================= */
+.content {
+  flex: 1;
+  background-color: #fff;
+  overflow-y: auto;
+}
+
+.page-content {
+  padding: 50px 60px;
+}
+
+.header {
+  background-color: var(--hijau-tua-regreen);
+  color: white;
+  padding: 20px 30px;
+  font-size: 1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-family: 'Poppins', sans-serif;
+}
+
+.table-container {
+  background-color: #d6e6c4;
+  border: 2px solid #5f8f3e;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background-color: #c7d9b6;
+}
+
+th, td {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid #b4c8a4;
+}
+
+tbody tr:hover {
+  background-color: #e8f2da;
+}
+
+.btn {
+  border: none;
+  border-radius: 5px;
+  padding: 5px 14px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-terima {
+  background-color: #558b3e;
+  color: white;
+}
+
+.btn-terima:hover {
+  background-color: #45a049;
+}
+
+.btn-tolak {
+  background-color: #8b3e3e;
+  color: white;
+}
+
+.btn-tolak:hover {
+  background-color: #a04545;
+}
+
+.status-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-text {
+  font-weight: 700;
+  font-size: 14px;
+  padding: 4px 0;
+}
+
+.status-text.accepted {
+  color: #558b3e;
+}
+
+.status-text.rejected {
+  color: #8b3e3e;
+}
+
+.edit-link {
+  font-size: 12px;
+  color: #666;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.edit-link:hover {
+  background-color: rgba(0,0,0,0.05);
+  color: #333;
+}
+
