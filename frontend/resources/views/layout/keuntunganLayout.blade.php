@@ -1,29 +1,44 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <title>@yield('title')</title>
-    <link rel="stylesheet" href="{{ asset('css/keuntungan.css') }}">
-</head>
-<body>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>@yield('title')</title>
 
-<div class="container">
+  <link rel="stylesheet" href="{{ asset('css/keuntungan.css') }}">
+</head>
+
+<body>
+  <div class="container">
+    <!-- Sidebar -->
     <nav class="sidebar">
-        <img src="{{ asset('assets/logo-regreen-with-text.png') }}" class="logo">
-        <a href="/keuntungan" class="active">Keuntungan</a>
+      <img src="{{ asset('assets/logo-regreen-with-text.png') }}" alt="ReGreen Logo" class="logo">
+
+      <a href="#">Beranda</a>
+      <a href="#">Pengambilan Sampah</a>
+      <a href="#">Pendaftaran Area</a>
+      <a href="{{ url('/keuntungan') }}" class="active">Keuntungan</a>
+      <a href="#">Data Bank Sampah</a>
+      <a href="#">Kelola Akun</a>
+      <a href="#">Kategori Sampah</a>
+
+      <div class="logout">
+        <a href="#" id="logoutBtn">Logout</a>
+      </div>
     </nav>
 
+    <!-- CONTENT -->
     <main class="content">
-        <header class="header">
-            @yield('header')
-        </header>
+      <header class="header">
+        @yield('header')
+      </header>
 
-        <div class="page-content">
-            @yield('content')
-        </div>
+      <div class="page-content">
+        @yield('content')
+      </div>
     </main>
-</div>
+  </div>
 
-<script src="{{ asset('js/keuntungan.js') }}"></script>
+  <script src="{{ asset('js/keuntungan.js') }}"></script>
 </body>
 </html>
