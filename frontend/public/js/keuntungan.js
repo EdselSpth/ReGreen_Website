@@ -1,90 +1,97 @@
-document.getElementById("logoutBtn").addEventListener("click", function (e) {
-  e.preventDefault();
-  if (confirm("Apakah Anda yakin ingin logout?")) {
-    window.location.href = "#";
+document.addEventListener("DOMContentLoaded", () => {
+
+  const tblPending = document.querySelector("#tblPending tbody");
+  const tblHistory = document.querySelector("#tblHistory tbody");
+
+  loadPending();
+  loadHistory();
+
+  function loadPending() {
+    fetch("http://localhost:3000/api/keuntungan")
+      .then(res => res.json())
+      .then(data => {
+        tblPending.innerHTML = "";
+        data.forEach(item => addPendingRow(item));
+        updateNumber(tblPending);
+      });
   }
-});
 
-const tblPending = document.querySelector("#tblPending tbody");
-const tblHistory = document.querySelector("#tblHistory tbody");
+  function loadHistory() {
+    fetch("http://localhost:3000/api/keuntungan/history")
+      .then(res => res.json())
+      .then(data => {
+        tblHistory.innerHTML = "";
+        data.forEach(item => addHistoryRow(item));
+        updateNumber(tblHistory);
+      });
+  }
 
-// Load dari API Node.js
-fetch("http://localhost:3000/api/keuntungan")
-  .then(res => res.json())
-  .then(data => {
-    data.forEach(item => addRowToPending(item));
-    updateNumbers(tblPending);
+  function addPendingRow(item) {
+    const tr = document.createElement("tr");
+    tr.dataset.id = item.id;
+
+    tr.innerHTML = `
+      <td></td>
+      <td>${item.nama_pengguna}</td>
+      <td>Rp ${Number(item.nominal).toLocaleString("id-ID")}</td>
+      <td>${item.rekening ?? "-"}</td>
+      <td>${item.metode ?? "-"}</td>
+      <td>
+        <button class="btn btn-terima">Terima</button>
+        <button class="btn btn-tolak">Tolak</button>
+      </td>
+    `;
+
+    tblPending.appendChild(tr);
+  }
+
+  function addHistoryRow(item) {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td></td>
+      <td>${item.nama_pengguna}</td>
+      <td>Rp ${Number(item.nominal).toLocaleString("id-ID")}</td>
+      <td>${item.rekening ?? "-"}</td>
+      <td>${item.metode ?? "-"}</td>
+      <td>
+        <span class="status-text ${item.status === "diterima" ? "accepted" : "rejected"}">
+          ${item.status}
+        </span>
+      </td>
+    `;
+
+    tblHistory.appendChild(tr);
+  }
+
+  function updateNumber(tbody) {
+    [...tbody.rows].forEach((row, i) => row.cells[0].innerText = i + 1);
+  }
+
+  document.addEventListener("click", e => {
+    if (e.target.classList.contains("btn-terima")) {
+      handleAction(e.target, "diterima");
+    }
+
+    if (e.target.classList.contains("btn-tolak")) {
+      handleAction(e.target, "ditolak");
+    }
   });
 
-function addRowToPending(item) {
-  const row = document.createElement("tr");
-  row.innerHTML = `
-    <td></td>
-    <td>${item.nama}</td>
-    <td>${item.nominal}</td>
-    <td>${item.rekening}</td>
-    <td>${item.metode}</td>
-    <td>
-      <button class="btn btn-terima">Terima</button>
-      <button class="btn btn-tolak">Tolak</button>
-    </td>
-  `;
-  tblPending.appendChild(row);
-}
+  function handleAction(button, status) {
+    const row = button.closest("tr");
+    const id = row.dataset.id;
 
-function addRowToHistory(row, status) {
-  const cells = row.querySelectorAll("td");
-  const newRow = document.createElement("tr");
-
-  newRow.innerHTML = `
-    <td></td>
-    <td>${cells[1].textContent}</td>
-    <td>${cells[2].textContent}</td>
-    <td>${cells[3].textContent}</td>
-    <td>${cells[4].textContent}</td>
-    <td>
-      <span class="status-text ${status === "Diterima" ? "accepted" : "rejected"}">
-        ${status}
-      </span>
-      <a class="edit-link" data-status="${status}">Ubah</a>
-    </td>
-  `;
-
-  tblHistory.appendChild(newRow);
-  updateNumbers(tblHistory);
-}
-  
-function updateNumbers(tbody) {
-  [...tbody.rows].forEach((row, i) => {
-    row.cells[0].textContent = i + 1;
-  });
-}
-
-document.addEventListener("click", function (e) {
-  const acceptBtn = e.target.closest(".btn-terima");
-  const rejectBtn = e.target.closest(".btn-tolak");
-  const editBtn = e.target.closest(".edit-link");
-
-  if (acceptBtn) {
-    const row = acceptBtn.closest("tr");
-    tblPending.removeChild(row);
-    addRowToHistory(row, "Diterima");
-    updateNumbers(tblPending);
+    fetch(`http://localhost:3000/api/keuntungan/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status })
+    })
+    .then(res => res.json())
+    .then(() => {
+      loadPending();
+      loadHistory();
+    });
   }
 
-  if (rejectBtn) {
-    const row = rejectBtn.closest("tr");
-    tblPending.removeChild(row);
-    addRowToHistory(row, "Ditolak");
-    updateNumbers(tblPending);
-  }
-
-  if (editBtn) {
-    const statusSpan = editBtn.previousElementSibling;
-    const isAccepted = statusSpan.textContent.trim() === "Diterima";
-
-    statusSpan.textContent = isAccepted ? "Ditolak" : "Diterima";
-    statusSpan.classList.toggle("accepted");
-    statusSpan.classList.toggle("rejected");
-  }
 });

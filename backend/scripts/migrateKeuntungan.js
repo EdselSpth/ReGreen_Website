@@ -1,23 +1,23 @@
-const fs = require("fs");
-const path = require("path");
 const db = require("../config/db");
 
-const dataPath = path.join(__dirname, "../data/dataKeuntungan.json");
-const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+const createTableQuery = `
+CREATE TABLE IF NOT EXISTS penarikan_keuntungan (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  firebase_uid VARCHAR(128),
+  nama_pengguna VARCHAR(100),
+  nominal INT,
+  rekening VARCHAR(50) NULL,
+  metode VARCHAR(50) NULL,
+  status ENUM('pending','diterima','ditolak') DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+`;
 
-data.forEach(item => {
-  const sql = `
-    INSERT INTO keuntungan (nama, nominal, rekening, metode)
-    VALUES (?, ?, ?, ?)
-  `;
-
-  db.query(
-    sql,
-    [item.nama, item.nominal, item.rekening, item.metode],
-    err => {
-      if (err) console.error(err);
-    }
-  );
+db.query(createTableQuery, (err) => {
+  if (err) {
+    console.error("Failed create table:", err);
+  } else {
+    console.log("Table penarikan_keuntungan ready");
+  }
 });
-
-console.log("Migrasi data keuntungan selesai");
