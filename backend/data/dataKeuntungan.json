@@ -1,13 +1,11 @@
 [
   {
-    "id": 1,
     "nama": "Budi Santoso",
     "nominal": "Rp150.000,00",
     "rekening": "1234567890",
     "metode": "BCA"
   },
   {
-    "id": 2,
     "nama": "Siti Aminah",
     "nominal": "Rp200.000,00",
     "rekening": "0987654321",
