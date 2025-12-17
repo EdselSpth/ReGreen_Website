@@ -53,7 +53,7 @@ function addRowToHistory(row, status) {
   tblHistory.appendChild(newRow);
   updateNumbers(tblHistory);
 }
-
+  
 function updateNumbers(tbody) {
   [...tbody.rows].forEach((row, i) => {
     row.cells[0].textContent = i + 1;
