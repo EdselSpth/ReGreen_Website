@@ -33,19 +33,30 @@ exports.updateStatus = (req, res) => {
 };
 
 exports.create = (req, res) => {
-  const { firebase_uid, nama_pengguna, nominal } = req.body;
+  const {
+    firebase_uid,
+    nama_pengguna,
+    nominal,
+    rekening,
+    metode
+  } = req.body;
 
   const sql = `
     INSERT INTO penarikan_keuntungan
-    (firebase_uid, nama_pengguna, nominal)
-    VALUES (?, ?, ?)
+    (firebase_uid, nama_pengguna, nominal, rekening, metode)
+    VALUES (?, ?, ?, ?, ?)
   `;
 
-  db.query(sql, [firebase_uid, nama_pengguna, nominal], (err) => {
-    if (err) return res.status(500).json(err);
-    res.json({ message: "Penarikan berhasil diajukan" });
-  });
+  db.query(
+    sql,
+    [firebase_uid, nama_pengguna, nominal, rekening, metode],
+    err => {
+      if (err) return res.status(500).json(err);
+      res.json({ message: "Penarikan berhasil diajukan" });
+    }
+  );
 };
+
 
 exports.getByUser = (req, res) => {
   const { uid } = req.params;
