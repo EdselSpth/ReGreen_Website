@@ -1,9 +1,20 @@
-const fs = require("fs");
-const path = require("path");
-
-const filePath = path.join(__dirname, "../data/dataKeuntungan.json");
+const db = require("../config/db");
 
 exports.getAll = (req, res) => {
-  const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-  res.json(data);
+  const sql = "SELECT * FROM keuntungan WHERE status = 'pending'";
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: "Database error" });
+    }
+    res.json(results);
+  });
+};
+
+exports.getHistory = (req, res) => {
+  const sql = "SELECT * FROM keuntungan WHERE status != 'pending'";
+  db.query(sql, (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json(result);
+  });
 };
