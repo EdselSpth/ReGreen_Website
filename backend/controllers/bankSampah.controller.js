@@ -1,70 +1,89 @@
-const fs = require("fs");
-const path = require("path");
-
-const filePath = path.join(__dirname, "../data/dataBankSampah.json");
+const db = require("../config/db");
 
 exports.getAll = (req, res) => {
-  const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    res.json(data);
+  const sql = "SELECT * FROM bank_sampah ORDER BY id DESC";
+  db.query(sql, (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: "Gagal ambil data", error: err });
+    }
+    res.json(results);
+  });
 };
 
 exports.getById = (req, res) => {
-  const id = req.params.id;
-  const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-  const item = data.find((entry) => entry.id === id);
-  if (item) {
-    res.json(item);
-  } else {
-    res.status(404).json({ message: "Item not found" });
-  }
+  const sql = "SELECT * FROM bank_sampah WHERE id = ?";
+  db.query(sql, [req.params.id], (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: "Query error", error: err });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Data tidak ditemukan" });
+    }
+    res.json(results[0]);
+  });
 };
 
 exports.create = (req, res) => {
-  const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  const { nama, alamat, jenis, status } = req.body;
 
-  let maxId = 0;
-  for (const entry of data) {
-    const n = parseInt(entry.id, 10);
-    if (!Number.isNaN(n) && n > maxId) {
-      maxId = n;
+  const sql = `
+    INSERT INTO bank_sampah (nama, alamat, jenis, status)
+    VALUES (?, ?, ?, ?)
+  `;
+
+  db.query(sql, [nama, alamat, jenis, status], (err, result) => {
+    if (err) {
+      return res.status(500).json({ message: "Gagal tambah data", error: err });
     }
-  }
-  const nextId = (maxId + 1).toString();
 
-  const newItem = {
-    id: nextId,
-    ...req.body
-  };
-
-  data.push(newItem);
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-  res.status(201).json(newItem);
+    res.status(201).json({
+      id: result.insertId,
+      nama,
+      alamat,
+      jenis,
+      status
+    });
+  });
 };
 
-
 exports.update = (req, res) => {
-    const id = req.params.id;
-    const updatedItem = req.body;
-    const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    const index = data.findIndex((entry) => entry.id === id);
-    if (index !== -1) {
-        data[index] = { ...data[index], ...updatedItem };
-        fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-        res.json(data[index]);
-    } else {
-        res.status(404).json({ message: "Item not found" });
+  const { nama, alamat, jenis, status } = req.body;
+
+  const sql = `
+    UPDATE bank_sampah
+    SET nama = ?, alamat = ?, jenis = ?, status = ?
+    WHERE id = ?
+  `;
+
+  db.query(
+    sql,
+    [nama, alamat, jenis, status, req.params.id],
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({ message: "Gagal update data", error: err });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Data tidak ditemukan" });
+      }
+
+      res.json({ message: "Data berhasil diupdate" });
     }
+  );
 };
 
 exports.delete = (req, res) => {
-    const id = req.params.id;
-    const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    const index = data.findIndex((entry) => entry.id === id);
-    if (index !== -1) {
-        const deletedItem = data.splice(index, 1);
-        fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-        res.json(deletedItem[0]);
-    } else {
-        res.status(404).json({ message: "Item not found" });
-    } 
+  const sql = "DELETE FROM bank_sampah WHERE id = ?";
+
+  db.query(sql, [req.params.id], (err, result) => {
+    if (err) {
+      return res.status(500).json({ message: "Gagal hapus data", error: err });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Data tidak ditemukan" });
+    }
+
+    res.json({ message: "Data berhasil dihapus" });
+  });
 };
