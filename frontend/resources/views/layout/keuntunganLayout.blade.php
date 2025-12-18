@@ -18,7 +18,7 @@
       <a href="#">Pengambilan Sampah</a>
       <a href="#">Pendaftaran Area</a>
       <a href="{{ url('/keuntungan') }}" class="active">Keuntungan</a>
-      <a href="#">Data Bank Sampah</a>
+      <a href="{{ url('/bankSampah') }}">Data Bank Sampah</a>
       <a href="#">Kelola Akun</a>
       <a href="#">Kategori Sampah</a>
 
