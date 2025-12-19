@@ -1,79 +1,130 @@
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("keuntungan.js loaded");
+    console.log("keuntungan.js loaded");
 
-  const tblPending = document.querySelector("#tblPending tbody");
-  const tblHistory = document.querySelector("#tblHistory tbody");
+    const tblPending = document.querySelector("#tblPending tbody");
+    const tblHistory = document.querySelector("#tblHistory tbody");
 
-  loadPending();
-  loadHistory();
+    // Panggil fungsi saat halaman dimuat
+    loadPending();
+    loadHistory();
 
-  function loadPending() {
-    fetch("http://localhost:3000/api/keuntungan")
-      .then(res => res.json())
-      .then(data => {
-        console.log("PENDING:", data);
-        tblPending.innerHTML = "";
+    // --- FUNGSI LOAD DATA ---
 
-        data.forEach(item => addPendingRow(item));
-        updateNumber(tblPending);
-      })
-      .catch(err => console.error("Pending error:", err));
-  }
+    function loadPending() {
+        fetch("http://localhost:3000/api/keuntungan")
+            .then(res => res.json())
+            .then(response => {
+                console.log("Response PENDING:", response);
+                tblPending.innerHTML = "";
 
-  function loadHistory() {
-    fetch("http://localhost:3000/api/keuntungan/history")
-      .then(res => res.json())
-      .then(data => {
-        console.log("HISTORY:", data);
-        tblHistory.innerHTML("");
+                // Menangani dua kemungkinan: 
+                // 1. Array langsung: [{}, {}] 
+                // 2. Dibungkus utility success: { data: [{}, {}] }
+                const rows = Array.isArray(response) ? response : response.data;
 
-        data.forEach(item => addHistoryRow(item));
-        updateNumber(tblHistory);
-      })
-      .catch(err => console.error("History error:", err));
-  }
+                if (rows && Array.isArray(rows)) {
+                    rows.forEach(item => addPendingRow(item));
+                    updateNumber(tblPending);
+                } else {
+                    console.warn("Format data pending tidak sesuai atau kosong");
+                }
+            })
+            .catch(err => console.error("Pending error:", err));
+    }
 
-  function addPendingRow(item) {
-    const tr = document.createElement("tr");
-    tr.dataset.id = item.id;
+    function loadHistory() {
+        fetch("http://localhost:3000/api/keuntungan/history")
+            .then(res => res.json())
+            .then(response => {
+                console.log("Response HISTORY:", response);
+                
+                // PERBAIKAN: Sebelumnya innerHTML("") yang menyebabkan error
+                tblHistory.innerHTML = ""; 
 
-    tr.innerHTML = `
-      <td></td>
-      <td>${item.nama_pengguna}</td>
-      <td>Rp ${Number(item.nominal).toLocaleString("id-ID")}</td>
-      <td>${item.rekening ?? "-"}</td>
-      <td>${item.metode ?? "-"}</td>
-      <td>
-        <button class="btn btn-terima">Terima</button>
-        <button class="btn btn-tolak">Tolak</button>
-      </td>
-    `;
+                const rows = Array.isArray(response) ? response : response.data;
 
-    tblPending.appendChild(tr);
-  }
+                if (rows && Array.isArray(rows)) {
+                    rows.forEach(item => addHistoryRow(item));
+                    updateNumber(tblHistory);
+                } else {
+                    console.warn("Format data history tidak sesuai atau kosong");
+                }
+            })
+            .catch(err => console.error("History error:", err));
+    }
 
-  function addHistoryRow(item) {
-    const tr = document.createElement("tr");
+    // --- FUNGSI MANIPULASI DOM ---
 
-    tr.innerHTML = `
-      <td></td>
-      <td>${item.nama_pengguna}</td>
-      <td>Rp ${Number(item.nominal).toLocaleString("id-ID")}</td>
-      <td>${item.rekening ?? "-"}</td>
-      <td>${item.metode ?? "-"}</td>
-      <td>
-        <span class="status-text ${item.status === "diterima" ? "accepted" : "rejected"}">
-          ${item.status}
-        </span>
-      </td>
-    `;
+    function addPendingRow(item) {
+        const tr = document.createElement("tr");
+        tr.dataset.id = item.id;
 
-    tblHistory.appendChild(tr);
-  }
+        tr.innerHTML = `
+            <td></td>
+            <td>${item.nama_pengguna || "Tanpa Nama"}</td>
+            <td>Rp ${Number(item.nominal || 0).toLocaleString("id-ID")}</td>
+            <td>${item.rekening ?? "-"}</td>
+            <td>${item.metode ?? "-"}</td>
+            <td>
+                <button class="btn btn-terima" onclick="updateStatus(${item.id}, 'diterima')">Terima</button>
+                <button class="btn btn-tolak" onclick="updateStatus(${item.id}, 'ditolak')">Tolak</button>
+            </td>
+        `;
 
-  function updateNumber(tbody) {
-    [...tbody.rows].forEach((row, i) => {
-      row.cells[0].innerText = i + 1;
-    });
-  }
+        tblPending.appendChild(tr);
+    }
+
+    function addHistoryRow(item) {
+        const tr = document.createElement("tr");
+
+        // Tentukan class warna berdasarkan status
+        const statusClass = item.status === "diterima" ? "accepted" : "rejected";
+
+        tr.innerHTML = `
+            <td></td>
+            <td>${item.nama_pengguna || "Tanpa Nama"}</td>
+            <td>Rp ${Number(item.nominal || 0).toLocaleString("id-ID")}</td>
+            <td>${item.rekening ?? "-"}</td>
+            <td>${item.metode ?? "-"}</td>
+            <td>
+                <span class="status-text ${statusClass}">
+                    ${item.status.toUpperCase()}
+                </span>
+            </td>
+        `;
+
+        tblHistory.appendChild(tr);
+    }
+
+    function updateNumber(tbody) {
+        [...tbody.rows].forEach((row, i) => {
+            if (row.cells[0]) {
+                row.cells[0].innerText = i + 1;
+            }
+        });
+    }
 });
+
+// Fungsi updateStatus diletakkan di luar DOMContentLoaded agar bisa dipanggil atribut onclick
+async function updateStatus(id, status) {
+    if (!confirm(`Apakah Anda yakin ingin mengubah status menjadi ${status}?`)) return;
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/keuntungan/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status })
+        });
+
+        if (response.ok) {
+            alert("Status berhasil diperbarui");
+            location.reload(); // Refresh halaman untuk melihat perubahan
+        } else {
+            const errData = await response.json();
+            alert("Gagal update: " + (errData.message || "Unknown error"));
+        }
+    } catch (err) {
+        console.error("Update error:", err);
+        alert("Terjadi kesalahan koneksi");
+    }
+}
