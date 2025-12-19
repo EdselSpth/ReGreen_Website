@@ -4,6 +4,7 @@ require("./scripts/migrateVideo");
 require("./scripts/migrateArtikel");
 require("./scripts/migrateAreaUser");
 require("./scripts/migrateAreaAdmin");
+require("./scripts/migrateJenisSampah")
 
 const express = require("express");
 const cors = require("cors");
@@ -19,6 +20,7 @@ app.use("/api/video", require("./routes/videoEdukasi.routes"));
 app.use("/api/artikel", require("./routes/artikelEdukasi.routes"));
 app.use("/api/area", require("./routes/pendaftaranAreaUser.routes"));
 app.use("/api/areaAdm", require("./routes/pendaftaranAreaAdmin.routes"));
+app.use("/api/jenisSampah", require("./routes/jenisSampah.routes"));
 
 app.listen(3000 ,() => {
   console.log("Server running at http://localhost:3000");
