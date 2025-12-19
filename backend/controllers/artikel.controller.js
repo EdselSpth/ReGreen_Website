@@ -66,6 +66,7 @@ exports.update = (req, res) => {
         return success(res, 200, null, "Artikel berhasil diperbarui");
     });
 };
+
 exports.delete = (req, res) => {
     const { id } = req.params;
     const sql = "DELETE FROM artikel WHERE id = ?";
