@@ -17,7 +17,7 @@
     <a href="#">Beranda</a>
     <a href="#">Pengambilan Sampah</a>
     <a href="#">Pendaftaran Area</a>
-    <a href="#">Keuntungan</a>
+    <a href="{{ url('/keuntungan') }}">Keuntungan</a>
     <a href="#" class="active">Data Bank Sampah</a>
     <a href="#">Kelola Akun</a>
     <a href="#">Kategori Sampah</a>
@@ -44,5 +44,6 @@
 @yield('modal')
 
 <script src="{{ asset('js/bankSampah.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

@@ -113,4 +113,8 @@ DATA BANK SAMPAH
     </div>
   </div>
 </div>
+<div id="loading-overlay">
+  <div class="spinner"></div>
+</div>
+
 @endsection
