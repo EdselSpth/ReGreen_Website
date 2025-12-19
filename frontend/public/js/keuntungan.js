@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("keuntungan.js loaded");
 
   const tblPending = document.querySelector("#tblPending tbody");
   const tblHistory = document.querySelector("#tblHistory tbody");
@@ -10,20 +11,26 @@ document.addEventListener("DOMContentLoaded", () => {
     fetch("http://localhost:3000/api/keuntungan")
       .then(res => res.json())
       .then(data => {
+        console.log("PENDING:", data);
         tblPending.innerHTML = "";
+
         data.forEach(item => addPendingRow(item));
         updateNumber(tblPending);
-      });
+      })
+      .catch(err => console.error("Pending error:", err));
   }
 
   function loadHistory() {
     fetch("http://localhost:3000/api/keuntungan/history")
       .then(res => res.json())
       .then(data => {
-        tblHistory.innerHTML = "";
+        console.log("HISTORY:", data);
+        tblHistory.innerHTML("");
+
         data.forEach(item => addHistoryRow(item));
         updateNumber(tblHistory);
-      });
+      })
+      .catch(err => console.error("History error:", err));
   }
 
   function addPendingRow(item) {
@@ -65,33 +72,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateNumber(tbody) {
-    [...tbody.rows].forEach((row, i) => row.cells[0].innerText = i + 1);
-  }
-
-  document.addEventListener("click", e => {
-    if (e.target.classList.contains("btn-terima")) {
-      handleAction(e.target, "diterima");
-    }
-
-    if (e.target.classList.contains("btn-tolak")) {
-      handleAction(e.target, "ditolak");
-    }
-  });
-
-  function handleAction(button, status) {
-    const row = button.closest("tr");
-    const id = row.dataset.id;
-
-    fetch(`http://localhost:3000/api/keuntungan/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status })
-    })
-    .then(res => res.json())
-    .then(() => {
-      loadPending();
-      loadHistory();
+    [...tbody.rows].forEach((row, i) => {
+      row.cells[0].innerText = i + 1;
     });
   }
-
 });
