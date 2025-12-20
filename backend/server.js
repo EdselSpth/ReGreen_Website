@@ -21,6 +21,7 @@ app.use("/api/artikel", require("./routes/artikelEdukasi.routes"));
 app.use("/api/area", require("./routes/pendaftaranAreaUser.routes"));
 app.use("/api/areaAdm", require("./routes/pendaftaranAreaAdmin.routes"));
 app.use("/api/jenisSampah", require("./routes/jenisSampah.routes"));
+app.use("/api/saldo", require("./routes/saldo.routes"));
 
 app.listen(3000 ,() => {
   console.log("Server running at http://localhost:3000");
