@@ -79,6 +79,18 @@ class KeuntunganRepository {
       });
     });
   }
+
+  static delete(id) {
+    return new Promise((resolve, reject) => {
+      const sql = "DELETE FROM penarikan_keuntungan WHERE id = ?";
+      db.query(sql, [id], (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
+  }
 }
+
+
 
 module.exports = KeuntunganRepository;
