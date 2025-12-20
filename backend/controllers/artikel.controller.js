@@ -1,82 +1,52 @@
-const db = require("../config/db");
+const ArtikelService = require("../services/artikel.service");
 const { success, error } = require("../utils/response");
 
-exports.getAll = (req, res) => {
-    const sql = "SELECT * FROM artikel ORDER BY created_at DESC";
-
-    db.query(sql, (err, results) => {
-        if (err) {
-            return error(res, 500, "Failed to fetch articles");
-        }
-        return success(res, 200, results, "List artikel berhasil diambil");
-    });
+exports.getAll = async (req, res) => {
+  try {
+    const data = await ArtikelService.getAll();
+    return success(res, 200, data, "List artikel berhasil diambil");
+  } catch (err) {
+    return error(res, 500, err.message);
+  }
 };
 
-exports.getById = (req, res) => {
-    const { id } = req.params;
-    const sql = "SELECT * FROM artikel WHERE id = ?";
-    db.query(sql, [id], (err, results) => {
-        if (err) {
-            return error(res, 500, "Failed to fetch article");
-        }
-        if (results.length === 0) {
-            return error(res, 404, "Artikel tidak ditemukan");
-        }
-        return success(res, 200, results[0], "Detail artikel berhasil diambil");
-    });
+exports.getById = async (req, res) => {
+  try {
+    const data = await ArtikelService.getById(req.params.id);
+    return success(res, 200, data, "Detail artikel berhasil diambil");
+  } catch (err) {
+    return error(res, 404, err.message);
+  }
 };
 
-exports.create = (req, res) => {
-    const { nama_artikel, file_pdf } = req.body;
-    if (!nama_artikel || !file_pdf) {
-        return error(res, 400, "nama_artikel dan file_pdf wajib diisi");
-    }
-    const sql = `
-        INSERT INTO artikel (nama_artikel, file_pdf)
-        VALUES (?, ?)
-    `;
-    db.query(sql, [nama_artikel, file_pdf], (err, result) => {
-        if (err) {
-            return error(res, 500, "Gagal menambahkan artikel");
-        }
-        return success(
-            res,
-            201,
-            { id: result.insertId },
-            "Artikel berhasil ditambahkan"
-        );
-    });
+exports.create = async (req, res) => {
+  try {
+    const result = await ArtikelService.create(req.body);
+    return success(
+      res,
+      201,
+      { id: result.insertId },
+      "Artikel berhasil ditambahkan"
+    );
+  } catch (err) {
+    return error(res, 400, err.message);
+  }
 };
 
-exports.update = (req, res) => {
-    const { id } = req.params;
-    const { nama_artikel, file_pdf } = req.body;
-    const sql = `
-        UPDATE artikel
-        SET nama_artikel = ?, file_pdf = ?
-        WHERE id = ?
-    `;
-    db.query(sql, [nama_artikel, file_pdf, id], (err, result) => {
-        if (err) {
-            return error(res, 500, "Gagal memperbarui artikel");
-        }
-        if (result.affectedRows === 0) {
-            return error(res, 404, "Artikel tidak ditemukan");
-        }
-        return success(res, 200, null, "Artikel berhasil diperbarui");
-    });
+exports.update = async (req, res) => {
+  try {
+    await ArtikelService.update(req.params.id, req.body);
+    return success(res, 200, null, "Artikel berhasil diperbarui");
+  } catch (err) {
+    return error(res, 400, err.message);
+  }
 };
 
-exports.delete = (req, res) => {
-    const { id } = req.params;
-    const sql = "DELETE FROM artikel WHERE id = ?";
-    db.query(sql, [id], (err, result) => {
-        if (err) {
-            return error(res, 500, "Gagal menghapus artikel");
-        }
-        if (result.affectedRows === 0) {
-            return error(res, 404, "Artikel tidak ditemukan");
-        }
-        return success(res, 200, null, "Artikel berhasil dihapus");
-    });
+exports.delete = async (req, res) => {
+  try {
+    await ArtikelService.delete(req.params.id);
+    return success(res, 200, null, "Artikel berhasil dihapus");
+  } catch (err) {
+    return error(res, 400, err.message);
+  }
 };
