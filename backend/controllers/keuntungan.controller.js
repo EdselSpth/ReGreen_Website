@@ -45,3 +45,13 @@ exports.updateStatus = async (req, res) => {
     error(res, 400, err.message);
   }
 };
+
+exports.delete = async (req, res) => {
+  try {
+    await KeuntunganService.delete(req.params.id);
+    success(res, 200, null, "Data berhasil dihapus");
+  } catch (err) {
+    error(res, 400, err.message);
+  }
+};
+

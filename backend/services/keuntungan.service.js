@@ -30,6 +30,11 @@ class KeuntunganService {
 
     await KeuntunganRepository.updateStatus(id, status);
   }
+
+  static async delete(id) {
+    if (!id) throw new Error("ID tidak valid");
+    return await KeuntunganRepository.delete(id);
+  }
 }
 
 module.exports = KeuntunganService;
