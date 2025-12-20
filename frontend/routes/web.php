@@ -13,3 +13,7 @@ Route::get('/keuntungan', function () {
 Route::get('/bankSampah', function () {
     return view('page.bankSampah');
 });
+
+route::get('/kategoriSampah', function () {
+    return view('page.kategoriSampah');
+});

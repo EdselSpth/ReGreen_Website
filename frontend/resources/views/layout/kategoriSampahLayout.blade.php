@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>@yield('title')</title>
 
-  <link rel="stylesheet" href="{{ asset('css/keuntungan.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/kategoriSampah.css') }}">
 </head>
 
 <body>
@@ -17,10 +17,10 @@
       <a href="#">Beranda</a>
       <a href="#">Pengambilan Sampah</a>
       <a href="#">Pendaftaran Area</a>
-      <a href="{{ url('/keuntungan') }}" class="active">Keuntungan</a>
+      <a href="{{ url('/keuntungan') }}">Keuntungan</a>
       <a href="{{ url('/bankSampah') }}">Data Bank Sampah</a>
       <a href="#">Kelola Akun</a>
-      <a href="{{ url('/kategoriSampah') }}">Kategori Sampah</a>
+      <a href="{{ url('/kategoriSampah') }}" class="active">Kategori Sampah</a>
 
       <div class="logout">
         <a href="#" id="logoutBtn">Logout</a>
@@ -39,6 +39,10 @@
     </main>
   </div>
 
-  <script src="{{ asset('js/keuntungan.js') }}"></script>
+  {{-- MODAL --}}
+  @yield('modal')
+
+  {{-- SCRIPT --}}
+  <script src="{{ asset('js/kategoriSampah.js') }}"></script>
 </body>
 </html>
