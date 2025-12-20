@@ -45,6 +45,14 @@ body {
   transition: 0.2s;
 }
 
+.sidebar a:hover {
+  background-color: #cdd9bf;
+}
+
+.sidebar a.active {
+  background-color: #cdd9bf;
+}
+
 .sidebar a:hover,
 .sidebar a.active {
   background-color: #cdd9bf;
