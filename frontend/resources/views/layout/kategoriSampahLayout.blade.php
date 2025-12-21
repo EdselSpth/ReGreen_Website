@@ -21,6 +21,7 @@
       <a href="{{ url('/bankSampah') }}">Data Bank Sampah</a>
       <a href="#">Kelola Akun</a>
       <a href="{{ url('/kategoriSampah') }}" class="active">Kategori Sampah</a>
+      <a href="{{ url('/videoArtikel') }}">Video & Artikel</a>
 
       <div class="logout">
         <a href="#" id="logoutBtn">Logout</a>
