@@ -25,3 +25,7 @@ Route::get('/bankSampah', function () {
 route::get('/kategoriSampah', function () {
     return view('page.kategoriSampah');
 });
+
+route::get('/kelolaAkun', function () {
+    return view('page.kelolaAkun');
+});
