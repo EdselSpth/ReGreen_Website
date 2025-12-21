@@ -13,6 +13,7 @@ class JenisSampahService {
 
     return data;
   }
+  
 
   static async create(data) {
     if (!data.nama_jenis || !data.harga_per_kg) {
