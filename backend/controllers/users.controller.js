@@ -14,7 +14,7 @@ exports.index = async (req, res) => {
 
 exports.store = async (req, res) => {
   try {
-    await UsersService.register(req.body);
+    await UsersService.createUser(req.body);
     return success(res, 201, null, "User berhasil ditambahkan");
   } catch (err) {
     return error(res, 400, err.message);
