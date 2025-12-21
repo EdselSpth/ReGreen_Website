@@ -1,6 +1,6 @@
 const UsersService = require('../services/users.service');
 
-const { success, error } = require('../utils/response.util');
+const { success, error } = require('../utils/response');
 
 exports.index = async (req, res) => {
     try {
