@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS artikel (
 
 db.query(createTableQuery, (err) => {
   if (err) {
-    console.error("Failed create table artikel:", err);
+    console.error("❌ Gagal Membuat Tabel artikel:", err);
   } else {
-    console.log("Table artikel ready");
+    console.log("✅ Table artikel siap");
   }
 });
