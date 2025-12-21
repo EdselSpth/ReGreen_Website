@@ -10,6 +10,10 @@ Route::get('/dashboard', function () {
     return view('page.dashboard');
 });
 
+route::get('/videoArtikel', function () {
+    return view('page.videoArtikel');
+}); 
+
 Route::get('/keuntungan', function () {
     return view('page.keuntungan');
 });
