@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS penarikan_keuntungan (
 
 db.query(createTableQuery, (err) => {
   if (err) {
-    console.error("Failed create table:", err);
+    console.error("❌ Gagal Membuat Tabel penarikan_keuntungan:", err);
   } else {
-    console.log("Table penarikan_keuntungan ready");
+    console.log("✅ Table penarikan_keuntungan siap");
   }
 });

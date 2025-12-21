@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS area_user (
 
 db.query(sql, err => {
   if (err) {
-    console.error("❌ Gagal migrate area_user:", err);
+    console.error("❌ Gagal Membuat Tabel area_user:", err);
   } else {
-    console.log("✅ Table area_user ready");
+    console.log("✅ Table area_user siap");
   }
 });

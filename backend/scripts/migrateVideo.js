@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS video (
 
 db.query(createTableQuery, (err) => {
   if (err) {
-    console.error("Failed create table video:", err);
+    console.error("❌ Gagal Membuat Tabel video:", err);
   } else {
-    console.log("Table video ready");
+    console.log("✅ Table video siap");
   }
 });
