@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS bank_sampah (
 
 db.query(createTableQuery, (err) => {
   if (err) {
-    console.error("Failed create table bank_sampah:", err);
+    console.error("❌ Gagal Membuat Tabel bank_sampah:", err);
   } else {
-    console.log("Table bank_sampah ready");
+    console.log("✅ Table bank_sampah siap");
   }
 });

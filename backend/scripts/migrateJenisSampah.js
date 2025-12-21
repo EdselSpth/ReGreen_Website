@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS jenis_sampah (
 
 db.query(createTableQuery, (err) => {
     if (err) {
-        console.error("Failed create table jenis_sampah:", err);
+        console.error("❌ Gagal Membuat Tabel jenis_sampah:", err);
     } else {
-        console.log("Table jenis_sampah ready");
+        console.log("✅ Table jenis_sampah siap");
     }
 });
