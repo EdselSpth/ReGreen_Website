@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS pendaftaran_area (
 
 db.query(sql, (err) => {
   if (err) {
-    console.error("❌ Gagal migrate pendaftaran_area:", err);
+    console.error("❌ Gagal Membuat Tabel pendaftaran_area:", err);
   } else {
-    console.log("✅ Table pendaftaran_area ready");
+    console.log("✅ Table pendaftaran_area siap");
   }
 });
