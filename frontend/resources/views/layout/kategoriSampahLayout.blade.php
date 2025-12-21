@@ -19,7 +19,7 @@
       <a href="#">Pendaftaran Area</a>
       <a href="{{ url('/keuntungan') }}">Keuntungan</a>
       <a href="{{ url('/bankSampah') }}">Data Bank Sampah</a>
-      <a href="#">Kelola Akun</a>
+      <a href="{{ url('/kelolaAkun') }}">Kelola Akun</a>
       <a href="{{ url('/kategoriSampah') }}" class="active">Kategori Sampah</a>
       <a href="{{ url('/videoArtikel') }}">Video & Artikel</a>
 
