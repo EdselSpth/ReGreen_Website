@@ -1,4 +1,4 @@
 .env
 npm-debug.log*
 yarn-error.log*
-backend/serviceAccountKey.json
+serviceAccountKey.json
