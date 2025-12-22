@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box;
+}
+
 :root{
     --hijau-tua-regreen: #558B3E;
     --hijau-muda-regreen: #D6E6C4;
@@ -11,6 +15,9 @@ body {
     margin: 0;
     font-family: 'Segoe UI', sans-serif;
     background-color: white;
+
+    height: 100vh;      
+    overflow: hidden;
 }
 
 .container {
@@ -20,27 +27,31 @@ body {
 
 /* mengatur sidebar */
 .sidebar {
-	width: 220px;
-	background-color: #dce8c6;
-	display: flex;
-	flex-direction: column;
-    justify-content: space-between;
-	padding: 20px 0;
+    width: 220px;
+    background-color: #dce8c6;
+    display: flex;
+    flex-direction: column;
+    
+    padding: 20px 0;
+    flex-shrink: 0;    
+    height: 100vh;    
+    position: sticky;  
+    top: 0;            
 }
 
 .sidebar a {
-	color: black;
-	font-weight: bold;
-	text-decoration: none;
-	display: block;
-	padding: 10px 20px;
-	border-radius: 6px;
-	transition: 0.2s;
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+    display: block;
+    padding: 10px 20px;
+    border-radius: 6px;
+    transition: 0.2s;
 }
 
 .sidebar a:hover,
 .sidebar a.active {
-	background-color: #cdd9bf;
+    background-color: #cdd9bf;
 }
 
 .logo {
@@ -48,17 +59,21 @@ body {
   width: 80%;
   display: block;
   margin: 20px auto;
+
 }
 
 .logout {
-	margin-top: auto;
-	padding: 20px;
-	border-top: 1px solid #b5c7a3;
+    margin-top: auto;
+    padding: 20px;
+    border-top: 1px solid #b5c7a3;
 }
 
 /* content utama*/
 .main-content{
     flex-grow: 1;
+
+    height: 100vh;      
+    overflow-y: auto;
 }
 
 .header{
@@ -255,6 +270,8 @@ body {
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
+    background: none;
+    border: none;
 }
 
 .btn-tutup:hover,
