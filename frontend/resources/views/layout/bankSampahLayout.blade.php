@@ -12,22 +12,56 @@
 <div class="container">
   <!-- Sidebar -->
   <nav class="sidebar">
-    <img src="{{ asset('assets/logo-regreen-with-text.png') }}" class="logo" alt="ReGreen">
+            <img src="{{ asset('assets/logo-regreen-with-text.png') }}" alt="ReGreen Logo" class="logo">
+            
+            {{-- MENU NAVIGASI (Pakai Route Laravel) --}}
+            {{-- Menggunakan request()->routeIs() biar class 'active' pindah otomatis --}}
+            
+            <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                Beranda
+            </a>
+            
+            <a href="#" class="{{ request()->routeIs('pengambilanSampah') ? 'active' : '' }}">
+                Pengambilan Sampah
+            </a>
+            
+            <a href="#" class="{{ request()->routeIs('pendaftaranArea') ? 'active' : '' }}">
+                Pendaftaran Area
+            </a>
+            
+            <a href="{{ route('keuntungan') }}" class="{{ request()->routeIs('keuntungan') ? 'active' : '' }}">
+                Keuntungan
+            </a>
+            
+            <a href="{{ route('bankSampah') }}" class="{{ request()->routeIs('bankSampah') ? 'active' : '' }}">
+                Data Bank Sampah
+            </a>
+            
+            <a href="{{ route('kelolaAkun') }}" class="{{ request()->routeIs('kelolaAkun') ? 'active' : '' }}">
+                Kelola Akun
+            </a>
+            
+            <a href="{{ route('kategoriSampah') }}" class="{{ request()->routeIs('kategoriSampah') ? 'active' : '' }}">
+                Kategori Sampah
+            </a>
+            
+            <a href="{{ route('videoArtikel') }}" class="{{ request()->routeIs('videoArtikel') ? 'active' : '' }}">
+                Video & Artikel
+            </a>
+            
+            {{-- LOGOUT FIX --}}
+            <div class="logout">
+                {{-- 1. Link ini cuma pancingan buat trigger form di bawah --}}
+                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    Logout
+                </a>
 
-    <a href="#">Beranda</a>
-    <a href="#">Pengambilan Sampah</a>
-    <a href="#">Pendaftaran Area</a>
-    <a href="{{ url('/keuntungan') }}">Keuntungan</a>
-    <a href="{{ url('/bankSampah') }}" class="active">Data Bank Sampah</a>
-    <a href="{{ url('/kelolaAkun') }}">Kelola Akun</a>
-    <a href="{{ url('/kategoriSampah') }}">Kategori Sampah</a>
-    <a href="{{ url('/videoArtikel') }}">Video & Artikel</a>
-
-   <form action="{{ route('logout') }}" method="POST">
-        @csrf
-        <button type="submit">Logout</button>
-      </form>
-  </nav>
+                {{-- 2. Form Rahasia (Hidden) untuk kirim POST Logout --}}
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                    @csrf
+                </form>
+            </div>
+        </nav>
 
   <!-- Main -->
   <div class="main-content">
