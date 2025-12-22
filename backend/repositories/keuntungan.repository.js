@@ -31,10 +31,11 @@ class KeuntunganRepository {
     });
   }
 
-  static findByUser(uid) {
+static findByUser(uid, limit = 10, offset = 0) {
     return new Promise((resolve, reject) => {
-      const sql = "SELECT * FROM penarikan_keuntungan WHERE firebase_uid = ? ORDER BY created_at DESC";
-      db.query(sql, [uid], (err, rows) => {
+      // Tambahkan LIMIT dan OFFSET pada query SQL
+      const sql = "SELECT * FROM penarikan_keuntungan WHERE firebase_uid = ? ORDER BY created_at DESC LIMIT ? OFFSET ?";
+      db.query(sql, [uid, parseInt(limit), parseInt(offset)], (err, rows) => {
         if (err) reject(err);
         else resolve(rows);
       });

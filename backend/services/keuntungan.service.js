@@ -10,9 +10,11 @@ class KeuntunganService {
     return await KeuntunganRepository.findHistory();
   }
 
-  static async getByUser(uid) {
+static async getByUser(uid, page = 1, limit = 10) {
     if (!uid) throw new Error("UID wajib diisi");
-    return await KeuntunganRepository.findByUser(uid);
+    
+    const offset = (page - 1) * limit; // Hitung mulai dari baris ke berapa
+    return await KeuntunganRepository.findByUser(uid, limit, offset);
   }
 
   static async create(data) {
