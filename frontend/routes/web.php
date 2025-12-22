@@ -1,31 +1,43 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
-Route::get('/', function () {
-    return view('welcome');
+Route::middleware('guest')->group(function () {
+    // Menampilkan halaman login
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    
+    // Menerima data post login
+    Route::post('/login', [AuthController::class, 'login']); 
 });
+Route::middleware('auth')->group(function () {
+    
+    // Route Logout
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/dashboard', function () {
-    return view('page.dashboard');
-});
+    // --- Daftar Halaman Admin ---
+    
+    Route::get('/dashboard', function () {
+        return view('page.dashboard');
+    })->name('dashboard');
 
-route::get('/videoArtikel', function () {
-    return view('page.videoArtikel');
-}); 
+    Route::get('/videoArtikel', function () {
+        return view('page.videoArtikel');
+    })->name('videoArtikel'); 
 
-Route::get('/keuntungan', function () {
-    return view('page.keuntungan');
-});
+    Route::get('/keuntungan', function () {
+        return view('page.keuntungan');
+    })->name('keuntungan');
 
-Route::get('/bankSampah', function () {
-    return view('page.bankSampah');
-});
+    Route::get('/bankSampah', function () {
+        return view('page.bankSampah');
+    })->name('bankSampah');
 
-route::get('/kategoriSampah', function () {
-    return view('page.kategoriSampah');
-});
+    Route::get('/kategoriSampah', function () {
+        return view('page.kategoriSampah');
+    })->name('kategoriSampah');
 
-route::get('/kelolaAkun', function () {
-    return view('page.kelolaAkun');
+    Route::get('/kelolaAkun', function () {
+        return view('page.kelolaAkun');
+    })->name('kelolaAkun');
 });

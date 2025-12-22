@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,47 +10,80 @@
 </head>
 
 <body>
-<div class="container">
+    <div class="container">
 
-    <!-- SIDEBAR -->
-    <nav class="sidebar">
-        <img src="{{ asset('assets/logo-regreen-with-text.png') }}" 
-             alt="ReGreen Logo" 
-             class="logo">
+        <!-- SIDEBAR -->
+        <nav class="sidebar">
+            <img src="{{ asset('assets/logo-regreen-with-text.png') }}"
+                alt="ReGreen Logo"
+                class="logo">
 
-        <a href="#">Beranda</a>
-        <a href="#">Pengambilan Sampah</a>
-        <a href="#">Pendaftaran Area</a>
-        <a href="{{ url('/keuntungan') }}">Keuntungan</a>
-        <a href="{{ url('/bankSampah') }}">Data Bank Sampah</a>
-        <a href="{{ url('/kelolaAkun') }}">Kelola Akun</a>
-        <a href="{{ url('/kategoriSampah') }}">Kategori Sampah</a>
-        <a href="{{ url('/videoArtikel') }}" class="active">Video & Artikel</a>
+           <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                Beranda
+            </a>
+            
+            <a href="#" class="{{ request()->routeIs('pengambilanSampah') ? 'active' : '' }}">
+                Pengambilan Sampah
+            </a>
+            
+            <a href="#" class="{{ request()->routeIs('pendaftaranArea') ? 'active' : '' }}">
+                Pendaftaran Area
+            </a>
+            
+            <a href="{{ route('keuntungan') }}" class="{{ request()->routeIs('keuntungan') ? 'active' : '' }}">
+                Keuntungan
+            </a>
+            
+            <a href="{{ route('bankSampah') }}" class="{{ request()->routeIs('bankSampah') ? 'active' : '' }}">
+                Data Bank Sampah
+            </a>
+            
+            <a href="{{ route('kelolaAkun') }}" class="{{ request()->routeIs('kelolaAkun') ? 'active' : '' }}">
+                Kelola Akun
+            </a>
+            
+            <a href="{{ route('kategoriSampah') }}" class="{{ request()->routeIs('kategoriSampah') ? 'active' : '' }}">
+                Kategori Sampah
+            </a>
+            
+            <a href="{{ route('videoArtikel') }}" class="{{ request()->routeIs('videoArtikel') ? 'active' : '' }}">
+                Video & Artikel
+            </a>
+            
+            {{-- LOGOUT FIX --}}
+            <div class="logout">
+                {{-- 1. Link ini cuma pancingan buat trigger form di bawah --}}
+                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    Logout
+                </a>
 
-        <div class="logout">
-            <a href="#" id="logoutBtn">Logout</a>
-        </div>
-    </nav>
+                {{-- 2. Form Rahasia (Hidden) untuk kirim POST Logout --}}
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                    @csrf
+                </form>
+            </div>
+        </nav>
 
-    <!-- CONTENT -->
-    <main class="content">
-        <header class="header">
-            @yield('header')
-        </header>
+        <!-- CONTENT -->
+        <main class="content">
+            <header class="header">
+                @yield('header')
+            </header>
 
-        <div class="page-content">
-            @yield('content')
-        </div>
-    </main>
-</div>
+            <div class="page-content">
+                @yield('content')
+            </div>
+        </main>
+    </div>
 
-{{-- MODAL --}}
-@yield('modal')
+    {{-- MODAL --}}
+    @yield('modal')
 
-{{-- SCRIPT --}}
-<script src="{{ asset('js/videoArtikel.js') }}"></script>
+    {{-- SCRIPT --}}
+    <script src="{{ asset('js/videoArtikel.js') }}"></script>
 
 </body>
+
 </html>
 
-        </a>
+</a>
