@@ -102,21 +102,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- FUNGSI MANIPULASI DOM ---
 
-    function addPendingRow(item) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td></td>
-            <td>${item.nama_pengguna || "Tanpa Nama"}</td>
-            <td>Rp ${Number(item.nominal || 0).toLocaleString("id-ID")}</td>
-            <td>${item.rekening ?? "-"}</td>
-            <td>${item.metode ?? "-"}</td>
-            <td>
-                <button class="btn btn-terima" onclick="updateStatus(${item.id}, 'diterima')">Terima</button>
-                <button class="btn btn-tolak" onclick="updateStatus(${item.id}, 'ditolak')">Tolak</button>
-            </td>
-        `;
-        tblPending.appendChild(tr);
-    }
+function addPendingRow(item) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+        <td></td>
+        <td>${item.nama_pengguna || "Tanpa Nama"}</td>
+        <td style="font-weight: bold; color: #2c3e50;">Rp ${Number(item.saldo_user || 0).toLocaleString("id-ID")}</td>
+        <td style="color: #e67e22; font-weight: bold;">Rp ${Number(item.nominal || 0).toLocaleString("id-ID")}</td>
+        <td>${item.rekening ?? "-"}</td>
+        <td>${item.metode ?? "-"}</td>
+        <td>
+            <button class="btn btn-terima" onclick="updateStatus(${item.id}, 'diterima')">Terima</button>
+            <button class="btn btn-tolak" onclick="updateStatus(${item.id}, 'ditolak')">Tolak</button>
+        </td>
+    `;
+    tblPending.appendChild(tr);
+}
 
     function addHistoryRow(item) {
         const tr = document.createElement("tr");

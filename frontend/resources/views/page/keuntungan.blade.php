@@ -27,14 +27,14 @@
     </div>
   </div>
 
-  <div class="table-container">
+<div class="table-container">
     <h4>Menunggu Persetujuan</h4>
     <table id="tblPending">
       <thead>
         <tr>
           <th>No</th>
           <th>Nama Pengguna</th>
-          <th>Nominal</th>
+          <th>Saldo Saat Ini</th> <th>Nominal Tarik</th>
           <th>No Rekening</th>
           <th>Metode</th>
           <th>Aksi</th>
@@ -42,7 +42,7 @@
       </thead>
       <tbody id="tableBody"></tbody>
     </table>
-  </div>
+</div>
   
   <div class="table-container" style="margin-top:25px;">
     <h4>Riwayat Penarikan</h4>
