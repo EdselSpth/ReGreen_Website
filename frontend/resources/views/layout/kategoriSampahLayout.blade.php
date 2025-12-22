@@ -23,9 +23,10 @@
       <a href="{{ url('/kategoriSampah') }}" class="active">Kategori Sampah</a>
       <a href="{{ url('/videoArtikel') }}">Video & Artikel</a>
 
-      <div class="logout">
-        <a href="#" id="logoutBtn">Logout</a>
-      </div>
+      <form action="{{ route('logout') }}" method="POST">
+    @csrf
+    <button type="submit">Logout</button>
+</form>
     </nav>
 
     <!-- CONTENT -->
