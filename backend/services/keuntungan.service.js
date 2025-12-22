@@ -20,15 +20,18 @@ class KeuntunganService {
     await KeuntunganRepository.create(data);
   }
 
-  static async updateStatus(id, status) {
+static async updateStatus(id, status) {
     const allowedStatus = ["pending", "diterima", "ditolak"];
     if (!allowedStatus.includes(status)) throw new Error("Status tidak valid");
 
-    // LOGIKA POTONG SALDO FIRESTORE
-    if (status === "diterima") {
-      const penarikan = await KeuntunganRepository.findById(id);
-      if (!penarikan) throw new Error("Data penarikan tidak ditemukan");
+    // 1. Ambil data penarikan dari MySQL terlebih dahulu
+    const penarikan = await KeuntunganRepository.findById(id);
+    if (!penarikan) throw new Error("Data penarikan tidak ditemukan");
 
+    // 2. CEK: Apakah ini data Admin atau data User asli?
+    // Jika statusnya 'diterima' DAN firebase_uid TIDAK mengandung kata 'ADMIN'
+    if (status === "diterima" && !penarikan.firebase_uid.includes("ADMIN")) {
+      
       const userRef = db.collection('users').doc(penarikan.firebase_uid);
       
       await db.runTransaction(async (t) => {
@@ -44,12 +47,13 @@ class KeuntunganService {
 
         const newBalance = currentBalance - nominalTarik;
 
+        // Potong saldo di Firestore
         t.update(userRef, { 
           balance: newBalance,
           updatedAt: admin.firestore.FieldValue.serverTimestamp()
         });
 
-        // Simpan history transaksi di firestore
+        // Simpan history transaksi di Firestore
         const transRef = db.collection('transactions').doc();
         t.set(transRef, {
           userId: penarikan.firebase_uid,
@@ -61,8 +65,10 @@ class KeuntunganService {
           createdAt: admin.firestore.FieldValue.serverTimestamp()
         });
       });
-    }
+    } 
+    // Jika firebase_uid mengandung kata 'ADMIN', blok kode di atas akan dilewati (skip).
 
+    // 3. Apapun jenis datanya (Admin/User), status di MySQL tetap harus diupdate
     await KeuntunganRepository.updateStatus(id, status);
   }
 
