@@ -1,10 +1,21 @@
 const KeuntunganService = require("../services/keuntungan.service");
+const { db } = require("../config/firebase");
 const { success, error } = require("../utils/response");
 
 exports.getPending = async (req, res) => {
   try {
     const data = await KeuntunganService.getPending();
-    success(res, 200, data);
+    
+    // Ambil saldo realtime dari firestore untuk setiap baris
+    const enrichedData = await Promise.all(data.map(async (item) => {
+        const userDoc = await db.collection('users').doc(item.firebase_uid).get();
+        return {
+            ...item,
+            saldo_user: userDoc.exists ? (userDoc.data().balance || 0) : 0
+        };
+    }));
+
+    success(res, 200, enrichedData);
   } catch (err) {
     error(res, 500, err.message);
   }
@@ -40,7 +51,7 @@ exports.create = async (req, res) => {
 exports.updateStatus = async (req, res) => {
   try {
     await KeuntunganService.updateStatus(req.params.id, req.body.status);
-    success(res, 200, null, "Status updated");
+    success(res, 200, null, `Status diperbarui menjadi ${req.body.status}`);
   } catch (err) {
     error(res, 400, err.message);
   }
@@ -54,4 +65,3 @@ exports.delete = async (req, res) => {
     error(res, 400, err.message);
   }
 };
-
