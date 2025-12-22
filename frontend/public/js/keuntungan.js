@@ -1,207 +1,166 @@
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("keuntungan.js loaded");
+    const rowsPerPage = 5;
+    let pendingData = [], historyData = [];
 
-    const tblPending = document.querySelector("#tblPending tbody");
-    const tblHistory = document.querySelector("#tblHistory tbody");
-    const formTambah = document.querySelector("#formTambah");
+    const tblPending = document.querySelector("#tableBody");
+    const tblHistory = document.querySelector("#tableHistoryBody");
+    const pagPending = document.querySelector("#paginationPending");
+    const pagHistory = document.querySelector("#paginationHistory");
 
-    // --- INITIAL LOAD ---
     loadPending();
     loadHistory();
 
-    // --- EVENT LISTENER FOR FORM TAMBAH ---
-    if (formTambah) {
-        formTambah.addEventListener("submit", async (e) => {
-            e.preventDefault();
+    async function loadPending() {
+        try {
+            const res = await fetch("http://localhost:3000/api/keuntungan");
+            const response = await res.json();
+            pendingData = Array.isArray(response.data) ? response.data : (Array.isArray(response) ? response : []);
+            displayTable(pendingData, tblPending, pagPending, 1, 'pending');
+        } catch (err) { console.error("Error pending:", err); }
+    }
 
-            // Mengambil value dari input
-            const nama_pengguna = document.getElementById("nama_pengguna").value;
-            const nominal = document.getElementById("nominal").value;
-            const rekening = document.getElementById("rekening").value;
-            const metode = document.getElementById("metode").value;
+    async function loadHistory() {
+        try {
+            const res = await fetch("http://localhost:3000/api/keuntungan/history");
+            const response = await res.json();
+            historyData = Array.isArray(response.data) ? response.data : (Array.isArray(response) ? response : []);
+            displayTable(historyData, tblHistory, pagHistory, 1, 'history');
+        } catch (err) { console.error("Error history:", err); }
+    }
 
-            // 1. VALIDASI REKENING (Hanya angka, 10-15 digit)
-            const rekRegex = /^[0-9]{10,15}$/;
-            if (!rekRegex.test(rekening)) {
-                alert("Nomor rekening tidak valid! Harus berupa angka 10-15 digit.");
-                return;
+    function displayTable(data, table, pagination, page, type) {
+        table.innerHTML = "";
+        let start = (page - 1) * rowsPerPage;
+        let end = start + rowsPerPage;
+        let paginatedItems = data.slice(start, end);
+
+        if (paginatedItems.length === 0) {
+            table.innerHTML = `<tr><td colspan="7" style="text-align:center">Tidak ada data</td></tr>`;
+            pagination.innerHTML = "";
+            return;
+        }
+
+        paginatedItems.forEach((item, i) => {
+            const tr = document.createElement("tr");
+            const rowNo = start + i + 1;
+            if (type === 'pending') {
+                tr.innerHTML = `
+                    <td>${rowNo}</td>
+                    <td>${item.nama_pengguna}</td>
+                    <td style="font-weight:bold">Rp ${(item.saldo_user || 0).toLocaleString('id-ID')}</td>
+                    <td style="color:#e67e22; font-weight:bold">Rp ${item.nominal.toLocaleString('id-ID')}</td>
+                    <td>${item.rekening}</td>
+                    <td>${item.metode}</td>
+                    <td>
+                        <button class="btn-aksi btn-simpan" onclick="updateStatus(${item.id}, 'diterima')">Terima</button>
+                        <button class="btn-aksi btn-batal" onclick="updateStatus(${item.id}, 'ditolak')">Tolak</button>
+                    </td>`;
+            } else {
+                const sClass = item.status === 'diterima' ? 'accepted' : 'rejected';
+                tr.innerHTML = `
+                    <td>${rowNo}</td>
+                    <td>${item.nama_pengguna}</td>
+                    <td>Rp ${item.nominal.toLocaleString('id-ID')}</td>
+                    <td>${item.rekening}</td>
+                    <td>${item.metode}</td>
+                    <td><span class="status-text ${sClass}">${item.status.toUpperCase()}</span></td>
+                    <td><button class="btn-aksi btn-batal" onclick="deleteData(${item.id})">Hapus</button></td>`;
             }
-
-            // 2. VALIDASI NOMINAL
-            if (parseInt(nominal) < 1000) {
-                alert("Nominal penarikan minimal Rp 1.000");
-                return;
-            }
-
-            const data = {
-                firebase_uid: "ADMIN-ENTRY-" + Date.now(), // UID dummy untuk input manual admin
-                nama_pengguna,
-                nominal: parseInt(nominal),
-                rekening,
-                metode
-            };
-
-            try {
-                const res = await fetch("http://localhost:3000/api/keuntungan", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await res.json();
-
-                if (res.ok) {
-                    alert("Data penarikan berhasil ditambahkan!");
-                    closeModal();
-                    location.reload();
-                } else {
-                    alert("Gagal menambah data: " + result.message);
-                }
-            } catch (err) {
-                console.error("Create error:", err);
-                alert("Terjadi kesalahan koneksi saat menambah data");
-            }
+            table.appendChild(tr);
         });
+        setupPagination(data, pagination, page, type);
     }
 
-    // --- FUNGSI LOAD DATA ---
-
-    function loadPending() {
-        fetch("http://localhost:3000/api/keuntungan")
-            .then(res => res.json())
-            .then(response => {
-                tblPending.innerHTML = "";
-                const rows = Array.isArray(response) ? response : response.data;
-
-                if (rows && rows.length > 0) {
-                    rows.forEach(item => addPendingRow(item));
-                    updateNumber(tblPending);
-                } else {
-                    tblPending.innerHTML = "<tr><td colspan='6' style='text-align:center'>Tidak ada data pending</td></tr>";
-                }
-            })
-            .catch(err => console.error("Pending error:", err));
+    function setupPagination(data, wrapper, currentPage, type) {
+        wrapper.innerHTML = "";
+        let pageCount = Math.ceil(data.length / rowsPerPage);
+        for (let i = 1; i <= pageCount; i++) {
+            let btn = document.createElement('button');
+            btn.innerText = i;
+            btn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+            btn.onclick = () => displayTable(data, (type==='pending'?tblPending:tblHistory), (type==='pending'?pagPending:pagHistory), i, type);
+            wrapper.appendChild(btn);
+        }
     }
 
-    function loadHistory() {
-        fetch("http://localhost:3000/api/keuntungan/history")
-            .then(res => res.json())
-            .then(response => {
-                tblHistory.innerHTML = ""; 
-                const rows = Array.isArray(response) ? response : response.data;
+    document.getElementById("formTambah").onsubmit = async (e) => {
+        e.preventDefault();
 
-                if (rows && rows.length > 0) {
-                    rows.forEach(item => addHistoryRow(item));
-                    updateNumber(tblHistory);
-                } else {
-                    tblHistory.innerHTML = "<tr><td colspan='7' style='text-align:center'>Riwayat kosong</td></tr>";
-                }
-            })
-            .catch(err => console.error("History error:", err));
-    }
+        const nominal = parseInt(document.getElementById("nominal").value);
+        const rekening = document.getElementById("rekening").value;
 
-    // --- FUNGSI MANIPULASI DOM ---
+        // VALIDASI NOMINAL MINIMAL 20.000
+        if (nominal < 20000) {
+            Swal.fire("Gagal", "Minimal penarikan adalah Rp 20.000", "warning");
+            return;
+        }
 
-function addPendingRow(item) {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-        <td></td>
-        <td>${item.nama_pengguna || "Tanpa Nama"}</td>
-        <td style="font-weight: bold; color: #2c3e50;">Rp ${Number(item.saldo_user || 0).toLocaleString("id-ID")}</td>
-        <td style="color: #e67e22; font-weight: bold;">Rp ${Number(item.nominal || 0).toLocaleString("id-ID")}</td>
-        <td>${item.rekening ?? "-"}</td>
-        <td>${item.metode ?? "-"}</td>
-        <td>
-            <button class="btn btn-terima" onclick="updateStatus(${item.id}, 'diterima')">Terima</button>
-            <button class="btn btn-tolak" onclick="updateStatus(${item.id}, 'ditolak')">Tolak</button>
-        </td>
-    `;
-    tblPending.appendChild(tr);
-}
+        // VALIDASI REKENING (10-15 DIGIT)
+        if (rekening.length < 10) {
+            Swal.fire("Gagal", "Nomor rekening minimal 10 digit", "warning");
+            return;
+        }
 
-    function addHistoryRow(item) {
-        const tr = document.createElement("tr");
-        const statusClass = item.status === "diterima" ? "accepted" : "rejected";
+        const data = {
+            nama_pengguna: document.getElementById("nama_pengguna").value,
+            nominal: nominal,
+            rekening: rekening,
+            metode: document.getElementById("metode").value,
+            firebase_uid: "ADMIN-ENTRY-" + Date.now()
+        };
 
-        tr.innerHTML = `
-            <td></td>
-            <td>${item.nama_pengguna || "Tanpa Nama"}</td>
-            <td>Rp ${Number(item.nominal || 0).toLocaleString("id-ID")}</td>
-            <td>${item.rekening ?? "-"}</td>
-            <td>${item.metode ?? "-"}</td>
-            <td>
-                <span class="status-text ${statusClass}">
-                    ${item.status.toUpperCase()}
-                </span>
-            </td>
-            <td>
-                <button class="btn btn-tolak" style="padding: 4px 8px; font-size: 11px;" onclick="deleteData(${item.id})">Hapus</button>
-            </td>
-        `;
-        tblHistory.appendChild(tr);
-    }
+        try {
+            const res = await fetch("http://localhost:3000/api/keuntungan", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
 
-    function updateNumber(tbody) {
-        [...tbody.rows].forEach((row, i) => {
-            if (row.cells[0]) {
-                row.cells[0].innerText = i + 1;
+            if (res.ok) {
+                Swal.fire("Sukses", "Data berhasil ditambah", "success").then(() => location.reload());
             }
-        });
-    }
+        } catch (err) {
+            Swal.fire("Error", "Gagal menghubungi server", "error");
+        }
+    };
 });
 
-// --- FUNGSI GLOBAL (DI LUAR DOMContentLoaded) ---
-
-// Fungsi Modal
-function openModal() {
-    document.getElementById("modalTambah").style.display = "flex";
+// Fungsi Global Modal
+function openModal() { 
+    const m = document.getElementById("modalTambah"); 
+    m.style.display="flex"; 
+    setTimeout(() => m.classList.add("active"), 10); 
+}
+function closeModal() { 
+    const m = document.getElementById("modalTambah"); 
+    m.classList.remove("active"); 
+    setTimeout(() => m.style.display="none", 300); 
 }
 
-function closeModal() {
-    document.getElementById("modalTambah").style.display = "none";
-}
-
-// Fungsi Update Status (Terima/Tolak)
-async function updateStatus(id, status) {
-    if (!confirm(`Apakah Anda yakin ingin mengubah status menjadi ${status}?`)) return;
+// Fungsi Global Update Status
+async function updateStatus(id, s) {
+    const resConfirm = await Swal.fire({ title: 'Konfirmasi', text: `Ubah status ke ${s}?`, showCancelButton: true });
+    if (!resConfirm.isConfirmed) return;
 
     try {
         const response = await fetch(`http://localhost:3000/api/keuntungan/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status })
+            body: JSON.stringify({ status: s })
         });
-
+        const result = await response.json();
         if (response.ok) {
-            alert("Status berhasil diperbarui");
-            location.reload();
+            Swal.fire("Berhasil", result.message, "success").then(() => location.reload());
         } else {
-            const errData = await response.json();
-            alert("Gagal update: " + (errData.message || "Unknown error"));
+            Swal.fire("Gagal", result.message, "error");
         }
-    } catch (err) {
-        console.error("Update error:", err);
-        alert("Terjadi kesalahan koneksi");
-    }
+    } catch (err) { Swal.fire("Error", "Koneksi bermasalah", "error"); }
 }
 
-// Fungsi Delete Permanen
 async function deleteData(id) {
-    if (!confirm("Data akan dihapus secara permanen dari database. Lanjutkan?")) return;
-
-    try {
-        const response = await fetch(`http://localhost:3000/api/keuntungan/${id}`, {
-            method: "DELETE"
-        });
-
-        if (response.ok) {
-            alert("Data berhasil dihapus!");
-            location.reload();
-        } else {
-            alert("Gagal menghapus data.");
-        }
-    } catch (err) {
-        console.error("Delete error:", err);
-        alert("Terjadi kesalahan koneksi");
+    const resConfirm = await Swal.fire({ title: 'Hapus data?', icon: 'warning', showCancelButton: true });
+    if (resConfirm.isConfirmed) {
+        await fetch(`http://localhost:3000/api/keuntungan/${id}`, { method: "DELETE" });
+        location.reload();
     }
 }
