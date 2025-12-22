@@ -32,7 +32,12 @@ exports.getHistory = async (req, res) => {
 
 exports.getByUser = async (req, res) => {
   try {
-    const data = await KeuntunganService.getByUser(req.params.uid);
+    // Ambil page dan limit dari query string, berikan default jika kosong
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    
+    const data = await KeuntunganService.getByUser(req.params.uid, page, limit);
+    
     success(res, 200, data);
   } catch (err) {
     error(res, 400, err.message);
