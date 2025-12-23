@@ -310,6 +310,26 @@ body {
   color: white;
   transition: opacity 0.2s;
 }
+.pagination {
+  margin-top: 15px;
+  justify-content: center;
+  display: flex;
+  text-align: center;
+  gap: 6px;
+}
+
+.pagination button {
+  padding: 6px 12px;
+  border: none;
+  background: #e0e0e0;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.pagination button.active {
+  background: #558b3e;
+  color: white;
+}
 
 .btn-simpan { background-color: var(--hijau-tua-regreen); }
 .btn-batal { background-color: #777; }

@@ -1,25 +1,23 @@
 document.addEventListener("DOMContentLoaded", () => {
-    /* =====================
-       CONFIG & ELEMENTS
-    ===================== */
+    const ITEMS_PER_PAGE = 2;
+
     const API_VIDEO = "http://localhost:3000/api/video";
     const API_ARTIKEL = "http://localhost:3000/api/artikel";
 
     const loading = document.getElementById("loading-overlay");
 
-    // TABLE BODY
     const videoBody = document.getElementById("video-body");
     const artikelBody = document.getElementById("artikel-body");
 
-    // BUTTON
+    const videoPagination = document.getElementById("video-pagination");
+    const artikelPagination = document.getElementById("artikel-pagination");
+
     const btnTambahVideo = document.getElementById("btnTambahVideo");
     const btnTambahArtikel = document.getElementById("btnTambahArtikel");
 
-    // MODAL
     const modalTambahVideo = document.getElementById("modal-tambah-video");
     const modalTambahArtikel = document.getElementById("modal-tambah-artikel");
 
-    // FORM
     const formTambahVideo = document.getElementById("form-tambah-video");
     const formTambahArtikel = document.getElementById("form-tambah-artikel");
 
@@ -28,23 +26,20 @@ document.addEventListener("DOMContentLoaded", () => {
     let dataVideo = [];
     let dataArtikel = [];
 
-    /* =====================
-       LOADING HANDLER
-    ===================== */
+    let videoPage = 1;
+    let artikelPage = 1;
+
     const showLoading = () => loading?.classList.add("active");
     const hideLoading = () => loading?.classList.remove("active");
 
-    /* =====================
-       LOAD DATA
-    ===================== */
+    /* load data */
     async function loadVideo() {
         try {
             showLoading();
             const res = await fetch(API_VIDEO);
-            if (!res.ok) throw new Error("Gagal mengambil data video");
-
             const result = await res.json();
             dataVideo = result.data || result;
+            videoPage = 1;
             renderVideo();
         } catch (err) {
             Swal.fire("Error", err.message, "error");
@@ -57,10 +52,9 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             showLoading();
             const res = await fetch(API_ARTIKEL);
-            if (!res.ok) throw new Error("Gagal mengambil data artikel");
-
             const result = await res.json();
             dataArtikel = result.data || result;
+            artikelPage = 1;
             renderArtikel();
         } catch (err) {
             Swal.fire("Error", err.message, "error");
@@ -69,77 +63,105 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    /* =====================
-       RENDER TABLE
-    ===================== */
+    /* video */
     function renderVideo() {
         videoBody.innerHTML = "";
 
-        if (!dataVideo || dataVideo.length === 0) {
+        if (dataVideo.length === 0) {
             videoBody.innerHTML = `
-                <tr>
-                    <td colspan="4" style="text-align:center;">Belum ada video</td>
-                </tr>`;
+                <tr><td colspan="5" style="text-align:center;">Belum ada video</td></tr>
+            `;
+            videoPagination.innerHTML = "";
             return;
         }
 
-        dataVideo.forEach((item, index) => {
+        const start = (videoPage - 1) * ITEMS_PER_PAGE;
+        const end = start + ITEMS_PER_PAGE;
+        const pageData = dataVideo.slice(start, end);
+
+        pageData.forEach((item, index) => {
             videoBody.innerHTML += `
                 <tr>
-                    <td>${index + 1}</td>
+                    <td>${start + index + 1}</td>
                     <td>${item.nama_video}</td>
-                    <td>
-                        <a href="${
-                            item.link_youtube
-                        }" target="_blank">Lihat Video</a>
-                    </td>
+                    <td><a href="${item.link_youtube}" target="_blank">Lihat Video</a></td>
                     <td>${item.deskripsi}</td>
                     <td>
-                        <button class="btn-aksi btn-hapus" data-id="${
-                            item.id
-                        }" data-type="video">Hapus</button>
+                        <button class="btn-aksi btn-hapus" data-id="${item.id}" data-type="video">Hapus</button>
                     </td>
                 </tr>
             `;
         });
+
+        renderVideoPagination();
     }
 
+    function renderVideoPagination() {
+        const totalPage = Math.ceil(dataVideo.length / ITEMS_PER_PAGE);
+        videoPagination.innerHTML = "";
+
+        for (let i = 1; i <= totalPage; i++) {
+            videoPagination.innerHTML += `
+                <button class="${i === videoPage ? "active" : ""}" onclick="changeVideoPage(${i})">${i}</button>
+            `;
+        }
+    }
+
+    window.changeVideoPage = (page) => {
+        videoPage = page;
+        renderVideo();
+    };
+
+    /* artikel */
     function renderArtikel() {
         artikelBody.innerHTML = "";
 
-        if (!dataArtikel || dataArtikel.length === 0) {
+        if (dataArtikel.length === 0) {
             artikelBody.innerHTML = `
-                <tr>
-                    <td colspan="4" style="text-align:center;">Belum ada artikel</td>
-                </tr>`;
+                <tr><td colspan="4" style="text-align:center;">Belum ada artikel</td></tr>
+            `;
+            artikelPagination.innerHTML = "";
             return;
         }
 
-        dataArtikel.forEach((item, index) => {
+        const start = (artikelPage - 1) * ITEMS_PER_PAGE;
+        const end = start + ITEMS_PER_PAGE;
+        const pageData = dataArtikel.slice(start, end);
+
+        pageData.forEach((item, index) => {
             artikelBody.innerHTML += `
                 <tr>
-                    <td>${index + 1}</td>
+                    <td>${start + index + 1}</td>
                     <td>${item.nama_artikel}</td>
+                    <td><a href="/uploads/${item.file_pdf}" target="_blank">Lihat PDF</a></td>
                     <td>
-                        <a href="/uploads/${
-                            item.file_pdf
-                        }" target="_blank">Lihat PDF</a>
-                    </td>
-                    <td>
-                        <button class="btn-aksi btn-hapus" data-id="${
-                            item.id
-                        }" data-type="artikel">Hapus</button>
+                        <button class="btn-aksi btn-hapus" data-id="${item.id}" data-type="artikel">Hapus</button>
                     </td>
                 </tr>
             `;
         });
+
+        renderArtikelPagination();
     }
 
-    /* =====================
-       MODAL HANDLER
-    ===================== */
-    const openModal = (modal) => modal.classList.add("active");
+    function renderArtikelPagination() {
+        const totalPage = Math.ceil(dataArtikel.length / ITEMS_PER_PAGE);
+        artikelPagination.innerHTML = "";
 
+        for (let i = 1; i <= totalPage; i++) {
+            artikelPagination.innerHTML += `
+                <button class="${i === artikelPage ? "active" : ""}" onclick="changeArtikelPage(${i})">${i}</button>
+            `;
+        }
+    }
+
+    window.changeArtikelPage = (page) => {
+        artikelPage = page;
+        renderArtikel();
+    };
+
+    /* modal */
+    const openModal = (modal) => modal.classList.add("active");
     const closeAllModals = () => {
         modalTambahVideo.classList.remove("active");
         modalTambahArtikel.classList.remove("active");
@@ -148,115 +170,10 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     btnTambahVideo.addEventListener("click", () => openModal(modalTambahVideo));
-    btnTambahArtikel.addEventListener("click", () =>
-        openModal(modalTambahArtikel)
-    );
-
+    btnTambahArtikel.addEventListener("click", () => openModal(modalTambahArtikel));
     tombolTutup.forEach((btn) => btn.addEventListener("click", closeAllModals));
 
-    window.addEventListener("click", (e) => {
-        if (e.target === modalTambahVideo || e.target === modalTambahArtikel) {
-            closeAllModals();
-        }
-    });
-
-    /* =====================
-       CREATE DATA
-    ===================== */
-    formTambahVideo.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const data = {
-            nama_video: document.getElementById("tambah-nama-video").value,
-            link_youtube: document.getElementById("tambah-link-video").value,
-            deskripsi: document.getElementById("tambah-deskripsi").value,
-        };
-
-        try {
-            showLoading();
-            const res = await fetch(API_VIDEO, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
-
-            if (!res.ok) throw new Error("Gagal menambahkan video");
-
-            await Swal.fire("Sukses", "Video berhasil ditambahkan", "success");
-            closeAllModals();
-            loadVideo();
-        } catch (err) {
-            Swal.fire("Error", err.message, "error");
-        } finally {
-            hideLoading();
-        }
-    });
-
-    formTambahArtikel.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const formData = new FormData(formTambahArtikel);
-
-        try {
-            showLoading();
-            const res = await fetch(API_ARTIKEL, {
-                method: "POST",
-                body: formData,
-            });
-
-            if (!res.ok) throw new Error("Gagal menambahkan artikel");
-
-            await Swal.fire(
-                "Sukses",
-                "Artikel berhasil ditambahkan",
-                "success"
-            );
-            closeAllModals();
-            loadArtikel();
-        } catch (err) {
-            Swal.fire("Error", err.message, "error");
-        } finally {
-            hideLoading();
-        }
-    });
-
-    /* =====================
-       DELETE DATA
-    ===================== */
-    document.addEventListener("click", async (e) => {
-        if (!e.target.classList.contains("btn-hapus")) return;
-
-        const id = e.target.dataset.id;
-        const type = e.target.dataset.type;
-        const API = type === "video" ? API_VIDEO : API_ARTIKEL;
-
-        const confirm = await Swal.fire({
-            title: "Yakin?",
-            text: "Data akan dihapus permanen",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Hapus",
-            cancelButtonText: "Batal",
-        });
-
-        if (!confirm.isConfirmed) return;
-
-        try {
-            showLoading();
-            const res = await fetch(`${API}/${id}`, { method: "DELETE" });
-            if (!res.ok) throw new Error("Gagal menghapus data");
-
-            await Swal.fire("Terhapus", "Data berhasil dihapus", "success");
-            type === "video" ? loadVideo() : loadArtikel();
-        } catch (err) {
-            Swal.fire("Error", err.message, "error");
-        } finally {
-            hideLoading();
-        }
-    });
-
-    /* =====================
-       INIT
-    ===================== */
+    /* init */
     loadVideo();
     loadArtikel();
 });
