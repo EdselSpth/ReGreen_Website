@@ -52,7 +52,7 @@
                 @endif
 
 
-                <div class="form-group">
+                <div class="form-group checkbox-group">
                     <input type="checkbox" name="remember" id="remember">
                     <label for="remember">Ingat Saya</label>
                 </div>
