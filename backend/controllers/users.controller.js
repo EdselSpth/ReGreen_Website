@@ -1,16 +1,16 @@
-const UsersService = require('../services/users.service');
+const UsersService = require("../services/users.service");
 
-const { success, error } = require('../utils/response');
+const { success, error } = require("../utils/response");
 
 exports.index = async (req, res) => {
-    try {
-        const { search } = req.query;
-        const userData = await UsersService.getUsers(search);
-        return success(res, 200, userData, "Data users berhasil diambil");
-    } catch (error){
-        return error(res, 500, error.message);
-    }
-}
+  try {
+    const { search, page, limit } = req.query;
+    const userData = await UsersService.getUsers(search, page, limit);
+    return success(res, 200, userData, "Data users berhasil diambil");
+  } catch (err) {
+    return error(res, 500, err.message);
+  }
+};
 
 exports.store = async (req, res) => {
   try {

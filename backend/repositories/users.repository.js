@@ -1,10 +1,10 @@
 const db = require("../config/db");
 
 class usersRepository{
-    static findAll() {
+    static findAll(limit, offset) {
         return new Promise((resolve, reject) =>{
-            const sql = "SELECT username, email, role FROM users ORDER BY username ASC";
-            db.query(sql, (err, rows) => {
+            const sql = "SELECT id, username, email, role FROM users ORDER BY username ASC LIMIT ? OFFSET ?";
+            db.query(sql, [limit, offset], (err, rows) => {
                 if (err){
                     reject(err);
                 } else {
@@ -14,18 +14,46 @@ class usersRepository{
         });
     }
 
-    static searchEngine(keyword){
+    static countAll() {
         return new Promise((resolve, reject) => {
-            const sql = "SELECT username, email, role FROM users WHERE username LIKE ? OR email LIKE ? ORDER BY username ASC";
+            const sql = "SELECT COUNT(*) as total FROM users";
+            db.query(sql, (err, rows) => {
+                if (err){
+                    reject(err);
+                } else {
+                    resolve(rows[0].total);
+                }
+            });
+        });
+    }
+
+    static searchEngine(keyword, limit, offset) {
+        return new Promise((resolve, reject) => {
+            const sql = "SELECT id, username, email, role FROM users WHERE username LIKE ? OR email LIKE ? ORDER BY username ASC LIMIT ? OFFSET ?";
+            const searchKeyword = `%${keyword}%`;
+            
+            db.query(sql, [searchKeyword, searchKeyword, limit, offset], (err, rows) => {
+                if (err){
+                    reject(err);
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
+    }
+
+    static countSearch(keyword) {
+        return new Promise((resolve, reject) => {
+            const sql = "SELECT COUNT(*) as total FROM users WHERE username LIKE ? OR email LIKE ?";
             const searchKeyword = `%${keyword}%`;
 
             db.query(sql, [searchKeyword, searchKeyword], (err, rows) => {
                 if (err){
                     reject(err);
                 } else {
-                    resolve(rows);
+                    resolve(rows[0].total);
                 }
-            })
+            });
         });
     }
 

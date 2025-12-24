@@ -5,19 +5,36 @@ const { success, error } = require("../utils/response");
 exports.getPending = async (req, res) => {
   try {
     const data = await KeuntunganService.getPending();
+
+    if (!data || data.length === 0) {
+      return success(res, 200, []);
+    }
     
-    // Ambil saldo realtime dari firestore untuk setiap baris
     const enrichedData = await Promise.all(data.map(async (item) => {
-        const userDoc = await db.collection('users').doc(item.firebase_uid).get();
-        return {
-            ...item,
-            saldo_user: userDoc.exists ? (userDoc.data().balance || 0) : 0
-        };
+        try {
+            if (!item.firebase_uid) {
+                console.warn(`[WARNING] Data ID ${item.id} tidak punya firebase_uid.`);
+                return { ...item, saldo_user: 0 };
+            }
+
+            const userDoc = await db.collection('users').doc(item.firebase_uid).get();
+            
+            return {
+                ...item,
+                saldo_user: userDoc.exists ? (userDoc.data().balance || 0) : 0
+            };
+
+        } catch (firebaseError) {
+            console.error(`[ERROR FIREBASE] Gagal ambil saldo untuk UID ${item.firebase_uid}:`, firebaseError.message);
+            return { ...item, saldo_user: 0 }; 
+        }
     }));
 
     success(res, 200, enrichedData);
+
   } catch (err) {
-    error(res, 500, err.message);
+    console.error("[CRITICAL ERROR] getPending:", err);
+    error(res, 500, "Terjadi kesalahan pada server: " + err.message);
   }
 };
 

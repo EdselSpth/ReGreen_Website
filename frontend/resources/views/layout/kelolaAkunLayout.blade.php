@@ -5,19 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <title>Pengguna | ReGreen</title>
+    <title>Kelola Akun | ReGreen</title>
 
     <link rel="stylesheet" href="{{ asset('css/kelolaAkun.css') }}">
 </head>
 
 <body>
     <div class="container">
-        {{-- SIDEBAR --}}
         <nav class="sidebar">
             <img src="{{ asset('assets/logo-regreen-with-text.png') }}" alt="ReGreen Logo" class="logo">
             
-            {{-- MENU NAVIGASI (Pakai Route Laravel) --}}
-            {{-- Menggunakan request()->routeIs() biar class 'active' pindah otomatis --}}
+
             
             <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 Beranda
@@ -51,21 +49,17 @@
                 Video & Artikel
             </a>
             
-            {{-- LOGOUT FIX --}}
             <div class="logout">
-                {{-- 1. Link ini cuma pancingan buat trigger form di bawah --}}
                 <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     Logout
                 </a>
 
-                {{-- 2. Form Rahasia (Hidden) untuk kirim POST Logout --}}
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                     @csrf
                 </form>
             </div>
         </nav>
 
-        {{-- MAIN CONTENT --}}
         <div class="main-content">
             <div class="header">Kelola Akun Pengguna</div>
 
@@ -75,7 +69,8 @@
         </div>
     </div>
 
-    {{-- Script JS Tambahan (jika ada) --}}
-    {{-- <script src="{{ asset('js/script.js') }}"></script> --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('js/kelolaAkun.js') }}"></script>
+    
 </body>
 </html>
