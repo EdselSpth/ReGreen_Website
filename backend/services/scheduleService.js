@@ -21,7 +21,7 @@ const validateSchedule = (data) => {
 const createSchedule = async (data) => {
   validateSchedule(data);
 
-  // 1️⃣ Cek konflik di MySQL
+  // Cek konflik di MySQL
   const conflict = await ScheduleRepository.findConflict(
     data.courierName,
     data.date,
@@ -34,10 +34,10 @@ const createSchedule = async (data) => {
 
   data.status = "terdaftar";
 
-  // 2️⃣ SIMPAN KE MYSQL
+  // SIMPAN KE MYSQL
   await ScheduleRepository.create(data);
 
-  // 3️⃣ SIMPAN KE FIREBASE (COLLECTION YANG SAMA)
+  // SIMPAN KE FIREBASE
   await db.collection("penjemputan").add({
     alamat: data.alamat,
     courierName: data.courierName,
