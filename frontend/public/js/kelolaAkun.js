@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const API_BASE_URL = "http://localhost:3000/api/users";
 
     let currentPage = 1;
-    let currentLimit = 5;
+    let currentLimit = 10;
     let currentSearch = "";
 
     const tblUsers = document.querySelector("#data-pengguna-body");
@@ -103,7 +103,6 @@ document.addEventListener("DOMContentLoaded", () => {
         pageInfo.innerText = `Halaman ${current_page} dari ${total_page} (Total: ${total_data} users)`;
 
         paginationContainer.innerHTML = "";
-
 
         const btnPrev = document.createElement("button");
         btnPrev.innerHTML = '<i class="fas fa-chevron-left"></i> Previous';
