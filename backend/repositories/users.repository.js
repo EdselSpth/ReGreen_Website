@@ -3,7 +3,7 @@ const db = require("../config/db");
 class usersRepository{
     static findAll() {
         return new Promise((resolve, reject) =>{
-            const sql = "SELECT username, email, role FROM users ORDER BY username ASC";
+            const sql = "SELECT id, username, email, role FROM users ORDER BY username ASC";
             db.query(sql, (err, rows) => {
                 if (err){
                     reject(err);

@@ -116,5 +116,4 @@
         </div>
     </div>
 
-    <script src="{{ asset('js/kelolaAkun.js') }}"></script>
 @endsection

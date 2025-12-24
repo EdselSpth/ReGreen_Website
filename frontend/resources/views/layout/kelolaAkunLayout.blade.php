@@ -75,7 +75,8 @@
         </div>
     </div>
 
-    {{-- Script JS Tambahan (jika ada) --}}
-    {{-- <script src="{{ asset('js/script.js') }}"></script> --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('js/kelolaAkun.js') }}"></script>
+    
 </body>
 </html>

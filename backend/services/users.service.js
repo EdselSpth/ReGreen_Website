@@ -77,7 +77,7 @@ class UsersService {
             throw new Error("User tidak ditemukan dan gagal mengupdate password");
         }
 
-        return this.updatePasswordResult;
+        return updatePasswordResult;
     }
 }
 
