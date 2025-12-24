@@ -23,33 +23,29 @@
                 <h2>Masuk</h2>
                 <p class="subtitle">Masuk untuk mengakses halaman utama admin ReGreen</p>
 
-                {{-- Form Action: Nanti arahkan ke route login Laravel --}}
                 <form id="loginForm" method="POST" action="{{ route('login') }}">
-                    {{-- Wajib ada @csrf untuk keamanan form di Laravel --}}
                     @csrf 
                     
                     <div class="form-group">
                         <label for="email" class="form-label">Email</label>
-                        {{-- Tambahkan name="email" agar terbaca oleh Controller --}}
                         <input type="email" class="form-input" id="email" name="email"
                             placeholder="Masukan Email Anda" required autofocus>
                     </div>
 
                     <div class="form-group">
                         <label for="password" class="form-label">Kata Sandi</label>
-                        {{-- Tambahkan name="password" --}}
                         <input type="password" class="form-input" id="password" name="password"
                             placeholder="Masukan Kata Sandi" required>
                     </div>
 
-                    {{-- Tambahan: Menampilkan error validasi jika login gagal --}}
                     @if ($errors->any())
-                        <div style="color: red; margin-bottom: 15px; font-size: 0.9em;">
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
+                        <div class="alert-box alert-danger">
+                            <div class="alert-icon">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <div class="alert-message">
+                                {{ $errors->first() }}
+                            </div>
                         </div>
                     @endif
 
@@ -58,7 +54,6 @@
                     </div>
                 </form>
                 
-                {{-- Container pesan tambahan (opsional jika pakai JS) --}}
                 <div id="loginMessage" class="message-container"></div>
             </div>
         </div>
@@ -75,7 +70,7 @@
 
             if (loginForm) {
                 loginForm.addEventListener('submit', function(event) {
-                    event.preventDefault(); // Tahan dulu
+                    event.preventDefault(); 
 
                     const email = document.getElementById('email').value;
                     const password = document.getElementById('password').value;
@@ -90,8 +85,6 @@
                         return;
                     }
 
-
-                    let timerInterval;
                     Swal.fire({
                         title: 'Proses Login...',
                         html: 'Mencocokkan data ke database.',
@@ -108,16 +101,4 @@
             }
         });
     </script>
-    
-
-    @if($errors->any())
-    <script>
-        Swal.fire({
-            icon: 'error',
-            title: 'Gagal Masuk',
-            text: '{{ $errors->first() }}', 
-            confirmButtonColor: '#d33'
-        });
-    </script>
-    @endif
 @endsection
