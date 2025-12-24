@@ -1,0 +1,57 @@
+const ScheduleRepository = require("../repositories/scheduleRepository");
+const { db, admin } = require("../config/firebase");
+
+const validateSchedule = (data) => {
+  const required = [
+    "alamat",
+    "courierName",
+    "date",
+    "time",
+    "userId",
+    "wasteType"
+  ];
+
+  for (const field of required) {
+    if (!data[field]) {
+      throw new Error(`${field} wajib diisi`);
+    }
+  }
+};
+
+const createSchedule = async (data) => {
+  validateSchedule(data);
+
+  // 1️⃣ Cek konflik di MySQL
+  const conflict = await ScheduleRepository.findConflict(
+    data.courierName,
+    data.date,
+    data.time
+  );
+
+  if (conflict.length > 0) {
+    throw new Error("Jadwal bentrok");
+  }
+
+  data.status = "terdaftar";
+
+  // 2️⃣ SIMPAN KE MYSQL
+  await ScheduleRepository.create(data);
+
+  // 3️⃣ SIMPAN KE FIREBASE (COLLECTION YANG SAMA)
+  await db.collection("penjemputan").add({
+    alamat: data.alamat,
+    courierName: data.courierName,
+    date: data.date,
+    time: data.time,
+    wasteType: data.wasteType,
+    status: data.status,
+    userId: data.userId,
+    createdAt: admin.firestore.FieldValue.serverTimestamp()
+  });
+
+  return true;
+};
+
+module.exports = {
+  createSchedule
+};

@@ -5,7 +5,8 @@ require("./scripts/migrateVideo");
 require("./scripts/migrateArtikel");
 require("./scripts/migrateAreaUser");
 require("./scripts/migrateAreaAdmin");
-require("./scripts/migrateJenisSampah")
+require("./scripts/migrateJenisSampah");
+require("./scripts/migrateSchedule");
 
 
 const express = require("express");
@@ -25,6 +26,7 @@ app.use("/api/areaAdm", require("./routes/pendaftaranAreaAdmin.routes"));
 app.use("/api/jenisSampah", require("./routes/jenisSampah.routes"));
 app.use("/api/saldo", require("./routes/saldo.routes"));
 app.use("/api/users", require("./routes/users.routes"));
+app.use("/api/schedule", require("./routes/schedule.routes"));
 
 app.listen(3000 ,() => {
   console.log("Server running at http://localhost:3000");
