@@ -115,6 +115,7 @@ class UsersService {
 
     return updatePasswordResult;
   }
+  
 }
 
 module.exports = UsersService;

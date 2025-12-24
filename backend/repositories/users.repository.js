@@ -61,7 +61,6 @@ class usersRepository{
         return new Promise((resolve, reject) => {
             const sql = "SELECT id FROM users WHERE username = ? OR email = ?";
             
-            // Perhatikan: TIDAK ADA % disini. Harus persis.
             db.query(sql, [username, email], (err, rows) => {
                 if (err) {
                     reject(err);
@@ -125,6 +124,7 @@ class usersRepository{
             });
         });
     }
+
 }
 
 module.exports = usersRepository;
