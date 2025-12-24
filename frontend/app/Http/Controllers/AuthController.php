@@ -14,19 +14,39 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        // 1. Validasi Input
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        $credentials['role'] = 'Admin';
+        $remember = $request->has('remember');
+        
+        // HAPUS baris $credentials['role'] = 'Admin' yang lama.
+        // Kita cek role secara manual di bawah supaya bisa kasih pesan error yang jelas.
 
-        if (Auth::attempt($credentials)) {
+        // 2. Cek apakah Email & Password cocok di Database?
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            return redirect()->intended('kelolaAkun');
+            // 3. LOGIC PENENTUAN NASIB (Role Check)
+            // Pastikan penulisan 'Admin' sesuai persis dengan di database (besar/kecilnya)
+            if (Auth::user()->role === 'Admin') {
+                return redirect()->intended('dashboard');
+            }
+
+            // 4. Kalau Login sukses TAPI bukan Admin (misal: Kurir iseng login)
+            // Kita tendang keluar lagi.
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors([
+                'email' => 'Akun Anda bukan Admin. Silakan login via Aplikasi Mobile.',
+            ])->onlyInput('email');
         }
 
+        // 5. Kalau Email/Password salah
         return back()->withErrors([
             'email' => 'Email atau password salah.',
         ])->onlyInput('email');
