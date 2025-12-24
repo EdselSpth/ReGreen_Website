@@ -1,10 +1,12 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const controller = require("../controllers/areaAdmin.controller");
+const controller = require('../controllers/areaAdmin.controller');
 
-router.get("/", controller.getAll);
-router.get("/:id", controller.getById);
-router.put("/:id", controller.update);
-router.delete("/:id", controller.delete);
+
+router.get('/', controller.getAllAreas);
+router.get('/pending', controller.getPendingAreas);
+router.put('/approve/:areaId', controller.approveArea);
+router.put('/reject/:areaId', controller.rejectArea);
+router.delete('/:areaId', controller.deleteArea);
 
 module.exports = router;

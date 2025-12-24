@@ -1,74 +1,76 @@
-const db = require("../config/db");
+const { db } = require("../config/firebase");
+const admin = require("firebase-admin");
 
-exports.getAll = (req, res) => {
-  const sql = "SELECT * FROM area_user ORDER BY created_at DESC";
-  db.query(sql, (err, results) => {
-    if (err) {
-      return res.status(500).json({
-        message: "Gagal ambil data area",
-        error: err
+
+exports.approveArea = async (req, res) => {
+  try {
+    const { areaId } = req.params;
+
+    const areaRef = db.collection("areas").doc(areaId);
+    const areaSnap = await areaRef.get();
+
+    if (!areaSnap.exists) {
+      return res.status(404).json({
+        success: false,
+        message: "Area tidak ditemukan",
       });
     }
-    res.json(results);
-  });
+
+    const areaData = areaSnap.data();
+
+    if (areaData.status === "approved") {
+      return res.status(400).json({
+        success: false,
+        message: "Area sudah di-approve",
+      });
+    }
+
+    if (!areaData.userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User pemilik area tidak ditemukan",
+      });
+    }
+
+    //update area
+    await areaRef.update({
+      status: "approved",
+      approvedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    // update user
+    await db.collection("users").doc(areaData.userId).update({
+      areaStatus: "approved",
+    });
+
+    return res.json({
+      success: true,
+      message: "Area berhasil di-approve",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Gagal approve area",
+    });
+  }
 };
 
-exports.getById = (req, res) => {
-  const sql = "SELECT * FROM area_user WHERE id = ?";
-  db.query(sql, [req.params.id], (err, results) => {
-    if (err) {
-      return res.status(500).json({
-        message: "Query error",
-        error: err
-      });
-    }
-    if (results.length === 0) {
-      return res.status(404).json({ message: "Data tidak ditemukan" });
-    }
-    res.json(results[0]);
-  });
-};
+exports.deleteArea = async (req, res) => {
+  try {
+    const { areaId } = req.params;
 
-exports.update = (req, res) => {
-  const { status } = req.body;
+    await db.collection("areas").doc(areaId).delete();
 
-  const sql = `
-    UPDATE area_user
-    SET status = ?
-    WHERE id = ?
-  `;
-
-  db.query(sql, [status, req.params.id], (err, result) => {
-    if (err) {
-      return res.status(500).json({
-        message: "Gagal update status area",
-        error: err
-      });
-    }
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Data tidak ditemukan" });
-    }
-
-    res.json({ message: "Status area berhasil diperbarui" });
-  });
-};
-
-exports.delete = (req, res) => {
-  const sql = "DELETE FROM area_user WHERE id = ?";
-
-  db.query(sql, [req.params.id], (err, result) => {
-    if (err) {
-      return res.status(500).json({
-        message: "Gagal hapus area",
-        error: err
-      });
-    }
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Data tidak ditemukan" });
-    }
-
-    res.json({ message: "Area berhasil dihapus" });
-  });
+    return res.json({
+      success: true,
+      message: "Area berhasil dihapus",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Gagal menghapus area",
+    });
+  }
 };
