@@ -22,21 +22,13 @@ class AuthController extends Controller
 
         $remember = $request->has('remember');
         
-        // HAPUS baris $credentials['role'] = 'Admin' yang lama.
-        // Kita cek role secara manual di bawah supaya bisa kasih pesan error yang jelas.
-
-        // 2. Cek apakah Email & Password cocok di Database?
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            // 3. LOGIC PENENTUAN NASIB (Role Check)
-            // Pastikan penulisan 'Admin' sesuai persis dengan di database (besar/kecilnya)
             if (Auth::user()->role === 'Admin') {
                 return redirect()->intended('dashboard');
             }
 
-            // 4. Kalau Login sukses TAPI bukan Admin (misal: Kurir iseng login)
-            // Kita tendang keluar lagi.
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
@@ -46,7 +38,6 @@ class AuthController extends Controller
             ])->onlyInput('email');
         }
 
-        // 5. Kalau Email/Password salah
         return back()->withErrors([
             'email' => 'Email atau password salah.',
         ])->onlyInput('email');

@@ -6,7 +6,7 @@
         <div class="header-tools">
             <div class="left-section">
                 <button class="btn-tambah" onclick="openModal('modal-tambah')">
-                    <i class="fas fa-plus"></i> Tambah Data
+                    + Tambah Data
                 </button>
             </div>
 
