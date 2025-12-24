@@ -12,18 +12,13 @@ Route::get('/', function () {
 });
 
 Route::middleware('guest')->group(function () {
-    // Menampilkan halaman login
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     
-    // Menerima data post login
     Route::post('/login', [AuthController::class, 'login']); 
 });
 Route::middleware('auth')->group(function () {
     
-    // Route Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-    // --- Daftar Halaman Admin ---
     
     Route::get('/dashboard', function () {
         return view('page.dashboard');

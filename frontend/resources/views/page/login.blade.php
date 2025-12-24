@@ -2,13 +2,11 @@
 
 @section('title', 'Login - ReGreen')
 
-{{-- 3. Mengisi bagian @yield('content') --}}
 @section('content')
     <div class="login-container">
 
         <div class="left-panel">
             <div>
-                {{-- Mengambil logo dari public/assets/logo.png --}}
                 <img src="{{ asset('assets/logo.png') }}" alt="ReGreen Logo" class="logo-img">
                 
                 <h1>Buang Sampah<br>Dapat Cuan.</h1>
@@ -17,7 +15,6 @@
                     dan mendapatkan dana secara online</p>
             </div>
             
-            {{-- Mengambil ilustrasi dari public/assets/illustration.png --}}
             <img src="{{ asset('assets/illustration.png') }}" alt="Ilustrasi" class="illustration-img">
         </div>
 
@@ -67,4 +64,60 @@
         </div>
 
     </div>
+@endsection
+
+@section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(event) {
+                    event.preventDefault(); // Tahan dulu
+
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+
+                    if (!email || !password) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Peringatan',
+                            text: 'Email dan Kata Sandi wajib diisi.',
+                            confirmButtonColor: '#558B3E'
+                        });
+                        return;
+                    }
+
+
+                    let timerInterval;
+                    Swal.fire({
+                        title: 'Proses Login...',
+                        html: 'Mencocokkan data ke database.',
+                        timer: 1000, 
+                        timerProgressBar: true,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        willClose: () => {
+                            this.submit(); 
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+    
+
+    @if($errors->any())
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal Masuk',
+            text: '{{ $errors->first() }}', 
+            confirmButtonColor: '#d33'
+        });
+    </script>
+    @endif
 @endsection
