@@ -1,3 +1,4 @@
+require("./scripts/migrateUsers");
 require("./scripts/migrateKeuntungan");
 require("./scripts/migratebankSampah");
 require("./scripts/migrateVideo");
@@ -5,7 +6,7 @@ require("./scripts/migrateArtikel");
 require("./scripts/migrateAreaUser");
 require("./scripts/migrateAreaAdmin");
 require("./scripts/migrateJenisSampah")
-require("./scripts/migrateUsers");
+
 
 const express = require("express");
 const cors = require("cors");

@@ -1,230 +1,92 @@
 document.addEventListener("DOMContentLoaded", () => {
     console.log("kelolaAkun.js loaded");
 
+    const API_BASE_URL = "http://localhost:3000/api/users";
+
+    let currentPage = 1;
+    let currentLimit = 5;
+    let currentSearch = "";
+
     const tblUsers = document.querySelector("#data-pengguna-body");
+    const pageInfo = document.querySelector("#page-info");
+    const paginationContainer = document.querySelector("#pagination-container");
+    const formSearch = document.querySelector("#form-search");
+
     const formTambah = document.querySelector("#form-tambah");
     const formEdit = document.querySelector("#form-edit");
     const formPassword = document.querySelector("#form-password");
-    const pageInfo = document.querySelector("#page-info");
 
     loadUsers();
 
-    if (formTambah) {
-        formTambah.addEventListener("submit", async (e) => {
+    if (formSearch) {
+        formSearch.addEventListener("submit", (e) => {
             e.preventDefault();
-
-            const username = document.getElementById("tambah-username").value;
-            const email = document.getElementById("tambah-email").value;
-            const role = document.getElementById("tambah-role").value;
-            const password = document.getElementById("tambah-password").value;
-
-            const data = { username, email, role, password };
-
-            try {
-                Swal.fire({
-                    title: "Proses menambah di database",
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    },
-                });
-
-                const response = await fetch(
-                    "http://localhost:3000/api/users",
-                    {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(data),
-                    }
-                );
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    await Swal.fire({
-                        title: "Sukses!",
-                        text: "User baru berhasil ditambahkan",
-                        icon: "success",
-                        timer: 1500,
-                        showConfirmButton: false,
-                    });
-
-                    closeModal("modal-tambah");
-                    formTambah.reset();
-                    loadUsers();
-                } else {
-                    Swal.fire({
-                        title: "Gagal!",
-                        text: result.message || "Gagal menambah data.",
-                        icon: "error",
-                    });
-                }
-            } catch (error) {
-                console.error("Create error:", error);
-                Swal.fire({
-                    title: "Error!",
-                    text: "Terjadi kesalahan koneksi server.",
-                    icon: "error",
-                });
-            }
-        });
-    }
-
-    if (formEdit) {
-        formEdit.addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            const id = document.getElementById("edit-user-id").value;
-            const username = document.getElementById("edit-username").value;
-            const email = document.getElementById("edit-email").value;
-            const role = document.getElementById("edit-role").value;
-
-            const data = { username, email, role };
-
-            try {
-                Swal.fire({
-                    title: "Mengupdate Data...",
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    },
-                });
-
-                const response = await fetch(
-                    `http://localhost:3000/api/users/${id}`,
-                    {
-                        method: "PUT",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(data),
-                    }
-                );
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    await Swal.fire({
-                        title: "Berhasil!",
-                        text: "Data user berhasil diupdate!",
-                        icon: "success",
-                        timer: 1500,
-                        showConfirmButton: false,
-                    });
-
-                    closeModal("modal-edit");
-                    loadUsers();
-                } else {
-                    Swal.fire({
-                        title: "Gagal!",
-                        text: result.message || "Gagal update data.",
-                        icon: "error",
-                    });
-                }
-            } catch (error) {
-                console.erroror("Update error:", error);
-                Swal.fire({
-                    title: "Error!",
-                    text: "Terjadi kesalahan koneksi.",
-                    icon: "error",
-                });
-            }
-        });
-    }
-
-    if (formPassword) {
-        formPassword.addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            const id = document.getElementById("password-user-id").value;
-            const password = document.getElementById("password-baru").value;
-            
-            try {
-                Swal.fire({
-                    title: 'Mengubah Password...',
-                    allowOutsideClick: false,
-                    didOpen: () => { Swal.showLoading(); }
-                });
-
-                const response = await fetch(`http://localhost:3000/api/users/${id}/password`, {
-                    method: "PATCH",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ password }),
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    await Swal.fire({
-                        title: 'Berhasil!',
-                        text: 'Password berhasil diubah!',
-                        icon: 'success',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-
-                    closeModal("modal-password");
-                    formPassword.reset();
-                } else {
-                    Swal.fire({
-                        title: 'Gagal!',
-                        text: result.message || 'Gagal mengubah password.',
-                        icon: 'error'
-                    });
-                }
-            } catch (error) {
-                console.error("Password error:", error);
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'Terjadi kesalahan koneksi.',
-                    icon: 'error'
-                });
-            }
+            currentSearch = document.getElementById("search-input").value;
+            currentPage = 1;
+            loadUsers();
         });
     }
 
     function loadUsers() {
         tblUsers.innerHTML =
-            "<tr><td colspan='4' style='text-align:center'>Memuat data...</td></tr>";
+            "<tr><td colspan='4' style='text-align:center; padding: 20px;'>Sedang memuat data...</td></tr>";
 
-        fetch("http://localhost:3000/api/users")
+        let url = `${API_BASE_URL}?page=${currentPage}&limit=${currentLimit}`;
+        if (currentSearch) {
+            url += `&search=${encodeURIComponent(currentSearch)}`;
+        }
+
+        fetch(url)
             .then((res) => res.json())
             .then((response) => {
                 tblUsers.innerHTML = "";
-                const rows = response.data ? response.data : response;
 
-                if (rows && rows.length > 0) {
-                    rows.forEach((item) => addUserRow(item));
-                    if (pageInfo)
-                        pageInfo.innerText = `Total Data: ${rows.length}`;
+                if (response.status === "success") {
+                    const userData = response.data.data;
+                    const paginationData = response.data.pagination;
+
+                    if (userData && userData.length > 0) {
+                        userData.forEach((item) => addUserRow(item));
+
+                        renderPagination(paginationData);
+                    } else {
+                        tblUsers.innerHTML =
+                            "<tr><td colspan='4' style='text-align:center; padding: 20px;'>Data tidak ditemukan</td></tr>";
+                        pageInfo.innerText = "0 Data";
+                        paginationContainer.innerHTML = "";
+                    }
                 } else {
-                    tblUsers.innerHTML =
-                        "<tr><td colspan='4' style='text-align:center'>Tidak ada data user</td></tr>";
-                    if (pageInfo) pageInfo.innerText = "Tidak ada data.";
+                    console.error("API Error:", response.message);
+                    tblUsers.innerHTML = `<tr><td colspan='4' style='text-align:center; color:red;'>Error: ${response.message}</td></tr>`;
                 }
             })
             .catch((err) => {
-                console.error("Load error:", err);
+                console.error("Fetch Error:", err);
                 tblUsers.innerHTML =
-                    "<tr><td colspan='4' style='text-align:center; color:red;'>Gagal koneksi ke server Node.js</td></tr>";
+                    "<tr><td colspan='4' style='text-align:center; color:red;'>Gagal koneksi ke Server Node.js</td></tr>";
             });
     }
 
     function addUserRow(item) {
         const tr = document.createElement("tr");
 
+        const roleColor = item.role === "Admin" ? "#e74a3b" : "#1cc88a";
+        const roleBadge = `<span style="background-color: ${roleColor}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${item.role}</span>`;
+
         tr.innerHTML = `
-            <td>${item.username}</td>
-            <td>${item.email}</td>
-            <td>${item.role}</td>
-            <td>
-                <button class="btn-aksi btn-edit" 
+            <td style="padding: 10px;">${item.username}</td>
+            <td style="padding: 10px;">${item.email}</td>
+            <td style="padding: 10px;">${roleBadge}</td>
+            <td style="padding: 10px;">
+                <button class="btn-aksi btn-edit" style="margin-right:5px;"
                     onclick="openEditModal('${item.id}', '${item.username}', '${item.email}', '${item.role}')">
                     ✏️ Edit
                 </button>
-                <button class="btn-aksi btn-hapus" 
+                <button class="btn-aksi btn-hapus" style="margin-right:5px;"
                     onclick="deleteUser('${item.id}', '${item.username}')">
                     🗑️ Hapus
                 </button>
-                <button class="btn-aksi btn-password" 
+                <button class="btn-aksi btn-password"
                     onclick="openPasswordModal('${item.id}', '${item.username}')">
                     🔑 Pass
                 </button>
@@ -233,21 +95,175 @@ document.addEventListener("DOMContentLoaded", () => {
         tblUsers.appendChild(tr);
     }
 
+    function renderPagination(pagination) {
+        if (!pagination) return;
+
+        const { current_page, total_page, total_data } = pagination;
+
+        pageInfo.innerText = `Halaman ${current_page} dari ${total_page} (Total: ${total_data} users)`;
+
+        paginationContainer.innerHTML = "";
+
+
+        const btnPrev = document.createElement("button");
+        btnPrev.innerHTML = '<i class="fas fa-chevron-left"></i> Previous';
+        btnPrev.className = "btn-pagination";
+        btnPrev.style.marginRight = "5px";
+
+        btnPrev.disabled = current_page === 1;
+
+        btnPrev.onclick = () => {
+            if (current_page > 1) {
+                currentPage--;
+                loadUsers();
+            }
+        };
+        paginationContainer.appendChild(btnPrev);
+
+        const btnNext = document.createElement("button");
+        btnNext.innerHTML = 'Next <i class="fas fa-chevron-right"></i>';
+        btnNext.className = "btn-pagination";
+
+        btnNext.disabled = current_page === total_page || total_page === 0;
+
+        btnNext.onclick = () => {
+            if (current_page < total_page) {
+                currentPage++;
+                loadUsers();
+            }
+        };
+        paginationContainer.appendChild(btnNext);
+    }
+
     window.reloadUserData = loadUsers;
+
+    if (formTambah) {
+        formTambah.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const data = {
+                username: document.getElementById("tambah-username").value,
+                email: document.getElementById("tambah-email").value,
+                role: document.getElementById("tambah-role").value,
+                password: document.getElementById("tambah-password").value,
+            };
+
+            await handleRequest(
+                API_BASE_URL,
+                "POST",
+                data,
+                "Menambah User...",
+                "User berhasil ditambahkan",
+                "modal-tambah"
+            );
+        });
+    }
+
+    if (formEdit) {
+        formEdit.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const id = document.getElementById("edit-user-id").value;
+            const data = {
+                username: document.getElementById("edit-username").value,
+                email: document.getElementById("edit-email").value,
+                role: document.getElementById("edit-role").value,
+            };
+
+            await handleRequest(
+                `${API_BASE_URL}/${id}`,
+                "PUT",
+                data,
+                "Mengupdate User...",
+                "User berhasil diupdate",
+                "modal-edit"
+            );
+        });
+    }
+
+    if (formPassword) {
+        formPassword.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const id = document.getElementById("password-user-id").value;
+            const passBaru = document.getElementById("password-baru").value;
+            const passKonfirm = document.getElementById(
+                "password-konfirmasi"
+            ).value;
+
+            if (passBaru !== passKonfirm) {
+                Swal.fire("Error", "Konfirmasi password tidak cocok!", "error");
+                return;
+            }
+
+            await handleRequest(
+                `${API_BASE_URL}/${id}/password`,
+                "PATCH",
+                { password: passBaru },
+                "Mengubah Password...",
+                "Password berhasil diubah",
+                "modal-password"
+            );
+        });
+    }
+
+    async function handleRequest(
+        url,
+        method,
+        data,
+        loadingText,
+        successText,
+        modalIdToClose
+    ) {
+        try {
+            Swal.fire({
+                title: loadingText,
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading(),
+            });
+
+            const response = await fetch(url, {
+                method: method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+                await Swal.fire({
+                    icon: "success",
+                    title: "Berhasil!",
+                    text: successText,
+                    timer: 1500,
+                    showConfirmButton: false,
+                });
+                if (modalIdToClose) closeModal(modalIdToClose);
+
+                if (method === "POST")
+                    document.getElementById("form-tambah").reset();
+                if (method === "PATCH")
+                    document.getElementById("form-password").reset();
+
+                loadUsers();
+            } else {
+                Swal.fire(
+                    "Gagal!",
+                    result.message || "Terjadi kesalahan",
+                    "error"
+                );
+            }
+        } catch (error) {
+            console.error(error);
+            Swal.fire("Error!", "Gagal koneksi ke server", "error");
+        }
+    }
 });
 
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.add("active");
-    }
+    if (modal) modal.classList.add("active");
 }
-
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.remove("active");
-    }
+    if (modal) modal.classList.remove("active");
 }
 
 function openEditModal(id, username, email, role) {
@@ -255,75 +271,46 @@ function openEditModal(id, username, email, role) {
     document.getElementById("edit-username").value = username;
     document.getElementById("edit-email").value = email;
     document.getElementById("edit-role").value = role;
-
     openModal("modal-edit");
 }
 
 function openPasswordModal(id, username) {
     document.getElementById("password-user-id").value = id;
-
-    const labelNama = document.getElementById("password-user-email");
-    if (labelNama) {
-        labelNama.innerText = username; 
-    }
-
+    document.getElementById("password-user-email").innerText = username;
     document.getElementById("password-baru").value = "";
-
+    document.getElementById("password-konfirmasi").value = "";
     openModal("modal-password");
 }
 
 async function deleteUser(id, username) {
-    const result = await Swal.fire({
-        title: `Hapus user ${username}`,
-        text: "Data yang dihapus tidak dapat dikembalikan",
+    const confirm = await Swal.fire({
+        title: `Hapus ${username}?`,
+        text: "Data tidak bisa dikembalikan!",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
         confirmButtonText: "Ya, Hapus!",
-        cancelButtonText: "Batal",
     });
 
-    if (result.isConfirmed) {
+    if (confirm.isConfirmed) {
         try {
             Swal.fire({
-                title: "Proses Menghapus di database",
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                },
+                title: "Menghapus...",
+                didOpen: () => Swal.showLoading(),
             });
+            const res = await fetch(`http://localhost:3000/api/users/${id}`, {
+                method: "DELETE",
+            });
+            const result = await res.json();
 
-            const respond = await fetch(
-                `http://localhost:3000/api/users/${id}`,
-                { method: "DELETE" }
-            );
-            const result = await respond.json();
-
-            if (respond.ok) {
-                await Swal.fire({
-                    title: "Terhapus!",
-                    text: "Data berhasil dihapus",
-                    icon: "success",
-                    timer: 1500,
-                    showConfirmButton: false,
-                });
-                if (window.reloadUserData) window.reloadUserData();
-                else location.reload();
+            if (res.ok) {
+                Swal.fire("Terhapus!", "Data berhasil dihapus.", "success");
+                window.reloadUserData();
             } else {
-                Swal.fire({
-                    title: "Gagal!",
-                    text: result.message || "Gagal menghapus data.",
-                    icon: "error",
-                });
+                Swal.fire("Gagal!", result.message, "error");
             }
-        } catch (error) {
-            console.error("Delete error:", error);
-            Swal.fire({
-                title: "Error!",
-                text: "Terjadi kesalahan koneksi server.",
-                icon: "error",
-            });
+        } catch (err) {
+            Swal.fire("Error!", "Gagal koneksi server", "error");
         }
     }
 }
