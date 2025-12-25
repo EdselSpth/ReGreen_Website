@@ -1,4 +1,4 @@
-@extends('layout.bankSampahLayout')
+@extends('layout.dashboardLayout')
 
 @section('title', 'Dashboard')
 
@@ -15,26 +15,29 @@
 
     <div class="dashboard-grid">
 
-        {{-- ================= BANK SAMPAH ================= --}}
+        {{-- ================= JADWAL PENGAMBILAN ================= --}}
         <div class="section-box">
             <div class="section-header">
-                <span class="section-title">Data Bank Sampah</span>
+                <span class="section-title">Jadwal Pengambilan Sampah</span>
             </div>
 
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>No</th>
-                            <th>Nama Bank Sampah</th>
-                            <th>Jenis</th>
-                            <th>Status</th>
+                            <th style="width:5%">No</th>
+                            <th style="width:15%">Kurir</th>
+                            <th style="width:30%; text-align:left">Alamat</th>
+                            <th style="width:15%">Tanggal</th>
+                            <th style="width:10%">Waktu</th>
+                            <th style="width:10%">Status</th>
+                            <th style="width:15%">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody id="bank-body">
+                    <tbody id="schedule-body">
                         <tr>
-                            <td colspan="4" style="text-align:center;">
-                                Loading...
+                            <td colspan="7" style="text-align:center;">
+                                Memuat data jadwal...
                             </td>
                         </tr>
                     </tbody>
@@ -42,27 +45,27 @@
             </div>
         </div>
 
-        {{-- ================= KEUNTUNGAN (PENDING) ================= --}}
+        {{-- ================= KEUNTUNGAN ================= --}}
         <div class="section-box">
             <div class="section-header">
-                <span class="section-title">Keuntungan (Pending)</span>
+                <span class="section-title">Keuntungan</span>
             </div>
 
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>No</th>
-                            <th>Nama Pengguna</th>
-                            <th>Nominal</th>
-                            <th>Metode</th>
-                            <th>Rekening</th>
+                            <th style="width:5%">No</th>
+                            <th style="width:35%">Nama Pengguna</th>
+                            <th style="width:20%">Nominal</th>
+                            <th style="width:20%">Metode</th>
+                            <th style="width:20%">Rekening</th>
                         </tr>
                     </thead>
                     <tbody id="pending-body">
                         <tr>
                             <td colspan="5" style="text-align:center;">
-                                Loading...
+                                Memuat data keuntungan...
                             </td>
                         </tr>
                     </tbody>
@@ -75,4 +78,5 @@
     {{-- ================= SCRIPT ================= --}}
     <script src="{{ asset('js/dashboard.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 @endsection
