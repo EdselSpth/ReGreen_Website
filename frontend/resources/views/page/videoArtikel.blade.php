@@ -116,14 +116,16 @@
                 <span class="btn-tutup">&times;</span>
             </div>
             <div class="modal-body">
-                <form id="form-tambah-artikel" enctype="multipart/form-data">
+                <form id="form-tambah-artikel">
                     <div class="form-group">
                         <label>Judul Artikel</label>
-                        <input type="text" name="nama_artikel" required>
+                        <input type="text" name="nama_artikel" id="tambah-nama-artikel" required
+                            placeholder="Contoh: Pentingnya Vaksinasi">
                     </div>
                     <div class="form-group">
-                        <label>File PDF</label>
-                        <input type="file" name="file_pdf" accept="application/pdf" required>
+                        <label>Link Artikel (URL)</label>
+                        <input type="url" id="tambah-link-artikel" name="link_artikel" required
+                            placeholder="https://drive.google.com/file/...">
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn-aksi btn-batal">Batal</button>
