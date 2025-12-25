@@ -1,0 +1,143 @@
+/* Layout Global */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+.app-wrapper { display: flex; min-height: 100vh; background-color: #fff; }
+
+/* SIDEBAR - Warna & Hover Identik Gambar image_fb862a */
+.sidebar {
+    width: 260px; background-color: #d9e7cb; position: fixed; 
+    height: 100vh; display: flex; flex-direction: column; z-index: 1000;
+}
+.sidebar-logo { padding: 30px 20px; text-align: center; }
+.sidebar-logo img { width: 140px; }
+.sidebar-menu { flex-grow: 1; }
+.sidebar-menu a {
+    display: block; padding: 12px 25px; color: #000; text-decoration: none;
+    font-weight: 600; font-size: 15px; transition: 0.2s;
+}
+.sidebar-menu a:hover, .sidebar-menu a.active {
+    background-color: rgba(0, 0, 0, 0.05); /* Efek highlight halus sesuai gambar */
+}
+.sidebar-logout { padding: 25px; border-top: 1px solid rgba(0,0,0,0.05); margin-top: auto; }
+.sidebar-logout a { color: #000; text-decoration: none; font-weight: bold; }
+
+/* MAIN CONTENT & HEADER - Identik Gambar image_fb7786 */
+.main-content { flex: 1; margin-left: 260px; }
+.main-header { 
+    background-color: #5d8736; padding: 20px 40px; color: white; 
+    font-weight: bold; font-size: 1.1rem; text-transform: uppercase;
+}
+
+/* KOTAK TABEL MELENGKUNG - Identik Gambar image_fb114c */
+.page-body { padding: 40px; }
+.btn-tambah {
+    background-color: #1a7a4a; color: white; padding: 10px 20px;
+    border: none; border-radius: 8px; font-weight: bold; margin-bottom: 25px; cursor: pointer;
+}
+.table-card {
+    border: 1px solid #5d8736; border-radius: 15px; 
+    padding: 25px; background-color: #d9e7cb; /* Container hijau muda */
+}
+.white-inner-box {
+    background: white; border-radius: 12px; padding: 15px;
+    border: 1px solid #5d8736;
+}
+.table-custom { width: 100%; border-collapse: collapse; }
+.table-custom th { padding: 15px; border-bottom: 1.5px solid #5d8736; font-size: 14px; text-align: center; }
+.table-custom td { padding: 15px; border-bottom: 1px solid #eee; text-align: center; font-size: 14px; }
+
+/* Badge & Buttons */
+.badge-yellow { background:#ffc107; padding:4px 10px; border-radius:4px; font-weight:bold; font-size:11px; }
+.time-box-ui { border: 1px solid #ccc; padding: 4px 8px; border-radius: 5px; display: inline-block; }
+.action-buttons { display: flex; gap: 5px; justify-content: center; }
+.btn-action { padding: 4px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; border: 1px solid; background: #fff; }
+.btn-edit-icon { color: #0d6efd; border-color: #0d6efd; }
+.btn-delete-icon { color: #dc3545; border-color: #dc3545; }
+
+/* MODAL - Tetap menjaga fungsionalitas */
+.modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 9999; align-items: center; justify-content: center;
+}
+.modal-window { background: white; width: 450px; border-radius: 15px; overflow: hidden; }
+/* Pastikan logo di dalam sidebar-logo ukurannya pas */
+.sidebar-logo img {
+    width: 180px; /* Sesuaikan dengan logo-regreen-with-text Anda */
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Penyesuaian logout agar teks tidak terlalu ke pinggir */
+.sidebar-logout a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 5px;
+    color: #000;
+    text-decoration: none;
+    font-weight: bold;
+}
+/* TAMBAHAN UNTUK ELEMEN DI DALAM MODAL */
+
+/* Header Modal (Hijau Tua sesuai Header Page) */
+.modal-header-ui {
+    background-color: #5d8736;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Body Modal */
+.modal-body-ui {
+    padding: 20px;
+}
+
+/* Grouping Form (Label & Input) */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+/* Input & Select (Dibuat Melengkung/Rounded) */
+.form-group input, 
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px; /* Melengkung sesuai konsep */
+    outline: none;
+}
+
+/* Footer & Tombol Simpan */
+.modal-footer-ui {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid #eee;
+}
+
+.btn-save {
+    background-color: #5d8736;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-ui {
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}

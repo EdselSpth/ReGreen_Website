@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS jadwal (
   date VARCHAR(50) NOT NULL,
   time VARCHAR(50) NOT NULL,
   waste_type VARCHAR(255) NOT NULL,
-  status ENUM('menunggu','diproses','selesai','ditolak') DEFAULT 'menunggu',
+  status ENUM('tersedia','diproses','selesai','ditolak') DEFAULT 'tersedia',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 `;
