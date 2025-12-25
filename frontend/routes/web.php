@@ -1,8 +1,9 @@
-<?php
+<?php 
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AreaAdminController;
 // 1. Import Controller yang baru dibuat
 use App\Http\Controllers\ScheduleController;
 
@@ -45,7 +46,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/kelolaAkun', function () {
         return view('page.kelolaAkun');
     })->name('kelolaAkun');
+
     Route::get('/schedule', function () {
         return view('page.schedule');
     })->name('schedule');
+
+    route::get('/pendaftaran-area', function () {
+        return view('page.area');
+    })->name('pendaftaranArea');
+
+    Route::get('/api/areaRequests', function () {
+        $areaRequests = AreaRequest::where('status', 'pending')->get();
+        return response()->json(['data' => $areaRequests]);
+    });
 });
+
