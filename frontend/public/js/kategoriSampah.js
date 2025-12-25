@@ -44,13 +44,15 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             showLoading();
             let url = `${API_BASE_URL}?page=${currentPage}&limit=${currentLimit}`;
-            if (currentSearch) url += `&search=${encodeURIComponent(currentSearch)}`;
+            if (currentSearch)
+                url += `&search=${encodeURIComponent(currentSearch)}`;
 
             const res = await fetch(url);
             if (!res.ok) throw new Error("Gagal koneksi ke server");
             const result = await res.json();
 
-            if (result.status !== "success") throw new Error(result.message || "Gagal memuat data");
+            if (result.status !== "success")
+                throw new Error(result.message || "Gagal memuat data");
 
             dataKategori = result.data.data;
             renderTable(dataKategori);
@@ -77,8 +79,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${item.nama_jenis}</td>
                 <td>Rp ${Number(item.harga_per_kg).toLocaleString("id-ID")}</td>
                 <td>
-                    <button class="btn-aksi btn-edit" data-id="${item.id}">✏️ Edit</button>
-                    <button class="btn-aksi btn-hapus" data-id="${item.id}">🗑️ Hapus</button>
+                    <button class="btn-aksi btn-edit" data-id="${
+                        item.id
+                    }">✏️ Edit</button>
+                    <button class="btn-aksi btn-hapus" data-id="${
+                        item.id
+                    }">🗑️ Hapus</button>
                 </td>
             `;
             tableBody.appendChild(tr);
@@ -87,30 +93,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ===================== PAGINATION =====================
     function renderPagination(pagination) {
-    if (!pagination) return;
-    const { currentPage, totalPages, totalItems } = pagination;
-    pageInfo.innerText = `Halaman ${currentPage} dari ${totalPages} (Total: ${totalItems})`;
-    paginationContainer.innerHTML = "";
+        if (!pagination) return;
+        const { currentPage, totalPages, totalItems } = pagination;
+        pageInfo.innerText = `Halaman ${currentPage} dari ${totalPages} (Total: ${totalItems})`;
+        paginationContainer.innerHTML = "";
 
-    const btnPrev = document.createElement("button");
-    btnPrev.className = "btn-pagination";
-    btnPrev.textContent = "Previous";
-    btnPrev.disabled = currentPage === 1;
-    btnPrev.onclick = () => { currentPage--; loadKategori(); };
+        const btnPrev = document.createElement("button");
+        btnPrev.className = "btn-pagination";
+        btnPrev.textContent = "Previous";
+        btnPrev.disabled = currentPage === 1;
+        btnPrev.onclick = () => {
+            currentPage--;
+            loadKategori();
+        };
 
-    const btnNext = document.createElement("button");
-    btnNext.className = "btn-pagination";
-    btnNext.textContent = "Next";
-    btnNext.disabled = currentPage === totalPages || totalPages === 0;
-    btnNext.onclick = () => { currentPage++; loadKategori(); };
+        const btnNext = document.createElement("button");
+        btnNext.className = "btn-pagination";
+        btnNext.textContent = "Next";
+        btnNext.disabled = currentPage === totalPages || totalPages === 0;
+        btnNext.onclick = () => {
+            currentPage++;
+            loadKategori();
+        };
 
-    paginationContainer.appendChild(btnPrev);
-    paginationContainer.appendChild(btnNext);
-}
-
+        paginationContainer.appendChild(btnPrev);
+        paginationContainer.appendChild(btnNext);
+    }
 
     // ===================== MODAL HANDLER =====================
-    function openModal(modal) { modal.classList.add("active"); }
+    function openModal(modal) {
+        modal.classList.add("active");
+    }
     function closeAllModals() {
         modalTambah.classList.remove("active");
         modalEdit.classList.remove("active");
@@ -119,21 +132,43 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     tombolTambah.addEventListener("click", () => openModal(modalTambah));
-    tombolTutup.forEach(btn => btn.addEventListener("click", closeAllModals));
-    tombolBatal.forEach(btn => btn.addEventListener("click", closeAllModals));
+    tombolTutup.forEach((btn) => btn.addEventListener("click", closeAllModals));
+    tombolBatal.forEach((btn) => btn.addEventListener("click", closeAllModals));
 
     window.addEventListener("click", (e) => {
-        if (e.target === modalTambah || e.target === modalEdit) closeAllModals();
+        if (e.target === modalTambah || e.target === modalEdit)
+            closeAllModals();
     });
 
     // ===================== CREATE =====================
     formTambah?.addEventListener("submit", async (e) => {
         e.preventDefault();
+        const namaBaru = document.getElementById("tambah-nama").value.trim();
+        const hargaBaru = parseInt(
+            document.getElementById("tambah-harga").value
+        );
+
+        // ===== CEK DUPLIKAT =====
+        const duplicate = dataKategori.find(
+            (k) => k.nama_jenis.toLowerCase() === namaBaru.toLowerCase()
+        );
+        if (duplicate) {
+            Swal.fire("Gagal!", "Nama kategori sudah ada", "warning");
+            return;
+        }
+
         const data = {
-            nama_jenis: document.getElementById("tambah-nama").value,
-            harga_per_kg: parseInt(document.getElementById("tambah-harga").value)
+            nama_jenis: namaBaru,
+            harga_per_kg: hargaBaru,
         };
-        await handleRequest(API_BASE_URL, "POST", data, "Menambahkan kategori...", "Kategori berhasil ditambahkan", modalTambah);
+        await handleRequest(
+            API_BASE_URL,
+            "POST",
+            data,
+            "Menambahkan kategori...",
+            "Kategori berhasil ditambahkan",
+            modalTambah
+        );
     });
 
     // ===================== EDIT =====================
@@ -142,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!id) return;
 
         if (e.target.classList.contains("btn-edit")) {
-            const kategori = dataKategori.find(k => k.id == id);
+            const kategori = dataKategori.find((k) => k.id == id);
             if (!kategori) return;
 
             document.getElementById("edit-id").value = kategori.id;
@@ -161,18 +196,36 @@ document.addEventListener("DOMContentLoaded", () => {
         const id = document.getElementById("edit-id").value;
         const data = {
             nama_jenis: document.getElementById("edit-nama").value,
-            harga_per_kg: parseInt(document.getElementById("edit-harga").value)
+            harga_per_kg: parseInt(document.getElementById("edit-harga").value),
         };
-        await handleRequest(`${API_BASE_URL}/${id}`, "PUT", data, "Mengupdate kategori...", "Kategori berhasil diperbarui", modalEdit);
+        await handleRequest(
+            `${API_BASE_URL}/${id}`,
+            "PUT",
+            data,
+            "Mengupdate kategori...",
+            "Kategori berhasil diperbarui",
+            modalEdit
+        );
     });
 
-    async function handleRequest(url, method, data, loadingText, successText, modal) {
+    async function handleRequest(
+        url,
+        method,
+        data,
+        loadingText,
+        successText,
+        modal
+    ) {
         try {
-            Swal.fire({ title: loadingText, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({
+                title: loadingText,
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading(),
+            });
             const res = await fetch(url, {
                 method,
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
             });
             const result = await res.json();
             if (res.ok) {
@@ -194,14 +247,20 @@ document.addEventListener("DOMContentLoaded", () => {
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#d33",
-            confirmButtonText: "Ya, Hapus!"
+            confirmButtonText: "Ya, Hapus!",
         });
 
         if (confirm.isConfirmed) {
             try {
-                Swal.fire({ title: "Menghapus...", didOpen: () => Swal.showLoading() });
-                const res = await fetch(`${API_BASE_URL}/${id}`, { method: "DELETE" });
-                if (res.ok) Swal.fire("Terhapus!", "Data berhasil dihapus", "success");
+                Swal.fire({
+                    title: "Menghapus...",
+                    didOpen: () => Swal.showLoading(),
+                });
+                const res = await fetch(`${API_BASE_URL}/${id}`, {
+                    method: "DELETE",
+                });
+                if (res.ok)
+                    Swal.fire("Terhapus!", "Data berhasil dihapus", "success");
                 loadKategori();
             } catch {
                 Swal.fire("Error!", "Gagal koneksi server", "error");
