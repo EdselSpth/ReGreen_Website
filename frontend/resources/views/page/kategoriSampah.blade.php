@@ -1,4 +1,4 @@
-@extends('layout.bankSampahLayout')
+@extends('layout.kategoriSampahLayout')
 
 @section('title', 'Kategori Sampah')
 
@@ -7,8 +7,28 @@ KATEGORI SAMPAH
 @endsection
 
 @section('content')
-<button class="btn-tambah" id="btnTambah">+ Tambah Kategori</button>
 
+<!-- ================= SEARCH & ADD ================= -->
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+
+  <!-- tombol tambah sekarang di kiri -->
+  <button class="btn-tambah" id="btnTambah">+ Tambah Kategori</button>
+
+  <!-- search bar sekarang di kanan -->
+  <form id="form-search" style="display:flex; gap:8px;">
+    <input 
+      type="text" 
+      id="search-input" 
+      placeholder="Cari kategori sampah..."
+      style="padding:8px; border-radius:4px; border:1px solid #ccc;"
+    >
+    <button type="submit" class="btn-aksi btn-simpan">Cari</button>
+  </form>
+
+</div>
+
+
+<!-- ================= TABLE ================= -->
 <div class="table-container">
   <table>
     <thead>
@@ -24,6 +44,13 @@ KATEGORI SAMPAH
     </tbody>
   </table>
 </div>
+
+<!-- ================= PAGINATION ================= -->
+<div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+  <div id="page-info" style="font-size:14px; color:#555;"></div>
+  <div id="pagination-container" style="display:flex; gap:6px;"></div>
+</div>
+
 @endsection
 
 @section('modal')
@@ -86,7 +113,9 @@ KATEGORI SAMPAH
     </div>
   </div>
 </div>  
+@endsection
 
-<script src="{{ asset('js/kategoriSampah.js') }}"></script>
+@section('script')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ asset('js/kategoriSampah.js') }}"></script>
 @endsection

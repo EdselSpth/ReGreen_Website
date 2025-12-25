@@ -1,5 +1,5 @@
-const exppress = require('express');
-const router = exppress.Router();
+const express = require('express');
+const router = express.Router();
 const controller = require('../controllers/jenisSampah.controller');
 
 router.get('/', controller.getAll);
