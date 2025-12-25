@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
+// 1. Import Controller yang baru dibuat
+use App\Http\Controllers\ScheduleController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -13,9 +15,9 @@ Route::get('/', function () {
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    
     Route::post('/login', [AuthController::class, 'login']); 
 });
+
 Route::middleware('auth')->group(function () {
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -43,4 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/kelolaAkun', function () {
         return view('page.kelolaAkun');
     })->name('kelolaAkun');
+    Route::get('/schedule', function () {
+        return view('page.schedule');
+    })->name('schedule');
 });

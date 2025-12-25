@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controllers/scheduleController');
+const scheduleController = require('../controllers/scheduleController');
 
-router.post('/', controller.store);
+router.get('/', scheduleController.index);
+router.post('/', scheduleController.store);
+router.put('/:id', scheduleController.update); // Rute untuk update
+router.delete('/:id', scheduleController.destroy);
 
 module.exports = router;
