@@ -1,198 +1,214 @@
 document.addEventListener("DOMContentLoaded", () => {
-    /* =====================
-       CONFIG & ELEMENTS
-    ===================== */
-    const API_URL = "http://localhost:3000/api/jenisSampah";
-    
-    const loading = document.getElementById("loading-overlay");
+    console.log("kategoriSampah.js loaded");
+
+    const API_BASE_URL = "http://localhost:3000/api/jenisSampah";
+
+    let currentPage = 1;
+    let currentLimit = 10;
+    let currentSearch = "";
+
     const tableBody = document.getElementById("data-body");
+    const pageInfo = document.getElementById("page-info");
+    const paginationContainer = document.getElementById("pagination-container");
+    const formSearch = document.getElementById("form-search");
+
     const tombolTambah = document.getElementById("btnTambah");
     const modalTambah = document.getElementById("modal-tambah");
     const modalEdit = document.getElementById("modal-edit");
+
     const formTambah = document.getElementById("form-tambah");
     const formEdit = document.getElementById("form-edit");
-    const tombolTutup = document.querySelectorAll(".btn-tutup, .btn-batal");
 
-    let dataJenis = [];
+    const tombolTutup = document.querySelectorAll(".btn-tutup");
+    const tombolBatal = document.querySelectorAll(".btn-batal");
 
-    const showLoading = () => loading?.classList.add("active");
-    const hideLoading = () => loading?.classList.remove("active");
+    let dataKategori = [];
 
-    /* =====================
-       LOAD DATA
-    ===================== */
-    async function loadData() {
+    // ===================== LOADING =====================
+    const loadingOverlay = document.getElementById("loading-overlay");
+    const showLoading = () => loadingOverlay?.classList.add("active");
+    const hideLoading = () => loadingOverlay?.classList.remove("active");
+
+    // ===================== SEARCH =====================
+    if (formSearch) {
+        formSearch.addEventListener("submit", (e) => {
+            e.preventDefault();
+            currentSearch = document.getElementById("search-input").value;
+            currentPage = 1;
+            loadKategori();
+        });
+    }
+
+    // ===================== LOAD DATA =====================
+    async function loadKategori() {
         try {
             showLoading();
-            const res = await fetch(API_URL);
-            if (!res.ok) throw new Error("Gagal mengambil data");
-            
+            let url = `${API_BASE_URL}?page=${currentPage}&limit=${currentLimit}`;
+            if (currentSearch) url += `&search=${encodeURIComponent(currentSearch)}`;
+
+            const res = await fetch(url);
+            if (!res.ok) throw new Error("Gagal koneksi ke server");
             const result = await res.json();
-            // Menangani berbagai kemungkinan format response API
-            dataJenis = result.data || result; 
-            renderTable();
+
+            if (result.status !== "success") throw new Error(result.message || "Gagal memuat data");
+
+            dataKategori = result.data.data;
+            renderTable(dataKategori);
+            renderPagination(result.data.pagination);
         } catch (err) {
             Swal.fire("Error", err.message, "error");
+            tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">${err.message}</td></tr>`;
         } finally {
             hideLoading();
         }
     }
 
-    /* =====================
-       RENDER TABLE
-    ===================== */
-    function renderTable() {
+    function renderTable(data) {
         tableBody.innerHTML = "";
-
-        if (!dataJenis || dataJenis.length === 0) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="4" style="text-align:center;">Belum ada data jenis sampah</td>
-                </tr>`;
+        if (!data || data.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Data tidak ditemukan</td></tr>`;
             return;
         }
 
-        dataJenis.forEach((item, index) => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${index + 1}</td>
+        data.forEach((item, index) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${(currentPage - 1) * currentLimit + index + 1}</td>
                 <td>${item.nama_jenis}</td>
                 <td>Rp ${Number(item.harga_per_kg).toLocaleString("id-ID")}</td>
                 <td>
-                    <button class="btn-aksi btn-edit" data-id="${item.id}">Edit</button>
-                    <button class="btn-aksi btn-hapus" data-id="${item.id}">Hapus</button>
+                    <button class="btn-aksi btn-edit" data-id="${item.id}">✏️ Edit</button>
+                    <button class="btn-aksi btn-hapus" data-id="${item.id}">🗑️ Hapus</button>
                 </td>
             `;
-            tableBody.appendChild(row);
+            tableBody.appendChild(tr);
         });
     }
 
-    /* =====================
-       MODAL HANDLER
-    ===================== */
-    const openModal = (modal) => modal.classList.add("active");
-    const closeAllModals = () => {
+    // ===================== PAGINATION =====================
+    function renderPagination(pagination) {
+    if (!pagination) return;
+    const { currentPage, totalPages, totalItems } = pagination;
+    pageInfo.innerText = `Halaman ${currentPage} dari ${totalPages} (Total: ${totalItems})`;
+    paginationContainer.innerHTML = "";
+
+    const btnPrev = document.createElement("button");
+    btnPrev.className = "btn-pagination";
+    btnPrev.textContent = "Previous";
+    btnPrev.disabled = currentPage === 1;
+    btnPrev.onclick = () => { currentPage--; loadKategori(); };
+
+    const btnNext = document.createElement("button");
+    btnNext.className = "btn-pagination";
+    btnNext.textContent = "Next";
+    btnNext.disabled = currentPage === totalPages || totalPages === 0;
+    btnNext.onclick = () => { currentPage++; loadKategori(); };
+
+    paginationContainer.appendChild(btnPrev);
+    paginationContainer.appendChild(btnNext);
+}
+
+
+    // ===================== MODAL HANDLER =====================
+    function openModal(modal) { modal.classList.add("active"); }
+    function closeAllModals() {
         modalTambah.classList.remove("active");
         modalEdit.classList.remove("active");
         formTambah.reset();
         formEdit.reset();
-    };
+    }
 
     tombolTambah.addEventListener("click", () => openModal(modalTambah));
     tombolTutup.forEach(btn => btn.addEventListener("click", closeAllModals));
+    tombolBatal.forEach(btn => btn.addEventListener("click", closeAllModals));
 
     window.addEventListener("click", (e) => {
         if (e.target === modalTambah || e.target === modalEdit) closeAllModals();
     });
 
-    /* =====================
-       CREATE (POST)
-    ===================== */
-    formTambah.addEventListener("submit", async (e) => {
+    // ===================== CREATE =====================
+    formTambah?.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const newData = {
+        const data = {
             nama_jenis: document.getElementById("tambah-nama").value,
-            harga_per_kg: parseInt(document.getElementById("tambah-harga").value),
+            harga_per_kg: parseInt(document.getElementById("tambah-harga").value)
         };
-
-        try {
-            showLoading();
-            const res = await fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newData),
-            });
-
-            if (!res.ok) throw new Error("Gagal menyimpan data");
-
-            await Swal.fire("Sukses", "Jenis sampah berhasil ditambahkan", "success");
-            closeAllModals();
-            loadData();
-        } catch (err) {
-            Swal.fire("Error", err.message, "error");
-        } finally {
-            hideLoading();
-        }
+        await handleRequest(API_BASE_URL, "POST", data, "Menambahkan kategori...", "Kategori berhasil ditambahkan", modalTambah);
     });
 
-    /* =====================
-       TABLE ACTIONS (EDIT & DELETE)
-    ===================== */
-    tableBody.addEventListener("click", async (e) => {
+    // ===================== EDIT =====================
+    tableBody.addEventListener("click", (e) => {
         const id = e.target.dataset.id;
         if (!id) return;
 
-        // DELETE LOGIC
-        if (e.target.classList.contains("btn-hapus")) {
-            const confirm = await Swal.fire({
-                title: "Yakin?",
-                text: "Data akan dihapus permanen",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#dc3545",
-                confirmButtonText: "Hapus",
-                cancelButtonText: "Batal",
-            });
-
-            if (confirm.isConfirmed) {
-                try {
-                    showLoading();
-                    const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-                    if (!res.ok) throw new Error("Gagal menghapus data dari server");
-                    
-                    await Swal.fire("Terhapus", "Data berhasil dihapus", "success");
-                    loadData();
-                } catch (err) {
-                    Swal.fire("Error", err.message, "error");
-                } finally {
-                    hideLoading();
-                }
-            }
-        }
-
-        // OPEN EDIT MODAL LOGIC
         if (e.target.classList.contains("btn-edit")) {
-            const data = dataJenis.find(item => item.id == id); // Gunakan == agar string/number tidak masalah
-            if (!data) return;
+            const kategori = dataKategori.find(k => k.id == id);
+            if (!kategori) return;
 
-            document.getElementById("edit-id").value = data.id;
-            document.getElementById("edit-nama").value = data.nama_jenis;
-            document.getElementById("edit-harga").value = data.harga_per_kg;
-
+            document.getElementById("edit-id").value = kategori.id;
+            document.getElementById("edit-nama").value = kategori.nama_jenis;
+            document.getElementById("edit-harga").value = kategori.harga_per_kg;
             openModal(modalEdit);
         }
-    });
 
-    /* =====================
-       UPDATE (PUT)
-    ===================== */
-    formEdit.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const id = document.getElementById("edit-id").value;
-        const updatedData = {
-            nama_jenis: document.getElementById("edit-nama").value,
-            harga_per_kg: parseInt(document.getElementById("edit-harga").value),
-        };
-
-        try {
-            showLoading();
-            const res = await fetch(`${API_URL}/${id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updatedData),
-            });
-
-            if (!res.ok) throw new Error("Gagal memperbarui data");
-
-            await Swal.fire("Sukses", "Data berhasil diperbarui", "success");
-            closeAllModals();
-            loadData();
-        } catch (err) {
-            Swal.fire("Error", err.message, "error");
-        } finally {
-            hideLoading();
+        if (e.target.classList.contains("btn-hapus")) {
+            deleteKategori(id);
         }
     });
 
-    loadData();
+    formEdit?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = document.getElementById("edit-id").value;
+        const data = {
+            nama_jenis: document.getElementById("edit-nama").value,
+            harga_per_kg: parseInt(document.getElementById("edit-harga").value)
+        };
+        await handleRequest(`${API_BASE_URL}/${id}`, "PUT", data, "Mengupdate kategori...", "Kategori berhasil diperbarui", modalEdit);
+    });
+
+    async function handleRequest(url, method, data, loadingText, successText, modal) {
+        try {
+            Swal.fire({ title: loadingText, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            const res = await fetch(url, {
+                method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            if (res.ok) {
+                Swal.fire("Berhasil!", successText, "success");
+                closeAllModals();
+                loadKategori();
+            } else {
+                Swal.fire("Gagal!", result.message, "error");
+            }
+        } catch (err) {
+            Swal.fire("Error!", "Gagal koneksi ke server", "error");
+        }
+    }
+
+    async function deleteKategori(id) {
+        const confirm = await Swal.fire({
+            title: "Yakin?",
+            text: "Data tidak bisa dikembalikan!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            confirmButtonText: "Ya, Hapus!"
+        });
+
+        if (confirm.isConfirmed) {
+            try {
+                Swal.fire({ title: "Menghapus...", didOpen: () => Swal.showLoading() });
+                const res = await fetch(`${API_BASE_URL}/${id}`, { method: "DELETE" });
+                if (res.ok) Swal.fire("Terhapus!", "Data berhasil dihapus", "success");
+                loadKategori();
+            } catch {
+                Swal.fire("Error!", "Gagal koneksi server", "error");
+            }
+        }
+    }
+
+    // INIT LOAD
+    loadKategori();
 });

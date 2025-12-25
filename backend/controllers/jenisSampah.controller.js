@@ -3,7 +3,8 @@ const { success, error } = require("../utils/response");
 
 exports.getAll = async (req, res) => {
   try {
-    const data = await JenisSampahService.getAll();
+    const { search, page, limit } = req.query;
+    const data = await JenisSampahService.getAll(search, page, limit);
     return success(res, 200, data, "List jenis sampah berhasil diambil");
   } catch (err) {
     return error(res, 500, err.message);

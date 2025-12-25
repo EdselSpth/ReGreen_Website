@@ -1,8 +1,39 @@
 const JenisSampahRepository = require("../repositories/jenisSampah.repository");
 
 class JenisSampahService {
-  static async getAll() {
-    return await JenisSampahRepository.findAll();
+  static async getAll(searchKeyword, page, limit) {
+    const currentPage = parseInt(page) || 1;
+    const itemsPerPage = parseInt(limit) || 10;
+    const offset = (currentPage - 1) * itemsPerPage;
+
+    let jenisSampah;
+    let totalItems;
+    if (searchKeyword) {
+      jenisSampah = await JenisSampahRepository.searchEngine(
+        searchKeyword,
+        itemsPerPage,
+        offset
+      );
+      totalItems = await JenisSampahRepository.countSearch(searchKeyword);
+    } else {
+      jenisSampah = await JenisSampahRepository.findAll(
+        itemsPerPage,
+        offset
+      );
+      totalItems = await JenisSampahRepository.countAll();
+    }
+
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    
+    return {
+      data: jenisSampah,
+      pagination: {
+        currentPage,
+        itemsPerPage,
+        totalItems,
+        totalPages: Math.ceil(totalItems / itemsPerPage),
+      },
+    };
   }
 
   static async getById(id) {
