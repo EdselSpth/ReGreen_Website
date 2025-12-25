@@ -1,3 +1,8 @@
+/* ================= RESET & ROOT ================= */
+* {
+  box-sizing: border-box;
+}
+
 :root {
   --hijau-tua-regreen: #558B3E;
   --hijau-muda-regreen: #D6E6C4;
@@ -5,14 +10,16 @@
   --abu-bg: #f8f9fa;
 }
 
-/* ================= GLOBAL ================= */
+/* ================= BODY ================= */
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  background-color: var(--abu-bg);
-  color: #333;
+  background-color: white;
+  height: 100vh;
+  overflow: hidden;
 }
 
+/* ================= LAYOUT ================= */
 .container {
   display: flex;
   min-height: 100vh;
@@ -28,14 +35,17 @@ body {
   height: 100vh;
   position: sticky;
   top: 0;
+  flex-shrink: 0;
 }
 
 .sidebar a {
   color: black;
   font-weight: bold;
   text-decoration: none;
+  display: block;
   padding: 10px 20px;
   border-radius: 6px;
+  transition: 0.2s;
 }
 
 .sidebar a:hover,
@@ -47,6 +57,7 @@ body {
   width: 80%;
   max-width: 180px;
   margin: 20px auto;
+  display: block;
 }
 
 .logout {
@@ -55,95 +66,107 @@ body {
   border-top: 1px solid var(--border-hijau);
 }
 
-/* ================= CONTENT ================= */
-.content {
-  flex: 1;
-  background-color: #fff;
+/* ================= MAIN CONTENT ================= */
+.main-content {
+  flex-grow: 1;
+  height: 100vh;
   overflow-y: auto;
+  background-color: white;
 }
 
 /* ================= HEADER ================= */
 .header {
   background-color: var(--hijau-tua-regreen);
-  color: #fff;
-  padding: 20px 30px;
+  color: white;
+  padding: 40px 24px;
+  font-size: 15pt;
   font-weight: bold;
   text-transform: uppercase;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ================= PAGE CONTENT ================= */
+.page-content {
+  padding: 24px;
 }
 
 /* ================= DASHBOARD GRID ================= */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 2fr 1.2fr;
+  grid-template-columns: 1fr;
   gap: 20px;
-  padding: 25px 30px;
 }
 
-/* ================= SECTION ================= */
+/* ================= SECTION BOX ================= */
 .section-box {
   background-color: var(--hijau-muda-regreen);
   border: 2px solid var(--hijau-tua-regreen);
   border-radius: 10px;
-  padding: 15px 20px;
+  padding: 20px;
 }
 
 .section-title {
   font-weight: bold;
   margin-bottom: 12px;
   color: #2f4e1e;
+  font-size: 15px;
 }
 
 /* ================= TABLE ================= */
 .table-container {
   width: 100%;
   overflow-x: auto;
+  border: 2px solid var(--hijau-tua-regreen);
+  background-color: var(--hijau-muda-regreen);
+  border-radius: 10px;
 }
 
-table {
+.table-container table {
   width: 100%;
   border-collapse: collapse;
-  background-color: #fff;
 }
 
-thead {
-  background-color: var(--hijau-tua-regreen);
-  color: #fff;
-}
-
-th, td {
-  padding: 10px 12px;
-  font-size: 0.9rem;
+.table-container th,
+.table-container td {
+  padding: 14px 16px;
+  font-size: 14px;
   border-bottom: 1px solid var(--border-hijau);
-  text-align: left;
+  background-color: var(--hijau-muda-regreen);
+  text-align: center;
+  vertical-align: middle;
 }
 
-tbody tr:hover {
-  background-color: #f1f5ed;
+.table-container th {
+  font-weight: bold;
+  color: #333;
+}
+
+.table-container tbody tr:hover {
+  background-color: #e6efd8;
 }
 
 /* ================= BADGE ================= */
 .badge {
-  padding: 4px 10px;
+  padding: 4px 12px;
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: bold;
+  color: white;
 }
 
 .badge.aktif {
   background-color: #4caf50;
-  color: #fff;
 }
 
 .badge.nonaktif {
   background-color: #dc3545;
-  color: #fff;
 }
 
 /* ================= LOADING ================= */
 .loading-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(255,255,255,0.75);
+  background: rgba(255, 255, 255, 0.75);
   display: none;
   align-items: center;
   justify-content: center;
@@ -164,7 +187,9 @@ tbody tr:hover {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ================= RESPONSIVE ================= */

@@ -1,11 +1,16 @@
 document.addEventListener("DOMContentLoaded", () => {
     const loading = document.getElementById("loading-overlay");
 
-    const API_BANK = "http://localhost:3000/api/bankSampah";
+    /* =====================
+        API
+    ====================== */
+    const API_SCHEDULE = "http://localhost:3000/api/schedule";
     const API_KEUNTUNGAN = "http://localhost:3000/api/keuntungan";
 
-    const bankBody = document.getElementById("bank-body");
+    const scheduleBody = document.getElementById("tableBody");
     const pendingBody = document.getElementById("pending-body");
+
+    let schedules = [];
 
     function showLoading() {
         loading?.classList.add("active");
@@ -15,34 +20,47 @@ document.addEventListener("DOMContentLoaded", () => {
         loading?.classList.remove("active");
     }
 
-    // LOAD DATA
-    loadBankSampah();
+    /* =====================
+        LOAD DATA
+    ====================== */
+    loadSchedules();
     loadPending();
 
     /* =====================
-        BANK SAMPAH
+        SCHEDULE
     ====================== */
-    async function loadBankSampah() {
+    async function loadSchedules() {
+        if (!scheduleBody) return;
+
         try {
             showLoading();
-            const res = await fetch(API_BANK);
-            const data = await res.json();
-            renderBank(data);
+            const res = await fetch(API_SCHEDULE);
+            const json = await res.json();
+
+            schedules = Array.isArray(json) ? json : (json.data || []);
+            renderSchedules(schedules);
         } catch (err) {
-            console.error("Gagal load bank sampah", err);
+            console.error("Gagal load schedule", err);
+            scheduleBody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align:center">
+                        Gagal memuat data jadwal
+                    </td>
+                </tr>
+            `;
         } finally {
             hideLoading();
         }
     }
 
-    function renderBank(data) {
-        bankBody.innerHTML = "";
+    function renderSchedules(data) {
+        scheduleBody.innerHTML = "";
 
         if (!data || data.length === 0) {
-            bankBody.innerHTML = `
+            scheduleBody.innerHTML = `
                 <tr>
-                    <td colspan="4" style="text-align:center">
-                        Tidak ada data bank sampah
+                    <td colspan="7" style="text-align:center">
+                        Tidak ada data jadwal
                     </td>
                 </tr>
             `;
@@ -50,15 +68,27 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         data.forEach((item, i) => {
-            bankBody.innerHTML += `
+            scheduleBody.innerHTML += `
                 <tr>
                     <td>${i + 1}</td>
-                    <td>${item.nama}</td>
-                    <td>${item.jenis}</td>
+                    <td><strong>${item.courier_name}</strong></td>
+                    <td style="text-align:left">${item.alamat}</td>
+                    <td>${item.date}</td>
+                    <td><div class="time-box-ui">${item.time}</div></td>
                     <td>
-                        <span class="badge ${item.status === "Aktif" ? "aktif" : "nonaktif"}">
-                            ${item.status}
+                        <span class="badge-yellow">
+                            ${(item.status || "tersedia").toUpperCase()}
                         </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button onclick="editData('${item.id}')" class="btn-action btn-edit-icon">
+                                <i class="bi bi-pencil"></i> Edit
+                            </button>
+                            <button onclick="deleteData('${item.id}')" class="btn-action btn-delete-icon">
+                                <i class="bi bi-trash"></i> Hapus
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `;
@@ -72,6 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const res = await fetch(API_KEUNTUNGAN);
             const response = await res.json();
+
             const data = Array.isArray(response.data)
                 ? response.data
                 : response;
@@ -108,4 +139,25 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
         });
     }
+
+    /* =====================
+        GLOBAL FUNCTIONS
+    ====================== */
+    window.editData = (id) => {
+        console.log("Edit schedule ID:", id);
+        // logic edit modal tetap pakai kode jadwal milikmu
+    };
+
+    window.deleteData = async (id) => {
+        if (confirm("Hapus jadwal ini?")) {
+            try {
+                const res = await fetch(`${API_SCHEDULE}/${id}`, {
+                    method: "DELETE"
+                });
+                if (res.ok) loadSchedules();
+            } catch (err) {
+                console.error("Gagal hapus jadwal", err);
+            }
+        }
+    };
 });
