@@ -3,7 +3,7 @@ const db = require("../config/db");
 class ArtikelRepository {
   static findAll() {
     return new Promise((resolve, reject) => {
-      const sql = "SELECT * FROM artikel ORDER BY created_at DESC";
+      const sql = "SELECT * FROM artikel ORDER BY nama_artikel DESC";
       db.query(sql, (err, rows) => {
         if (err) reject(err);
         else resolve(rows);
@@ -14,47 +14,38 @@ class ArtikelRepository {
     return new Promise((resolve, reject) => {
       const sql = "SELECT COUNT(*) as total FROM artikel";
       db.query(sql, (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows[0].total);
-        }
+        if (err) reject(err);
+        else resolve(rows[0].total);
       });
     });
   }
 
-  static searchEngine(keyword, limit, offset) {
+  static searchEngine(keyword, limit = 10, offset = 0) {
     return new Promise((resolve, reject) => {
-      const sql =
-        "SELECT id, nama_artikel, file_pdf FROM artikel WHERE nama_artikel LIKE ? OR file_pdf LIKE ? ORDER BY nama_artikel ASC LIMIT ? OFFSET ?";
+      const sql = `
+        SELECT id, nama_video, link_youtube, deskripsi
+        FROM artikel
+        WHERE nama_artikel LIKE ? OR file_pdf LIKE ?
+        ORDER BY nama_artikel ASC
+        LIMIT ? OFFSET ?
+      `;
       const searchKeyword = `%${keyword}%`;
 
-      db.query(
-        sql,
-        [searchKeyword, searchKeyword, limit, offset],
-        (err, rows) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(rows);
-          }
-        }
-      );
+      db.query(sql, [searchKeyword, limit, offset], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
     });
   }
 
   static countSearch(keyword) {
     return new Promise((resolve, reject) => {
-      const sql =
-        "SELECT COUNT(*) as total FROM artikel WHERE nama_artikel LIKE ? OR file_pdf LIKE ?";
+      const sql = "SELECT COUNT(*) as total FROM artikel WHERE nama_artikel LIKE ?";
       const searchKeyword = `%${keyword}%`;
 
-      db.query(sql, [searchKeyword, searchKeyword], (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows[0].total);
-        }
+      db.query(sql, [searchKeyword], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows[0].total);
       });
     });
   }

@@ -3,7 +3,7 @@ const db = require("../config/db");
 class VideoRepository {
   static findAll() {
     return new Promise((resolve, reject) => {
-      const sql = "SELECT * FROM video ORDER BY created_at DESC";
+      const sql = "SELECT * FROM video ORDER BY nama_video DESC";
       db.query(sql, (err, rows) => {
         if (err) reject(err);
         else resolve(rows);
@@ -12,47 +12,45 @@ class VideoRepository {
   }
 
   static countAll() {
-        return new Promise((resolve, reject) => {
-            const sql = "SELECT COUNT(*) as total FROM video";
-            db.query(sql, (err, rows) => {
-                if (err){
-                    reject(err);
-                } else {
-                    resolve(rows[0].total);
-                }
-            });
-        });
-    }
+    return new Promise((resolve, reject) => {
+      const sql = "SELECT COUNT(*) as total FROM video";
+      db.query(sql, (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows[0].total);
+      });
+    });
+  }
 
-    static searchEngine(keyword, limit, offset) {
-        return new Promise((resolve, reject) => {
-            const sql = "SELECT id, nama_video, link_youtube, deskripsi FROM video WHERE nama_video LIKE ? OR deskripsi LIKE ? ORDER BY nama_video ASC LIMIT ? OFFSET ?";
-            const searchKeyword = `%${keyword}%`;
-            
-            db.query(sql, [searchKeyword, searchKeyword, limit, offset], (err, rows) => {
-                if (err){
-                    reject(err);
-                } else {
-                    resolve(rows);
-                }
-            });
-        });
-    }
+  static searchEngine(keyword, limit = 10, offset = 0) {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        SELECT id, nama_video, link_youtube, deskripsi
+        FROM video
+        WHERE nama_video LIKE ? OR deskripsi LIKE ?
+        ORDER BY nama_video ASC
+        LIMIT ? OFFSET ?
+      `;
+      const searchKeyword = `%${keyword}%`;
 
-    static countSearch(keyword) {
-        return new Promise((resolve, reject) => {
-            const sql = "SELECT COUNT(*) as total FROM video WHERE nama_video LIKE ? OR deskripsi LIKE ?";
-            const searchKeyword = `%${keyword}%`;
+      db.query(sql, [searchKeyword, limit, offset], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+  }
 
-            db.query(sql, [searchKeyword, searchKeyword], (err, rows) => {
-                if (err){
-                    reject(err);
-                } else {
-                    resolve(rows[0].total);
-                }
-            });
-        });
-    }
+  static countSearch(keyword) {
+    return new Promise((resolve, reject) => {
+      const sql =
+        "SELECT COUNT(*) as total FROM video WHERE nama_video LIKE ?";
+      const searchKeyword = `%${keyword}%`;
+
+      db.query(sql, [searchKeyword], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows[0].total);
+      });
+    });
+  }
 
   static findById(id) {
     return new Promise((resolve, reject) => {

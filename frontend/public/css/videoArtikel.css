@@ -2,7 +2,7 @@
     box-sizing: border-box;
 }
 
-:root {
+:root{
     --hijau-tua-regreen: #558B3E;
     --hijau-muda-regreen: #D6E6C4;
     --kuning-edit: #ffc107;
@@ -15,13 +15,14 @@ body {
     margin: 0;
     font-family: 'Segoe UI', sans-serif;
     background-color: white;
-    height: 100vh;
+
+    height: 100vh;      
     overflow: hidden;
 }
 
 .container {
-    display: flex;
-    min-height: 100vh;
+  display: flex;
+  min-height: 100vh;
 }
 
 /* Sidebar */
@@ -31,17 +32,10 @@ body {
     display: flex;
     flex-direction: column;
     padding: 20px 0;
-    flex-shrink: 0;
-    height: 100vh;
-    position: sticky;
-    top: 0;
-}
-
-.logo {
-    max-width: 180px;
-    width: 80%;
-    display: block;
-    margin: 20px auto;
+    flex-shrink: 0;    
+    height: 100vh;    
+    position: sticky;  
+    top: 0;            
 }
 
 .sidebar a {
@@ -59,20 +53,27 @@ body {
     background-color: #cdd9bf;
 }
 
+.logo {
+    max-width: 180px;
+    width: 80%;
+    display: block;
+    margin: 20px auto;
+}
+
 .logout {
     margin-top: auto;
     padding: 20px;
-    border-top: 1px solid var(--border-hijau);
+    border-top: 1px solid #b5c7a3;
 }
 
-/* Main content */
-.main-content {
+/* Content utama */
+.main-content{
     flex-grow: 1;
-    height: 100vh;
+    height: 100vh;      
     overflow-y: auto;
 }
 
-.header {
+.header{
     background-color: var(--hijau-tua-regreen);
     color: white;
     padding: 40px 24px;
@@ -104,18 +105,18 @@ body {
     cursor: pointer;
     font-weight: bold;
     transition: background-color 0.2s ease;
-    margin-bottom: 10px;
 }
 
 .btn-tambah:hover {
     background-color: #4a6842;
 }
 
-/* Tabel */
+/* Table */
 .table-container {
     width: 100%;
     overflow-x: auto;
     margin-top: 10px;
+    overflow: hidden;
     border: 2px solid var(--hijau-tua-regreen);
     background-color: var(--hijau-muda-regreen);
     border-radius: 10px;
@@ -146,7 +147,7 @@ body {
     border-right: none;
 }
 
-.table-container tbody tr {
+.table-container tbody tr{
     border-bottom: none;
 }
 
@@ -179,24 +180,14 @@ body {
     background-color: var(--biru-password);
 }
 
-.btn-simpan {
-    background-color: var(--hijau-tua-regreen);
-}
-
-.btn-simpan:hover {
-    background-color: #4a6842;
-}
-
-.btn-batal {
-    background-color: #777;
-}
-
-/* Pagination */
-.pagination {
+/* Footer table & pagination */
+.table-footer {
     display: flex;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 15px;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: #777;
+    margin-top: 20px;
 }
 
 .pagination button {
@@ -206,6 +197,7 @@ body {
     border-radius: 4px;
     cursor: pointer;
     color: #555;
+    margin-left: 2px;
 }
 
 .pagination button:hover {
@@ -213,23 +205,24 @@ body {
 }
 
 .pagination button.active {
-    background-color: var(--hijau-tua-regreen);
+    background-color: var(--biru-tambah);
     color: white;
-    border-color: var(--hijau-tua-regreen);
+    border-color: var(--biru-tambah);
 }
 
 /* Modal */
 .modal {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
+    display: none; 
+    position: fixed; 
     z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -244,9 +237,8 @@ body {
     background-color: white;
     border-radius: 8px;
     width: 90%;
-    max-width: 500px;
+    max-width: 500px; 
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    padding: 20px;
     transform: translateY(-50px);
     transition: transform 0.3s ease;
 }
@@ -301,13 +293,12 @@ body {
 .form-group input[type="text"],
 .form-group input[type="email"],
 .form-group input[type="password"],
-.form-group select,
-.form-group input[type="file"] {
+.form-group select {
     width: 100%;
     padding: 10px;
     border: 1px solid var(--hijau-tua-regreen);
     border-radius: 4px;
-    box-sizing: border-box;
+    box-sizing: border-box; 
     font-size: 14px;
     background-color: var(--hijau-muda-regreen);
 }
@@ -316,4 +307,16 @@ body {
     padding: 16px 24px;
     border-top: 1px solid #ddd;
     text-align: right;
+}
+
+.btn-simpan {
+    background-color: var(--hijau-tua-regreen);
+}
+
+.btn-simpan:hover {
+    background-color: var(--hijau-muda-regreen);
+}
+
+.btn-batal {
+    background-color: red;
 }
