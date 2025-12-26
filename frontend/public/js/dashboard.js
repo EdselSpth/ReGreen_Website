@@ -128,49 +128,43 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* =====================
-        AREA
-    ====================== */
-    async function loadAreas() {
-        if (!areaBody) return;
+async function loadAreas() {
+    const areaBody = document.getElementById("pendingAreaTable");
+    if (!areaBody) return;
 
-        try {
-            showLoading();
-            const res = await fetch(API_AREA);
-            const data = await res.json();
+    try {
+        const res = await fetch("http://localhost:3000/api/areaRequests?status=pending");
+        const json = await res.json();
+        const data = json.data || []; 
 
-            areaBody.innerHTML = "";
-            if (!data || data.length === 0) {
-                areaBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" style="text-align:center">
-                            Tidak ada area terdaftar
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            data.forEach((item, i) => {
-                areaBody.innerHTML += `
-                    <tr>
-                        <td>${i + 1}</td>
-                        <td>${item.jalan}</td>
-                        <td>${item.kelurahan}</td>
-                        <td>${item.kecamatan}</td>
-                        <td>${item.kota}</td>
-                        <td>${item.provinsi}</td>
-                        <td>${item.status || "pending"}</td>
-                    </tr>
-                `;
-            });
-        } catch (err) {
-            console.error("Gagal load area", err);
-        } finally {
-            hideLoading();
+        areaBody.innerHTML = "";
+        
+        if (data.length === 0) {
+            areaBody.innerHTML = `<tr><td colspan="6" style="text-align:center">Tidak ada area menunggu persetujuan</td></tr>`;
+            return;
         }
-    }
 
+        data.forEach((item, i) => {
+    const info = item.area || {}; 
+
+    const statusTampil = item.areaStatus ? item.areaStatus.toUpperCase() : "PENDING";
+
+    areaBody.innerHTML += `
+        <tr>
+            <td>${i + 1}</td>
+            <td>${info.jalan || "-"}</td>
+            <td>${info.kecamatan || "-"}</td>
+            <td>${info.kota || "-"}</td>
+            <td>${info.kelurahan || "-"}</td>
+            <td>${info.provinsi || "-"}</td>
+            <td><span class="badge-yellow">${statusTampil}</span></td>
+        </tr>
+    `;
+});
+    } catch (err) {
+        console.error("Gagal load area:", err);
+    }
+}
     /* =====================
         GLOBAL FUNCTIONS
     ====================== */
