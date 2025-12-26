@@ -5,372 +5,376 @@ document.addEventListener("DOMContentLoaded", () => {
     const API_ARTIKEL = "http://localhost:3000/api/artikel";
     const ITEMS_PER_PAGE = 2;
 
-    // === STATE ===
-    let videoPage = 1,
-        artikelPage = 1;
-    let videoSearch = "",
-        artikelSearch = "";
-    let dataVideo = [],
-        dataArtikel = [];
+    // ===================== STATE =====================
+    let videoPage = 1;
+    let artikelPage = 1;
+    let videoSearch = "";
+    let artikelSearch = "";
 
-    // === ELEMENTS ===
+    // ===================== ELEMENTS =====================
     const videoBody = document.getElementById("video-body");
     const artikelBody = document.getElementById("artikel-body");
+
     const videoPagination = document.getElementById("video-pagination");
     const artikelPagination = document.getElementById("artikel-pagination");
+
     const videoPageInfo = document.getElementById("video-page-info");
     const artikelPageInfo = document.getElementById("artikel-page-info");
 
-    const btnTambahVideo = document.getElementById("btnTambahVideo");
-    const btnTambahArtikel = document.getElementById("btnTambahArtikel");
     const modalTambahVideo = document.getElementById("modal-tambah-video");
     const modalTambahArtikel = document.getElementById("modal-tambah-artikel");
+    const modalEditVideo = document.getElementById("modal-edit-video");
+    const modalEditArtikel = document.getElementById("modal-edit-artikel");
 
-    const formTambahVideo = document.getElementById("form-tambah-video");
-    const formTambahArtikel = document.getElementById("form-tambah-artikel");
+    // === FORM EDIT VIDEO ===
+    const editNamaVideo = document.getElementById("edit-nama-video");
+    const editLinkVideo = document.getElementById("edit-link-video");
+    const editDeskripsi = document.getElementById("edit-deskripsi");
 
-    const tombolTutup = document.querySelectorAll(".btn-tutup, .btn-batal");
-    const formSearchVideo = document.getElementById("form-search-video");
-    const formSearchArtikel = document.getElementById("form-search-artikel");
-
-    const loadingOverlay = document.getElementById("loading-overlay");
-    const showLoading = () => loadingOverlay?.classList.add("active");
-    const hideLoading = () => loadingOverlay?.classList.remove("active");
-
-    // ===================== LOAD VIDEO =====================
-    // ===================== LOAD VIDEO =====================
-    async function loadVideo() {
-        try {
-            showLoading();
-            let url = `${API_VIDEO}?page=${videoPage}&limit=${ITEMS_PER_PAGE}`;
-            if (videoSearch)
-                url += `&search=${encodeURIComponent(videoSearch)}`;
-
-            const res = await fetch(url);
-            const result = await res.json();
-
-            if (result.status !== "success")
-                throw new Error(result.message || "Gagal memuat data");
-
-            // <-- Ambil array video dan pagination
-            dataVideo = Array.isArray(result.data.data) ? result.data.data : [];
-            const pagination = result.data.pagination || {
-                currentPage: 1,
-                totalPages: 1,
-                totalItems: dataVideo.length,
-            };
-
-            renderVideoTable(dataVideo, videoPage);
-            renderVideoPagination(pagination);
-        } catch (err) {
-            console.error(err);
-            videoBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">${err.message}</td></tr>`;
-        } finally {
-            hideLoading();
-        }
-    }
-
-    function renderVideoTable(data, page) {
-        videoBody.innerHTML = "";
-        if (!data || data.length === 0) {
-            videoBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Belum ada video</td></tr>`;
-            return;
-        }
-        data.forEach((item, index) => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-            <td>${(page - 1) * ITEMS_PER_PAGE + index + 1}</td>
-            <td>${item.nama_video}</td>
-            <td><a href="${
-                item.link_youtube
-            }" target="_blank">Lihat Video</a></td>
-            <td>${item.deskripsi || "-"}</td>
-            <td><button class="btn-aksi btn-hapus" data-id="${
-                item.id
-            }">🗑️ Hapus</button></td>
-        `;
-            videoBody.appendChild(tr);
-        });
-    }
-
-    function renderVideoPagination(pagination) {
-        if (!pagination) return;
-        const { currentPage, totalPages, totalItems } = pagination;
-
-        videoPageInfo.innerText = `Halaman ${currentPage} dari ${totalPages} (Total: ${totalItems})`;
-        videoPagination.innerHTML = "";
-
-        const btnPrev = document.createElement("button");
-        btnPrev.textContent = "Previous";
-        btnPrev.disabled = currentPage === 1;
-        btnPrev.onclick = () => {
-            if (currentPage > 1) {
-                videoPage = currentPage - 1; // <-- update page
-                loadVideo();
-            }
-        };
-
-        const btnNext = document.createElement("button");
-        btnNext.textContent = "Next";
-        btnNext.disabled = currentPage === totalPages || totalPages === 0;
-        btnNext.onclick = () => {
-            if (currentPage < totalPages) {
-                videoPage = currentPage + 1; // <-- update page
-                loadVideo();
-            }
-        };
-
-        videoPagination.appendChild(btnPrev);
-        videoPagination.appendChild(btnNext);
-    }
-
-    // ===================== LOAD ARTIKEL =====================
-    async function loadArtikel() {
-        try {
-            showLoading();
-            let url = API_ARTIKEL;
-            if (artikelSearch)
-                url += `?search=${encodeURIComponent(artikelSearch)}`;
-
-            const res = await fetch(url);
-            if (!res.ok) throw new Error("Gagal koneksi ke server");
-
-            const result = await res.json();
-            if (result.status !== "success")
-                throw new Error(result.message || "Gagal memuat data");
-
-            // Ambil array artikel dari result.data.data
-            dataArtikel = Array.isArray(result.data.data)
-                ? result.data.data
-                : [];
-            const paginationArtikel = result.data.pagination || {
-                currentPage: 1,
-                totalPages: 1,
-                totalItems: dataArtikel.length,
-            };
-
-            renderArtikelTable(dataArtikel, artikelPage);
-            renderArtikelPagination(paginationArtikel);
-        } catch (err) {
-            console.error(err);
-            artikelBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">${err.message}</td></tr>`;
-        } finally {
-            hideLoading();
-        }
-    }
-
-    function renderArtikelPagination(pagination) {
-        if (!pagination) return;
-        artikelPageInfo.innerText = `Total: ${pagination.totalItems}`;
-        artikelPagination.innerHTML = "";
-    }
-
-    function renderArtikelTable(data, page) {
-        artikelBody.innerHTML = "";
-        if (!data || data.length === 0) {
-            artikelBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Belum ada artikel</td></tr>`;
-            return;
-        }
-        data.forEach((item, index) => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${(page - 1) * ITEMS_PER_PAGE + index + 1}</td>
-                <td>${item.nama_artikel}</td>
-                <td><a href="${
-                    item.file_pdf
-                }" target="_blank">Baca Artikel</a></td>
-                <td><button class="btn-aksi btn-hapus" data-id="${
-                    item.id
-                }">🗑️ Hapus</button></td>
-            `;
-            artikelBody.appendChild(tr);
-        });
-    }
-
-    function renderArtikelPagination(pagination) {
-        if (!pagination) return;
-        const { currentPage, totalPages, totalItems } = pagination;
-        artikelPageInfo.innerText = `Halaman ${currentPage} dari ${totalPages} (Total: ${totalItems})`;
-        artikelPagination.innerHTML = "";
-
-        const btnPrev = document.createElement("button");
-        btnPrev.textContent = "Previous";
-        btnPrev.disabled = currentPage === 1;
-        btnPrev.onclick = () => {
-            artikelPage--;
-            loadArtikel();
-        };
-
-        const btnNext = document.createElement("button");
-        btnNext.textContent = "Next";
-        btnNext.disabled = currentPage === totalPages || totalPages === 0;
-        btnNext.onclick = () => {
-            artikelPage++;
-            loadArtikel();
-        };
-
-        artikelPagination.appendChild(btnPrev);
-        artikelPagination.appendChild(btnNext);
-    }
-
-    // ===================== SEARCH =====================
-    formSearchVideo?.addEventListener("submit", (e) => {
-        e.preventDefault();
-        videoSearch = document
-            .getElementById("search-video-input")
-            .value.trim();
-        videoPage = 1;
-        loadVideo();
-    });
-
-    formSearchArtikel?.addEventListener("submit", (e) => {
-        e.preventDefault();
-        artikelSearch = document
-            .getElementById("search-artikel-input")
-            .value.trim();
-        artikelPage = 1;
-        loadArtikel();
-    });
+    // === FORM EDIT ARTIKEL ===
+    const editNamaArtikel = document.getElementById("edit-nama-artikel");
+    const editLinkArtikel = document.getElementById("edit-link-artikel");
 
     // ===================== MODAL =====================
     const openModal = (modal) => modal?.classList.add("active");
     const closeModal = (modal) => modal?.classList.remove("active");
 
-    btnTambahVideo?.addEventListener("click", () =>
-        openModal(modalTambahVideo)
-    );
-    btnTambahArtikel?.addEventListener("click", () =>
-        openModal(modalTambahArtikel)
-    );
-    tombolTutup.forEach((btn) =>
+    document.querySelectorAll(".btn-tutup, .btn-batal").forEach((btn) => {
         btn.addEventListener("click", () => {
             closeModal(modalTambahVideo);
             closeModal(modalTambahArtikel);
-        })
-    );
-
-    // ===================== FORM SUBMIT =====================
-    formTambahVideo?.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const data = {
-            nama_video: document.getElementById("tambah-nama-video").value,
-            link_youtube: document.getElementById("tambah-link-video").value,
-            deskripsi: document.getElementById("tambah-deskripsi").value,
-        };
-        await handleRequest(
-            API_VIDEO,
-            "POST",
-            data,
-            "Menambahkan Video...",
-            "Video berhasil ditambahkan",
-            modalTambahVideo,
-            loadVideo
-        );
+            closeModal(modalEditVideo);
+            closeModal(modalEditArtikel);
+        });
     });
 
-    formTambahArtikel?.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const data = {
-            nama_artikel: document.getElementById("tambah-nama-artikel").value,
-            file_pdf: document.getElementById("tambah-link-artikel").value,
-        };
-        await handleRequest(
-            API_ARTIKEL,
-            "POST",
-            data,
-            "Menambahkan Artikel...",
-            "Artikel berhasil ditambahkan",
-            modalTambahArtikel,
-            loadArtikel
-        );
-    });
+    document
+        .getElementById("btnTambahVideo")
+        ?.addEventListener("click", () => openModal(modalTambahVideo));
 
+    document
+        .getElementById("btnTambahArtikel")
+        ?.addEventListener("click", () => openModal(modalTambahArtikel));
+
+    // ===================== LOAD VIDEO =====================
+    async function loadVideo() {
+        const url = `${API_VIDEO}?page=${videoPage}&limit=${ITEMS_PER_PAGE}&search=${encodeURIComponent(
+            videoSearch
+        )}`;
+
+        const res = await fetch(url);
+        const result = await res.json();
+
+        const data = result.data?.data || [];
+        const pagination = result.data?.pagination || {
+            currentPage: 1,
+            totalPages: 1,
+            totalItems: data.length,
+        };
+
+        renderVideoTable(data);
+        renderVideoPagination(pagination);
+    }
+
+    function renderVideoTable(data) {
+        videoBody.innerHTML = "";
+
+        if (data.length === 0) {
+            videoBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Belum ada video</td></tr>`;
+            return;
+        }
+
+        data.forEach((item, index) => {
+            videoBody.innerHTML += `
+                <tr>
+                    <td>${(videoPage - 1) * ITEMS_PER_PAGE + index + 1}</td>
+                    <td>${item.nama_video}</td>
+                    <td><a href="${
+                        item.link_youtube
+                    }" target="_blank">Lihat Video</a></td>
+                    <td>${item.deskripsi || "-"}</td>
+                    <td>
+                        <button class="btn-aksi btn-edit btn-edit-video"
+                            data-id="${item.id}"
+                            data-nama="${item.nama_video}"
+                            data-link="${item.link_youtube}"
+                            data-deskripsi="${item.deskripsi || ""}">
+                            ✏️ Edit
+                        </button>
+                        <button class="btn-aksi btn-hapus" data-id="${item.id}">
+                            🗑️ Hapus
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function renderVideoPagination({ currentPage, totalPages, totalItems }) {
+        videoPageInfo.innerText = `Halaman ${currentPage} dari ${totalPages} (Total: ${totalItems})`;
+        videoPagination.innerHTML = "";
+
+        const prev = document.createElement("button");
+        prev.textContent = "Previous";
+        prev.disabled = currentPage === 1;
+        prev.onclick = () => {
+            videoPage--;
+            loadVideo();
+        };
+
+        const next = document.createElement("button");
+        next.textContent = "Next";
+        next.disabled = currentPage === totalPages;
+        next.onclick = () => {
+            videoPage++;
+            loadVideo();
+        };
+
+        videoPagination.append(prev, next);
+    }
+
+    // ===================== LOAD ARTIKEL =====================
+    async function loadArtikel() {
+        const url = `${API_ARTIKEL}?page=${artikelPage}&limit=${ITEMS_PER_PAGE}&search=${encodeURIComponent(
+            artikelSearch
+        )}`;
+
+        const res = await fetch(url);
+        const result = await res.json();
+
+        const data = result.data?.data || [];
+        const pagination = result.data?.pagination || {
+            currentPage: 1,
+            totalPages: 1,
+            totalItems: data.length,
+        };
+
+        renderArtikelTable(data);
+        renderArtikelPagination(pagination);
+    }
+
+    function renderArtikelTable(data) {
+        artikelBody.innerHTML = "";
+
+        if (data.length === 0) {
+            artikelBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Belum ada artikel</td></tr>`;
+            return;
+        }
+
+        data.forEach((item, index) => {
+            artikelBody.innerHTML += `
+                <tr>
+                    <td>${(artikelPage - 1) * ITEMS_PER_PAGE + index + 1}</td>
+                    <td>${item.nama_artikel}</td>
+                    <td><a href="${
+                        item.file_pdf
+                    }" target="_blank">Baca Artikel</a></td>
+                    <td>
+                        <button class="btn-aksi btn-edit btn-edit-artikel"
+                            data-id="${item.id}"
+                            data-nama="${item.nama_artikel}"
+                            data-link="${item.file_pdf}">
+                            ✏️ Edit
+                        </button>
+                        <button class="btn-aksi btn-hapus" data-id="${item.id}">
+                            🗑️ Hapus
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function renderArtikelPagination({ currentPage, totalPages, totalItems }) {
+        artikelPageInfo.innerText = `Halaman ${currentPage} dari ${totalPages} (Total: ${totalItems})`;
+        artikelPagination.innerHTML = "";
+
+        const prev = document.createElement("button");
+        prev.textContent = "Previous";
+        prev.disabled = currentPage === 1;
+        prev.onclick = () => {
+            artikelPage--;
+            loadArtikel();
+        };
+
+        const next = document.createElement("button");
+        next.textContent = "Next";
+        next.disabled = currentPage === totalPages;
+        next.onclick = () => {
+            artikelPage++;
+            loadArtikel();
+        };
+
+        artikelPagination.append(prev, next);
+    }
+
+    // ===================== SEARCH =====================
+    document
+        .getElementById("form-search-video")
+        ?.addEventListener("submit", (e) => {
+            e.preventDefault();
+            videoSearch = document
+                .getElementById("search-video-input")
+                .value.trim();
+            videoPage = 1;
+            loadVideo();
+        });
+
+    document
+        .getElementById("form-search-artikel")
+        ?.addEventListener("submit", (e) => {
+            e.preventDefault();
+            artikelSearch = document
+                .getElementById("search-artikel-input")
+                .value.trim();
+            artikelPage = 1;
+            loadArtikel();
+        });
+
+    // ===================== HANDLE REQUEST =====================
     async function handleRequest(
         url,
         method,
         data,
-        loadingText,
-        successText,
+        loading,
+        success,
         modal,
-        callback
+        reload
     ) {
-        try {
-            Swal.fire({
-                title: loadingText,
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading(),
-            });
-            const res = await fetch(url, {
-                method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
-            const result = await res.json();
-            if (res.ok) {
-                Swal.fire("Berhasil!", successText, "success");
-                closeModal(modal);
-                callback?.();
-            } else {
-                Swal.fire(
-                    "Gagal!",
-                    result.message || "Terjadi kesalahan",
-                    "error"
-                );
-            }
-        } catch (err) {
-            console.error(err);
-            Swal.fire("Error!", "Gagal koneksi ke server", "error");
+        Swal.fire({
+            title: loading,
+            didOpen: () => Swal.showLoading(),
+            allowOutsideClick: false,
+        });
+
+        const res = await fetch(url, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+
+        if (res.ok) {
+            Swal.fire("Berhasil", success, "success");
+            closeModal(modal);
+            reload();
+        } else {
+            Swal.fire("Gagal", "Terjadi kesalahan", "error");
         }
     }
 
+    // ===================== EDIT =====================
+    videoBody.addEventListener("click", (e) => {
+        const btn = e.target.closest(".btn-edit-video");
+        if (!btn) return;
+
+        document.getElementById("edit-video-id").value = btn.dataset.id;
+        document.getElementById("edit-nama-video").value = btn.dataset.nama;
+        document.getElementById("edit-link-video").value = btn.dataset.link;
+        document.getElementById("edit-deskripsi").value = btn.dataset.deskripsi;
+
+        openModal(modalEditVideo);
+    });
+
+    artikelBody.addEventListener("click", (e) => {
+        const btn = e.target.closest(".btn-edit-artikel");
+        if (!btn) return;
+
+        document.getElementById("edit-artikel-id").value = btn.dataset.id;
+        document.getElementById("edit-nama-artikel").value = btn.dataset.nama;
+        document.getElementById("edit-link-artikel").value = btn.dataset.link;
+
+        openModal(modalEditArtikel);
+    });
+
+    document
+        .getElementById("form-edit-video")
+        ?.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const id = document.getElementById("edit-video-id").value;
+
+            handleRequest(
+                `${API_VIDEO}/${id}`,
+                "PUT",
+                {
+                    nama_video: editNamaVideo.value,
+                    link_youtube: editLinkVideo.value,
+                    deskripsi: editDeskripsi.value,
+                },
+                "Memperbarui Video...",
+                "Video berhasil diperbarui",
+                modalEditVideo,
+                loadVideo
+            );
+        });
+
+    document
+        .getElementById("form-edit-artikel")
+        ?.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const id = document.getElementById("edit-artikel-id").value;
+
+            handleRequest(
+                `${API_ARTIKEL}/${id}`,
+                "PUT",
+                {
+                    nama_artikel: editNamaArtikel.value,
+                    file_pdf: editLinkArtikel.value,
+                },
+                "Memperbarui Artikel...",
+                "Artikel berhasil diperbarui",
+                modalEditArtikel,
+                loadArtikel
+            );
+        });
+
     // ===================== DELETE =====================
     videoBody.addEventListener("click", async (e) => {
-        const id = e.target.dataset.id;
-        if (!id || !e.target.classList.contains("btn-hapus")) return;
-        const confirm = await Swal.fire({
+        const btn = e.target.closest(".btn-hapus");
+        if (!btn) return;
+
+        const ok = await Swal.fire({
             title: "Hapus Video?",
-            text: "Data tidak bisa dikembalikan!",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: "#d33",
             confirmButtonText: "Ya, Hapus!",
         });
-        if (confirm.isConfirmed)
-            await handleRequest(
-                `${API_VIDEO}/${id}`,
+
+        if (ok.isConfirmed)
+            handleRequest(
+                `${API_VIDEO}/${btn.dataset.id}`,
                 "DELETE",
                 {},
-                "Menghapus Video...",
-                "Video berhasil dihapus",
+                "Menghapus...",
+                "Berhasil",
                 null,
                 loadVideo
             );
     });
 
     artikelBody.addEventListener("click", async (e) => {
-        const id = e.target.dataset.id;
-        if (!id || !e.target.classList.contains("btn-hapus")) return;
-        const confirm = await Swal.fire({
+        const btn = e.target.closest(".btn-hapus");
+        if (!btn) return;
+
+        const ok = await Swal.fire({
             title: "Hapus Artikel?",
-            text: "Data tidak bisa dikembalikan!",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: "#d33",
             confirmButtonText: "Ya, Hapus!",
         });
-        if (confirm.isConfirmed)
-            await handleRequest(
-                `${API_ARTIKEL}/${id}`,
+
+        if (ok.isConfirmed)
+            handleRequest(
+                `${API_ARTIKEL}/${btn.dataset.id}`,
                 "DELETE",
                 {},
-                "Menghapus Artikel...",
-                "Artikel berhasil dihapus",
+                "Menghapus...",
+                "Berhasil",
                 null,
                 loadArtikel
             );
     });
 
-    // ===================== INIT LOAD =====================
+    // ===================== INIT =====================
     loadVideo();
     loadArtikel();
 });

@@ -337,3 +337,8 @@ body {
     font-weight: bold;
 }
 .link-view:hover { text-decoration: underline; }
+
+.btn-edit {
+    background-color: #ffc107;
+    color: #000;
+}
