@@ -23,8 +23,7 @@
                         <th>Aksi</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody">
-                    </tbody>
+                <tbody id="tableBody"></tbody>
             </table>
         </div>
     </div>
@@ -36,25 +35,32 @@
     <div class="modal-window">
         <div class="modal-header-ui">
             <h2 id="modalTitle" style="font-size: 1.1rem; margin:0;">Tambah Jadwal Baru</h2>
-            <span class="btn-close-x" id="btnClose" style="cursor:pointer;">&times;</span>
+            <span class="btn-close-x" id="btnClose">&times;</span>
         </div>
+
         <form id="formSchedule">
             <div class="modal-body-ui">
                 <input type="hidden" id="scheduleId">
-                
+
                 <div class="form-group">
                     <label>Pilih Kurir</label>
                     <select id="courier_name" required>
-                        <option value="ajang beye">ajang beye</option>
-                        <option value="Adang galon">Adang galon</option>
+                        <option value="">-- Pilih Kurir --</option>
+                        <option value="ajang beye">Ajang Beye</option>
+                        <option value="Adang galon">Adang Galon</option>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label>Alamat / Area</label>
-                    <select id="alamat" required>
-                        <option value="" disabled selected>Memuat area...</option>
-                    </select>
+                    <input
+                        type="text"
+                        id="alamat"
+                        list="alamatList"
+                        placeholder="Pilih area atau ketik manual"
+                        required
+                    />
+                    <datalist id="alamatList"></datalist>
                 </div>
 
                 <div class="row">
@@ -73,11 +79,14 @@
                     <select id="status">
                         <option value="tersedia">TERSEDIA</option>
                         <option value="diproses">DIPROSES</option>
+                        <option value="selesai">SELESAI</option>
+                        <option value="ditolak">DITOLAK</option>
                     </select>
                 </div>
             </div>
+
             <div class="modal-footer-ui">
-                <button type="button" class="btn-ui" style="background:#eee;" id="btnBatal">Batal</button>
+                <button type="button" class="btn-ui" id="btnBatal">Batal</button>
                 <button type="submit" class="btn-ui btn-save">Simpan</button>
             </div>
         </form>

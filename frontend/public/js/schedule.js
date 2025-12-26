@@ -1,5 +1,6 @@
 const API_SCHEDULE = "http://localhost:3000/api/schedule";
-const API_AREA = "http://localhost:3000/api/areaAdm";
+const API_AREA = "http://localhost:3000/api/areaMaster";
+
 let schedules = [];
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -8,63 +9,61 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnClose = document.getElementById("btnClose");
     const btnBatal = document.getElementById("btnBatal");
     const form = document.getElementById("formSchedule");
-    const alamatSelect = document.getElementById("alamat");
 
-    // 1. Fungsi Load Data Area dengan Proteksi Ganda
+    const alamatInput = document.getElementById("alamat");
+    const alamatList = document.getElementById("alamatList");
+
+    /* =======================
+       LOAD AREA (DATALIST)
+    ======================= */
     async function loadAreas() {
+        alamatList.innerHTML = "";
+        alamatInput.disabled = false;
+        alamatInput.readOnly = false;
+
         try {
-            // Berikan indikator loading sementara
-            alamatSelect.innerHTML = '<option value="" disabled selected>Memuat area...</option>';
-            
             const res = await fetch(API_AREA);
-            if (!res.ok) throw new Error(`HTTP Error! Status: ${res.status}`);
-            
+            if (!res.ok) throw new Error("Gagal mengambil area");
+
             const json = await res.json();
             const areas = Array.isArray(json) ? json : (json.data || []);
-            
-            alamatSelect.innerHTML = '<option value="" disabled selected>Pilih Area Penjemputan</option>';
-            
-            if (areas.length === 0) {
-                alamatSelect.innerHTML = '<option value="">Tidak ada data area tersedia</option>';
-                return;
-            }
 
-            areas.forEach(area => {
-                const option = document.createElement("option");
-                // Menangani kemungkinan nama properti yang berbeda di DB (nama_area atau alamat)
-                const val = area.nama_area || area.alamat || area.nama; 
-                if (val) {
-                    option.value = val;
-                    option.textContent = val;
-                    alamatSelect.appendChild(option);
+            areas.forEach(a => {
+                if (a.jalan && a.kelurahan && a.kecamatan && a.kota && a.provinsi) {
+                    const opt = document.createElement("option");
+                    opt.value = `${a.jalan}, ${a.kelurahan}, ${a.kecamatan}, ${a.kota}, ${a.provinsi}`;
+                    alamatList.appendChild(opt);
                 }
             });
         } catch (err) {
-            console.error("Gagal memuat area:", err);
-            alamatSelect.innerHTML = '<option value="">Gagal memuat data area</option>';
+            console.error("Load area error:", err);
         }
     }
 
-    // Modal Control - Tambah
-    btnTambah.onclick = async () => {
-        document.getElementById("modalTitle").innerText = "Tambah Jadwal Baru";
+    /* =======================
+       MODAL CONTROL
+    ======================= */
+    btnTambah.addEventListener("click", async () => {
         form.reset();
+        document.getElementById("modalTitle").innerText = "Tambah Jadwal";
         document.getElementById("scheduleId").value = "";
         document.getElementById("statusContainer").style.display = "none";
-        
-        await loadAreas(); 
-        modal.style.display = "flex";
-    };
 
-    const hideModal = () => {
+        await loadAreas();
+        modal.style.display = "flex";
+    });
+
+    function hideModal() {
         modal.style.display = "none";
-        form.reset(); // Bersihkan form saat tutup
-    };
+        form.reset();
+    }
 
     btnClose.onclick = hideModal;
     btnBatal.onclick = hideModal;
 
-    // Load Tabel
+    /* =======================
+       LOAD TABLE
+    ======================= */
     async function loadSchedules() {
         const tbody = document.getElementById("tableBody");
         if (!tbody) return;
@@ -73,103 +72,132 @@ document.addEventListener("DOMContentLoaded", () => {
             const res = await fetch(API_SCHEDULE);
             const json = await res.json();
             schedules = Array.isArray(json) ? json : (json.data || []);
+
             tbody.innerHTML = "";
 
+            if (schedules.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7">Tidak ada data</td></tr>`;
+                return;
+            }
+
             schedules.forEach((item, i) => {
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td>${i + 1}</td>
-                    <td><strong>${item.courier_name}</strong></td>
-                    <td style="text-align: left;">${item.alamat}</td>
-                    <td>${item.date}</td>
-                    <td><div class="time-box-ui">${item.time}</div></td>
-                    <td><span class="badge-yellow">${(item.status || 'tersedia').toUpperCase()}</span></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button onclick="editData('${item.id}')" class="btn-action btn-edit-icon">
-                                <i class="bi bi-pencil"></i> Edit
-                            </button>
-                            <button onclick="deleteData('${item.id}')" class="btn-action btn-delete-icon">
-                                <i class="bi bi-trash"></i> Hapus
-                            </button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(tr);
+                tbody.insertAdjacentHTML("beforeend", `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td><strong>${item.courier_name}</strong></td>
+                        <td style="text-align:left">${item.alamat}</td>
+                        <td>${item.date}</td>
+                        <td><div class="time-box-ui">${item.time}</div></td>
+                        <td>
+                            <span class="badge-yellow">
+                                ${(item.status || "tersedia").toUpperCase()}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn-action btn-edit-icon" onclick="editData('${item.id}')">Edit</button>
+                            <button class="btn-action btn-delete-icon" onclick="deleteData('${item.id}')">Hapus</button>
+                        </td>
+                    </tr>
+                `);
             });
-        } catch (err) { 
-            console.error("Error load table:", err);
-            tbody.innerHTML = '<tr><td colspan="7">Gagal memuat data antrean.</td></tr>';
+        } catch (err) {
+            console.error("Load schedule error:", err);
         }
     }
 
     loadSchedules();
 
-    // Submit Form (Tambah & Update)
-    form.onsubmit = async (e) => {
+    /* =======================
+       SUBMIT (TAMBAH & EDIT)
+    ======================= */
+    let isSubmitting = false;
+    form.addEventListener("submit", async (e) => {
         e.preventDefault();
+
+        if (isSubmitting) return; // 🔒 ANTI DUPLIKAT
+        isSubmitting = true;
+
         const id = document.getElementById("scheduleId").value;
-        
+
         const payload = {
-            courier_name: document.getElementById("courier_name").value,
-            alamat: alamatSelect.value,
+            firebase_uid: "ADMIN_MANUAL",
+            courier_name: document.getElementById("courier_name").value.trim(),
+            alamat: alamatInput.value.trim(),
             date: document.getElementById("date").value,
             time: document.getElementById("time").value,
-            status: document.getElementById("status").value || "tersedia"
+            waste_type: "campuran",
+            status: document.getElementById("status")?.value || "tersedia"
         };
 
-        const method = id ? "PUT" : "POST";
+        if (!payload.courier_name || !payload.alamat || !payload.date || !payload.time) {
+            alert("Semua field wajib diisi");
+            isSubmitting = false;
+            return;
+        }
+
         const url = id ? `${API_SCHEDULE}/${id}` : API_SCHEDULE;
+        const method = id ? "PUT" : "POST";
 
         try {
-            const response = await fetch(url, {
+            const res = await fetch(url, {
                 method,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
 
-            if (response.ok) {
-                hideModal();
-                loadSchedules();
-            } else {
-                alert("Gagal menyimpan data!");
-            }
-        } catch (error) {
-            console.error("Fetch error:", error);
-        }
-    };
+            const text = await res.text();
+            console.log("STATUS:", res.status);
+            console.log("RESPONSE:", text);
 
-    // Fungsi Edit (Global Window)
+            if (!res.ok) {
+                alert("Gagal menyimpan data");
+                return;
+            }
+
+            hideModal();
+            loadSchedules();
+        } catch (err) {
+            console.error(err);
+            alert("Terjadi kesalahan");
+        } finally {
+            isSubmitting = false; // 🔓 buka lagi
+        }
+    });
+
+
+    /* =======================
+       EDIT DATA
+    ======================= */
     window.editData = async (id) => {
-        // Menggunakan loose equality (==) untuk mengantisipasi perbedaan tipe string/number
         const item = schedules.find(s => s.id == id);
         if (!item) return;
-        
+
+        await loadAreas();
+
         document.getElementById("modalTitle").innerText = "Edit Jadwal";
         document.getElementById("scheduleId").value = item.id;
         document.getElementById("courier_name").value = item.courier_name;
-        
-        // Muat area dulu, baru set nilainya agar select tidak balik ke default
-        await loadAreas(); 
-        alamatSelect.value = item.alamat;
-        
+        alamatInput.value = item.alamat;
         document.getElementById("date").value = item.date;
         document.getElementById("time").value = item.time;
+
         document.getElementById("statusContainer").style.display = "block";
         document.getElementById("status").value = item.status || "tersedia";
-        
+
         modal.style.display = "flex";
     };
 
-    // Fungsi Delete (Global Window)
+    /* =======================
+       DELETE DATA
+    ======================= */
     window.deleteData = async (id) => {
-        if (confirm("Hapus data jadwal ini?")) {
-            try {
-                const res = await fetch(`${API_SCHEDULE}/${id}`, { method: "DELETE" });
-                if (res.ok) loadSchedules();
-            } catch (err) {
-                console.error("Gagal menghapus:", err);
-            }
+        if (!confirm("Hapus jadwal ini?")) return;
+
+        try {
+            await fetch(`${API_SCHEDULE}/${id}`, { method: "DELETE" });
+            loadSchedules();
+        } catch (err) {
+            console.error("Delete error:", err);
         }
     };
 });
