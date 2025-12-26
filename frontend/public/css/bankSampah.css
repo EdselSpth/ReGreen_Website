@@ -205,10 +205,10 @@ body {
 }
 
 .pagination button.active {
-    background-color: var(--biru-tambah);
+    background-color: var(--hijau-tua-regreen);
     color: white;
-    border-color: var(--biru-tambah);
 }
+
 
 /* untuk modal */
 .modal {
@@ -324,4 +324,40 @@ body {
 
 .btn-batal {
     background-color: red;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+#search-bank {
+    padding: 10px 14px;
+    width: 260px;
+    border-radius: 6px;
+    border: 1px solid var(--border-hijau);
+    font-size: 14px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.badge-aktif {
+    background-color: #d4edda;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}
+
+.badge-nonaktif {
+    background-color: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
 }

@@ -24,13 +24,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let dataBank = [];
 
+    let currentPage = 1;
+    const rowsPerPage = 5;
+    let filteredData = [];
+
+    const searchInput = document.getElementById("search-bank");
+    const paginationEl = document.getElementById("pagination");
+    const infoData = document.getElementById("info-data");
+
+    searchInput.addEventListener("input", () => {
+        const keyword = searchInput.value.toLowerCase();
+
+        filteredData = dataBank.filter(
+            (item) =>
+                item.nama.toLowerCase().includes(keyword) ||
+                item.alamat.toLowerCase().includes(keyword) ||
+                item.jenis.toLowerCase().includes(keyword)
+        );
+
+        currentPage = 1;
+        renderTabel();
+    });
+
     async function loadData() {
         try {
             showLoading();
             const res = await fetch(API_URL);
             dataBank = await res.json();
+            filteredData = dataBank;
             renderTabel();
-        } catch (err) {
+        } catch {
             Swal.fire("Error", "Gagal memuat data", "error");
         } finally {
             hideLoading();
@@ -40,34 +63,67 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderTabel() {
         tableBody.innerHTML = "";
 
-        if (dataBank.length === 0) {
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const pageData = filteredData.slice(start, end);
+
+        if (pageData.length === 0) {
             tableBody.innerHTML = `
         <tr>
           <td colspan="5" style="text-align:center;">
-            Belum ada data bank sampah
+            Data tidak ditemukan
           </td>
         </tr>`;
+            paginationEl.innerHTML = "";
+            infoData.innerText = "";
             return;
         }
 
-        dataBank.forEach((item) => {
+        pageData.forEach((item) => {
             const row = document.createElement("tr");
             row.innerHTML = `
-        <td>${item.nama}</td>
-        <td>${item.alamat}</td>
-        <td>${item.jenis}</td>
-        <td>
-          <span class="badge ${item.status === "Aktif" ? "aktif" : "nonaktif"}">
-            ${item.status}
-          </span>
-        </td>
-        <td>
-          <button class="btn-aksi btn-edit" data-id="${item.id}">Edit</button>
-          <button class="btn-aksi btn-hapus" data-id="${item.id}">Hapus</button>
-        </td>
-      `;
+          <td>${item.nama}</td>
+          <td>${item.alamat}</td>
+          <td>${item.jenis}</td>
+          <td>
+            <span class="badge ${item.status === "Aktif" ? "badge-aktif" : "badge-nonaktif"}">
+                ${item.status}
+            </span>
+          </td>
+
+          <td>
+            <button class="btn-aksi btn-edit" data-id="${item.id}">Edit</button>
+            <button class="btn-aksi btn-hapus" data-id="${item.id}">Hapus</button>
+          </td>
+        `;
             tableBody.appendChild(row);
         });
+
+        renderPagination();
+    }
+
+    function renderPagination() {
+        paginationEl.innerHTML = "";
+        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+
+        infoData.innerText = `Menampilkan ${Math.min(
+            rowsPerPage,
+            filteredData.length - (currentPage - 1) * rowsPerPage
+        )} dari ${filteredData.length} data`;
+
+
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement("button");
+            btn.innerText = i;
+            btn.classList.toggle("active", i === currentPage);
+
+            btn.addEventListener("click", () => {
+                currentPage = i;
+                renderTabel();
+            });
+
+            paginationEl.appendChild(btn);
+        }
     }
 
     function openModal(modal) {
