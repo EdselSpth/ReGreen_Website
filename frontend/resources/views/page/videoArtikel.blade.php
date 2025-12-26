@@ -137,6 +137,71 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ================= MODAL EDIT VIDEO ================= -->
+            <div class="modal" id="modal-edit-video">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Edit Video Edukasi</h2>
+                        <span class="btn-tutup">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <form id="form-edit-video">
+                            <input type="hidden" id="edit-video-id">
+
+                            <div class="form-group">
+                                <label>Judul Video</label>
+                                <input type="text" id="edit-nama-video" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Link Video</label>
+                                <input type="text" id="edit-link-video" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Deskripsi</label>
+                                <input type="text" id="edit-deskripsi" required>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn-aksi btn-batal">Batal</button>
+                                <button type="submit" class="btn-aksi btn-simpan">Update</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= MODAL EDIT ARTIKEL ================= -->
+            <div class="modal" id="modal-edit-artikel">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Edit Artikel Edukasi</h2>
+                        <span class="btn-tutup">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <form id="form-edit-artikel">
+                            <input type="hidden" id="edit-artikel-id">
+
+                            <div class="form-group">
+                                <label>Judul Artikel</label>
+                                <input type="text" id="edit-nama-artikel" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Link Artikel</label>
+                                <input type="url" id="edit-link-artikel" required>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn-aksi btn-batal">Batal</button>
+                                <button type="submit" class="btn-aksi btn-simpan">Update</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         @endsection
 
         @section('script')
