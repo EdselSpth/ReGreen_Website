@@ -262,6 +262,59 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // ===================== ADD =====================
+    document
+        .getElementById("form-tambah-video")
+        ?.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const nama = document.getElementById("tambah-nama-video").value;
+            const link = document.getElementById("tambah-link-video").value;
+            const deskripsi = document.getElementById("tambah-deskripsi").value;
+
+            handleRequest(
+                API_VIDEO,
+                "POST",
+                {
+                    nama_video: nama,
+                    link_youtube: link,
+                    deskripsi: deskripsi,
+                },
+                "Menyimpan Video...",
+                "Video berhasil ditambahkan",
+                modalTambahVideo,
+                () => {
+                    loadVideo();
+                    e.target.reset(); // reset form
+                }
+            );
+        });
+
+    document
+        .getElementById("form-tambah-artikel")
+        ?.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const nama = document.getElementById("tambah-nama-artikel").value;
+            const link = document.getElementById("tambah-link-artikel").value;
+
+            handleRequest(
+                API_ARTIKEL,
+                "POST",
+                {
+                    nama_artikel: nama,
+                    file_pdf: link,
+                },
+                "Menyimpan Artikel...",
+                "Artikel berhasil ditambahkan",
+                modalTambahArtikel,
+                () => {
+                    loadArtikel();
+                    e.target.reset();
+                }
+            );
+        });
+
     // ===================== EDIT =====================
     videoBody.addEventListener("click", (e) => {
         const btn = e.target.closest(".btn-edit-video");
