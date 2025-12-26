@@ -38,25 +38,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const hideLoading = () => loadingOverlay?.classList.remove("active");
 
     // ===================== LOAD VIDEO =====================
+    // ===================== LOAD VIDEO =====================
     async function loadVideo() {
         try {
             showLoading();
-            let url = API_VIDEO; // bisa tambah query search jika perlu
+            let url = `${API_VIDEO}?page=${videoPage}&limit=${ITEMS_PER_PAGE}`;
             if (videoSearch)
-                url += `?search=${encodeURIComponent(videoSearch)}`;
+                url += `&search=${encodeURIComponent(videoSearch)}`;
+
             const res = await fetch(url);
-            if (!res.ok) throw new Error("Gagal koneksi ke server");
             const result = await res.json();
+
             if (result.status !== "success")
                 throw new Error(result.message || "Gagal memuat data");
 
-            dataVideo = result.data || [];
-            renderVideoTable(dataVideo, 1); // karena server tidak pakai page, pakai 1
-            renderVideoPagination({
+            // <-- Ambil array video dan pagination
+            dataVideo = Array.isArray(result.data.data) ? result.data.data : [];
+            const pagination = result.data.pagination || {
                 currentPage: 1,
                 totalPages: 1,
                 totalItems: dataVideo.length,
-            });
+            };
+
+            renderVideoTable(dataVideo, videoPage);
+            renderVideoPagination(pagination);
         } catch (err) {
             console.error(err);
             videoBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">${err.message}</td></tr>`;
@@ -127,19 +132,26 @@ document.addEventListener("DOMContentLoaded", () => {
             let url = API_ARTIKEL;
             if (artikelSearch)
                 url += `?search=${encodeURIComponent(artikelSearch)}`;
+
             const res = await fetch(url);
             if (!res.ok) throw new Error("Gagal koneksi ke server");
+
             const result = await res.json();
             if (result.status !== "success")
                 throw new Error(result.message || "Gagal memuat data");
 
-            dataArtikel = result.data || [];
-            renderArtikelTable(dataArtikel, 1);
-            renderArtikelPagination({
+            // Ambil array artikel dari result.data.data
+            dataArtikel = Array.isArray(result.data.data)
+                ? result.data.data
+                : [];
+            const paginationArtikel = result.data.pagination || {
                 currentPage: 1,
                 totalPages: 1,
                 totalItems: dataArtikel.length,
-            });
+            };
+
+            renderArtikelTable(dataArtikel, artikelPage);
+            renderArtikelPagination(paginationArtikel);
         } catch (err) {
             console.error(err);
             artikelBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">${err.message}</td></tr>`;
