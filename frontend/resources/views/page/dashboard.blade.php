@@ -29,6 +29,7 @@
                             <th style="width:30%; text-align:left">Alamat</th>
                             <th style="width:15%">Tanggal</th>
                             <th style="width:10%">Waktu</th>
+                            <th style="width:10%">Jenis Sampah</th>
                             <th style="width:10%">Status</th>
                         </tr>
                     </thead>
