@@ -7,6 +7,8 @@ Pendaftaran Area
 @endsection
 
 @section('content')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <div style="margin-bottom: 20px;">
     <button class="btn-tambah" onclick="openAddAreaModal()">+ Tambah Area Baru</button>
 </div>

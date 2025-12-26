@@ -3,10 +3,10 @@ const areaMasterSvc = require("../services/areaMaster.service");
 
 exports.list = async (req, res) => {
     try {
-        const status = req.query.status || "pending";  // Default status 'pending'
+        const status = req.query.status || "pending";  
         const data = await areaReqSvc.listAreaRequests(status);
         
-        // Mengirimkan data yang diambil dari Firebase ke frontend
+        
         res.status(200).json({ data });
     } catch (error) {
         console.error("Error in area request controller:", error);
