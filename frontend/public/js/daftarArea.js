@@ -1,9 +1,9 @@
 const API_URL = "http://localhost:3000/api";
 
 document.addEventListener("DOMContentLoaded", () => {
-    loadPending();      // Tabel 1 (Dari Database)
-    loadRegistered();   // Tabel 2 (Dari Database)
-    renderAdminSimpleTable(); // Tabel 3 (Hanya LocalStorage)
+    loadPending();      // Tabel 1 (Database: areaRequests)
+    loadRegistered();   // Tabel 2 (Database: areaMaster)
+    renderAdminSimpleTable(); // Tabel 3 (Database: adminNotes)
 });
 
 // TABEL 1: Menunggu Persetujuan
@@ -37,7 +37,7 @@ async function loadPending() {
     } catch (e) { console.error("Error Tabel 1:", e); }
 }
 
-// TABEL 2: Area Terdaftar
+// TABEL 2: Area Terdaftar (Riwayat Resmi)
 async function loadRegistered() {
     try {
         const res = await fetch(`${API_URL}/areaMaster`);
@@ -63,31 +63,40 @@ async function loadRegistered() {
     } catch (e) { console.error("Error Tabel 2:", e); }
 }
 
-function renderAdminSimpleTable() {
+
+async function renderAdminSimpleTable() {
     const table = document.getElementById("adminSimpleTable");
     if(!table) return;
-    const savedAreas = JSON.parse(localStorage.getItem("admin_areas_simple") || "[]");
 
-    table.innerHTML = "";
-    if (savedAreas.length === 0) {
-        table.innerHTML = "<tr><td colspan='4' align='center' style='color:#888'>Belum ada area ditambahkan manual</td></tr>";
-        return;
+    try {
+        // Ambil data dari endpoint API baru
+        const res = await fetch(`${API_URL}/adminNotes`);
+        const data = await res.json();
+
+        table.innerHTML = "";
+        if (!data || data.length === 0) {
+            table.innerHTML = "<tr><td colspan='4' align='center' style='color:#888'>Belum ada area ditambahkan ke database</td></tr>";
+            return;
+        }
+
+        data.forEach((area, i) => {
+            table.innerHTML += `
+                <tr style="background-color: #f0fff4;">
+                    <td>${i + 1}</td>
+                    <td><strong>${area.kecamatan}</strong></td>
+                    <td>${area.kelurahan}</td>
+                    <td>
+                        <button onclick="deleteDBArea(${area.id})" style="color:red; cursor:pointer; border:none; background:none; font-weight:bold;">Hapus</button>
+                    </td>
+                </tr>`;
+        });
+    } catch (e) { 
+        console.error("Error Tabel 3:", e);
+        table.innerHTML = "<tr><td colspan='4' align='center' style='color:red'>Gagal memuat data dari database</td></tr>";
     }
-
-    savedAreas.forEach((area, i) => {
-        table.innerHTML += `
-            <tr style="background-color: #f0fff4;">
-                <td>${i + 1}</td>
-                <td><strong>${area.kecamatan}</strong></td>
-                <td>${area.kelurahan}</td>
-                <td>
-                    <button onclick="deleteLocalArea(${i})" style="color:red; cursor:pointer; border:none; background:none; font-weight:bold;">Hapus</button>
-                </td>
-            </tr>`;
-    });
 }
 
-document.getElementById("addAreaForm").onsubmit = (e) => {
+document.getElementById("addAreaForm").onsubmit = async (e) => {
     e.preventDefault();
     
     const payload = {
@@ -95,22 +104,65 @@ document.getElementById("addAreaForm").onsubmit = (e) => {
         kelurahan: document.getElementById("kelurahan").value
     };
 
-    let savedAreas = JSON.parse(localStorage.getItem("admin_areas_simple") || "[]");
-    savedAreas.unshift(payload);
-    localStorage.setItem("admin_areas_simple", JSON.stringify(savedAreas));
+    try {
+        const res = await fetch(`${API_URL}/adminNotes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
 
-    Swal.fire({
-        icon: 'success',
-        title: 'Tersimpan!',
-        text: 'Area berhasil ditambahkan ke Catatan Admin.',
-        timer: 2000,
-        showConfirmButton: false
-    });
+        if (res.ok) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Tersimpan!',
+                text: 'Area berhasil disimpan ke Database MySQL.',
+                timer: 2000,
+                showConfirmButton: false
+            });
 
-    document.getElementById("addAreaForm").reset();
-    closeAddAreaModal();
-    renderAdminSimpleTable(); 
+            document.getElementById("addAreaForm").reset();
+            closeAddAreaModal();
+            renderAdminSimpleTable(); // Refresh tabel 3
+        } else {
+            throw new Error("Gagal simpan");
+        }
+    } catch (e) {
+        Swal.fire('Error', 'Gagal menyimpan ke database.', 'error');
+    }
 };
+
+async function deleteDBArea(id) {
+    Swal.fire({
+        title: 'Hapus Catatan?',
+        text: "Data akan dihapus permanen dari Database MySQL.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`${API_URL}/adminNotes/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (res.ok) {
+                    Swal.fire({
+                        title: 'Dihapus!',
+                        icon: 'success',
+                        timer: 1000,
+                        showConfirmButton: false
+                    });
+                    renderAdminSimpleTable(); // Refresh tabel 3
+                }
+            } catch (e) {
+                Swal.fire('Error!', 'Gagal menghapus data dari server.', 'error');
+            }
+        }
+    });
+}
 
 async function processAction(uid, action) {
     const actionText = action === 'approve' ? 'menyetujui' : 'menolak';
@@ -150,33 +202,6 @@ async function processAction(uid, action) {
             } catch (e) { 
                 Swal.fire('Error!', 'Gagal menghubungi server.', 'error');
             }
-        }
-    });
-}
-
-function deleteLocalArea(index) {
-    Swal.fire({
-        title: 'Hapus Catatan?',
-        text: "Catatan ini hanya akan dihapus dari browser Anda.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            let savedAreas = JSON.parse(localStorage.getItem("admin_areas_simple") || "[]");
-            savedAreas.splice(index, 1);
-            localStorage.setItem("admin_areas_simple", JSON.stringify(savedAreas));
-            renderAdminSimpleTable();
-            
-            Swal.fire({
-                title: 'Dihapus!',
-                icon: 'success',
-                timer: 1000,
-                showConfirmButton: false
-            });
         }
     });
 }
