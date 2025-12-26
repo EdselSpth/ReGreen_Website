@@ -112,17 +112,43 @@ document.addEventListener("DOMContentLoaded", () => {
         )} dari ${filteredData.length} data`;
 
 
-        for (let i = 1; i <= totalPages; i++) {
-            const btn = document.createElement("button");
-            btn.innerText = i;
-            btn.classList.toggle("active", i === currentPage);
+        if (totalPages <= 1) return;
 
-            btn.addEventListener("click", () => {
-                currentPage = i;
-                renderTabel();
-            });
+        const createButton = (page, text = page) => {
+            const btn = document.createElement("button");
+            btn.innerText = text;
+            btn.classList.toggle("active", page === currentPage);
+            btn.disabled = text === "...";
+            
+            if (page !== "dotts") {
+                btn.addEventListener("click", () => {
+                    currentPage = page;
+                    renderTabel();
+                });
+            }
 
             paginationEl.appendChild(btn);
+        }
+
+        createButton(1);
+
+        if (currentPage > 3) {
+            createButton("dotts", "...");
+        }
+
+        const start = Math.max(2, currentPage - 1);
+        const end = Math.min(totalPages - 1, currentPage + 1);
+
+        for (let i = start; i <= end; i++) {
+            createButton(i);
+        }
+
+        if (currentPage < totalPages - 2) {
+            createButton("dotts", "...");
+        }
+
+        if (totalPages > 1) {
+            createButton(totalPages);
         }
     }
 
