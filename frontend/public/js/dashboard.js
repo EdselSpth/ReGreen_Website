@@ -6,11 +6,11 @@ document.addEventListener("DOMContentLoaded", () => {
     ====================== */
     const API_SCHEDULE = "http://localhost:3000/api/schedule";
     const API_KEUNTUNGAN = "http://localhost:3000/api/keuntungan";
+    const API_AREA = "http://localhost:3000/api/areaMaster"; // Endpoint area
 
     const scheduleBody = document.getElementById("tableBody");
     const pendingBody = document.getElementById("pending-body");
-
-    let schedules = [];
+    const areaBody = document.getElementById("area-body"); // <tbody> untuk daftar area
 
     function showLoading() {
         loading?.classList.add("active");
@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ====================== */
     loadSchedules();
     loadPending();
+    loadAreas(); // Load area saat halaman siap
 
     /* =====================
         SCHEDULE
@@ -37,8 +38,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const res = await fetch(API_SCHEDULE);
             const json = await res.json();
 
-            schedules = Array.isArray(json) ? json : (json.data || []);
-            renderSchedules(schedules);
+            const data = Array.isArray(json) ? json : (json.data || []);
+            renderSchedules(data);
         } catch (err) {
             console.error("Gagal load schedule", err);
             scheduleBody.innerHTML = `
@@ -102,11 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const res = await fetch(API_KEUNTUNGAN);
             const response = await res.json();
-
-            const data = Array.isArray(response.data)
-                ? response.data
-                : response;
-
+            const data = Array.isArray(response.data) ? response.data : response;
             renderPending(data);
         } catch (err) {
             console.error("Gagal load keuntungan", err);
@@ -141,19 +138,59 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* =====================
+        AREA
+    ====================== */
+    async function loadAreas() {
+        if (!areaBody) return;
+
+        try {
+            showLoading();
+            const res = await fetch(API_AREA);
+            const data = await res.json();
+
+            areaBody.innerHTML = "";
+            if (!data || data.length === 0) {
+                areaBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align:center">
+                            Tidak ada area terdaftar
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            data.forEach((item, i) => {
+                areaBody.innerHTML += `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>${item.jalan}</td>
+                        <td>${item.kelurahan}</td>
+                        <td>${item.kecamatan}</td>
+                        <td>${item.kota}</td>
+                        <td>${item.provinsi}</td>
+                    </tr>
+                `;
+            });
+        } catch (err) {
+            console.error("Gagal load area", err);
+        } finally {
+            hideLoading();
+        }
+    }
+
+    /* =====================
         GLOBAL FUNCTIONS
     ====================== */
     window.editData = (id) => {
         console.log("Edit schedule ID:", id);
-        // logic edit modal tetap pakai kode jadwal milikmu
+        // logic edit modal tetap pakai kode jadwal
     };
 
     window.deleteData = async (id) => {
         if (confirm("Hapus jadwal ini?")) {
             try {
-                const res = await fetch(`${API_SCHEDULE}/${id}`, {
-                    method: "DELETE"
-                });
+                const res = await fetch(`${API_SCHEDULE}/${id}`, { method: "DELETE" });
                 if (res.ok) loadSchedules();
             } catch (err) {
                 console.error("Gagal hapus jadwal", err);

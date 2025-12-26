@@ -9,43 +9,38 @@ function validatePayload(payload) {
   const provinsi = payload.provinsi?.trim();
   const jalan = payload.jalan?.trim();  // Validasi untuk nama jalan
 
-  // Cek apakah semua field wajib sudah terisi
-  if (!kecamatan || !kelurahan || !kota || !provinsi || !jalan) {  // cek jalan
+  if (!kecamatan || !kelurahan || !kota || !provinsi || !jalan) {
     const err = new Error("Field wajib: kecamatan, kelurahan, kota, provinsi, jalan");
-    err.statusCode = 400; // Status kode 400 untuk Bad Request
+    err.statusCode = 400;
     throw err;
   }
 
-  // Kembalikan payload yang telah diproses (clean)
   return { kecamatan, kelurahan, kota, provinsi, jalan };
 }
 
 // Fungsi untuk membuat area baru
 async function create(payload) {
-  const clean = validatePayload(payload);  // Validasi input sebelum menambah
+  const clean = validatePayload(payload);
 
-  // Cek apakah area yang sama sudah terdaftar
   const exists = await repo.findByUnique(clean);
   if (exists) {
     const err = new Error("Area sudah terdaftar (duplikat)");
-    err.statusCode = 409; // Status kode 409 untuk Conflict (data duplikat)
+    err.statusCode = 409;
     throw err;
   }
 
-  // Jika tidak ada duplikat, lanjutkan untuk menambah data ke database
-  return repo.create(clean); // Fungsi ini akan menambah data area ke database
+  return repo.create(clean);
 }
 
 // Fungsi untuk memastikan area sudah terdaftar (untuk update)
 async function ensureAreaRegistered(payload) {
-  const clean = validatePayload(payload); // Validasi input sebelum memastikan
+  const clean = validatePayload(payload);
 
-  // Cek apakah area yang sama sudah terdaftar
   const exists = await repo.findByUnique(clean);
-  if (exists) return exists; // Jika sudah ada, kembalikan data yang ada (idempotent)
+  if (exists) return exists;
 
-  // Jika belum ada, lanjutkan untuk menambah data ke database
-  return repo.create(clean); // Fungsi ini akan menambah data area ke database
+  return repo.create(clean);
 }
 
-module.exports = { list, getById, create, update, remove, ensureAreaRegistered };
+// ✅ Export hanya fungsi yang ada
+module.exports = { create, ensureAreaRegistered };
