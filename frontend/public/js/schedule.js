@@ -13,9 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const alamatInput = document.getElementById("alamat");
     const alamatList = document.getElementById("alamatList");
 
-    /* =======================
-       LOAD AREA (DATALIST)
-    ======================= */
+
     async function loadAreas() {
         alamatList.innerHTML = "";
         alamatInput.disabled = false;
@@ -40,9 +38,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    /* =======================
-       MODAL CONTROL
-    ======================= */
     btnTambah.addEventListener("click", async () => {
         form.reset();
         document.getElementById("modalTitle").innerText = "Tambah Jadwal";
@@ -61,9 +56,6 @@ document.addEventListener("DOMContentLoaded", () => {
     btnClose.onclick = hideModal;
     btnBatal.onclick = hideModal;
 
-    /* =======================
-       LOAD TABLE
-    ======================= */
     async function loadSchedules() {
         const tbody = document.getElementById("tableBody");
         if (!tbody) return;
@@ -107,9 +99,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadSchedules();
 
-    /* =======================
-       SUBMIT (TAMBAH & EDIT)
-    ======================= */
     let isSubmitting = false;
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -165,9 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-    /* =======================
-       EDIT DATA
-    ======================= */
     window.editData = async (id) => {
         const item = schedules.find(s => s.id == id);
         if (!item) return;
@@ -187,9 +173,6 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.style.display = "flex";
     };
 
-    /* =======================
-       DELETE DATA
-    ======================= */
     window.deleteData = async (id) => {
         if (!confirm("Hapus jadwal ini?")) return;
 
