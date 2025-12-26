@@ -37,7 +37,7 @@ async function loadPending() {
     } catch (e) { console.error("Error Tabel 1:", e); }
 }
 
-// TABEL 2: Riwayat Seluruh Area (Database Murni)
+// TABEL 2: Area Terdaftar
 async function loadRegistered() {
     try {
         const res = await fetch(`${API_URL}/areaMaster`);
@@ -63,7 +63,6 @@ async function loadRegistered() {
     } catch (e) { console.error("Error Tabel 2:", e); }
 }
 
-// TABEL 3: Catatan Admin (Hanya di Browser)
 function renderAdminSimpleTable() {
     const table = document.getElementById("adminSimpleTable");
     if(!table) return;
@@ -88,58 +87,99 @@ function renderAdminSimpleTable() {
     });
 }
 
-// LOGIKA SIMPAN: Sekarang HANYA ke LocalStorage agar Tabel 2 tidak terisi data admin
 document.getElementById("addAreaForm").onsubmit = (e) => {
     e.preventDefault();
     
-    // Ambil data input
     const payload = {
         kecamatan: document.getElementById("kecamatan").value,
         kelurahan: document.getElementById("kelurahan").value
     };
 
-    // Simpan ke LocalStorage
     let savedAreas = JSON.parse(localStorage.getItem("admin_areas_simple") || "[]");
     savedAreas.unshift(payload);
     localStorage.setItem("admin_areas_simple", JSON.stringify(savedAreas));
 
-    alert("Berhasil disimpan ke Catatan Admin!");
-    
-    // Reset dan Tutup
+    Swal.fire({
+        icon: 'success',
+        title: 'Tersimpan!',
+        text: 'Area berhasil ditambahkan ke Catatan Admin.',
+        timer: 2000,
+        showConfirmButton: false
+    });
+
     document.getElementById("addAreaForm").reset();
     closeAddAreaModal();
-    
-    // Render Tabel 3 saja
     renderAdminSimpleTable(); 
-    
-    // CATATAN: loadRegistered() sengaja tidak dipanggil agar Tabel 2 tetap bersih dari data ini.
 };
 
-// PROSES APPROVE / REJECT
 async function processAction(uid, action) {
-    if (!confirm(`Yakin ingin ${action}?`)) return;
-    try {
-        const res = await fetch(`${API_URL}/areaRequests/${uid.trim()}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: action, alsoRegister: true })
-        });
-        if (res.ok) {
-            alert("Status diperbarui!");
-            loadPending();    
-            loadRegistered(); // Tabel 2 update jika ada data dari User yang di-approve
+    const actionText = action === 'approve' ? 'menyetujui' : 'menolak';
+    const actionColor = action === 'approve' ? '#28a745' : '#dc3545';
+
+    Swal.fire({
+        title: 'Konfirmasi Tindakan',
+        text: `Apakah Anda yakin ingin ${actionText} pendaftaran ini?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: actionColor,
+        cancelButtonColor: '#6e7881',
+        confirmButtonText: action === 'approve' ? 'Ya, Approve!' : 'Ya, Reject!',
+        cancelButtonText: 'Batal'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`${API_URL}/areaRequests/${uid.trim()}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: action, alsoRegister: true })
+                });
+
+                if (res.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: `Status pendaftaran berhasil di-${action}.`,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    loadPending();    
+                    loadRegistered(); 
+                } else {
+                    Swal.fire('Gagal!', 'Terjadi kesalahan pada server.', 'error');
+                }
+            } catch (e) { 
+                Swal.fire('Error!', 'Gagal menghubungi server.', 'error');
+            }
         }
-    } catch (e) { alert("Gagal proses data"); }
+    });
 }
 
 function deleteLocalArea(index) {
-    if(!confirm("Hapus catatan ini?")) return;
-    let savedAreas = JSON.parse(localStorage.getItem("admin_areas_simple") || "[]");
-    savedAreas.splice(index, 1);
-    localStorage.setItem("admin_areas_simple", JSON.stringify(savedAreas));
-    renderAdminSimpleTable();
+    Swal.fire({
+        title: 'Hapus Catatan?',
+        text: "Catatan ini hanya akan dihapus dari browser Anda.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            let savedAreas = JSON.parse(localStorage.getItem("admin_areas_simple") || "[]");
+            savedAreas.splice(index, 1);
+            localStorage.setItem("admin_areas_simple", JSON.stringify(savedAreas));
+            renderAdminSimpleTable();
+            
+            Swal.fire({
+                title: 'Dihapus!',
+                icon: 'success',
+                timer: 1000,
+                showConfirmButton: false
+            });
+        }
+    });
 }
 
-// MODAL CONTROLLER
 function openAddAreaModal() { document.getElementById("addAreaModal").classList.add("active"); }
 function closeAddAreaModal() { document.getElementById("addAreaModal").classList.remove("active"); }
