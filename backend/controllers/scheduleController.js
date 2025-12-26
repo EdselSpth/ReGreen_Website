@@ -1,11 +1,28 @@
 const service = require("../services/scheduleService");
 
+//get untuk pagination + serach
 exports.index = async (req, res) => {
   try {
-    const data = await service.getAllSchedules();
-    res.json({ success: true, data });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const search = req.query.search || "";
+
+    const result = await service.getAllSchedules({
+      page,
+      limit,
+      search,
+    });
+
+    res.json({
+      success: true,
+      data: result.data,
+      pagination: result.pagination,
+    });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 

@@ -6,6 +6,15 @@
 
 @section('content')
 <button class="btn-tambah" id="btnTambah">+ Tambah Jadwal</button>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <input
+        type="text"
+        id="searchInput"
+        class="form-control"
+        style="max-width:300px"
+        placeholder="Cari kurir / alamat..."
+    />
+</div>
 
 <div class="table-card">
     <h4 style="font-weight: bold; margin-bottom: 20px;">Daftar Antrean Penjemputan</h4>
@@ -28,6 +37,12 @@
         </div>
     </div>
 </div>
+<div class="d-flex justify-content-end mt-3">
+    <nav>
+        <ul class="pagination" id="pagination"></ul>
+    </nav>
+</div>
+
 @endsection
 
 @section('modal')

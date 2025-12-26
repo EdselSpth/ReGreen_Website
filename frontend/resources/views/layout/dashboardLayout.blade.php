@@ -18,7 +18,7 @@
       Beranda
     </a>
 
-    <a href="#" class="{{ request()->routeIs('pengambilanSampah') ? 'active' : '' }}">
+    <a href="{{ route('schedule')}}" class="{{ request()->routeIs('pengambilanSampah') ? 'active' : '' }}">
       Pengambilan Sampah
     </a>
 
