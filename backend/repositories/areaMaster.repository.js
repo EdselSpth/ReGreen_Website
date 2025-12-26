@@ -23,7 +23,7 @@ async function create({ kecamatan, kelurahan, kota, provinsi, jalan }) {
   const result = await query(
     `INSERT INTO area_terdaftar (kecamatan, kelurahan, kota, provinsi, jalan)
      VALUES (?, ?, ?, ?, ?)`,
-    [kecamatan, kelurahan, kota, provinsi, jalan]  // tambahkan jalan di sini
+    [kecamatan, kelurahan, kota, provinsi, jalan]  
   );
   return findById(result.insertId);
 }
