@@ -7,7 +7,16 @@ DATA BANK SAMPAH
 @endsection
 
 @section('content')
-<button class="btn-tambah">+ Tambah Data</button>
+<div class="table-header">
+  <button class="btn-tambah">+ Tambah Data</button>
+
+  <input 
+    type="text" 
+    id="search-bank" 
+    placeholder="Cari bank sampah..."
+  />
+</div>
+
 
 <div class="table-container">
   <table>
@@ -25,6 +34,13 @@ DATA BANK SAMPAH
     </tbody>
   </table>
 </div>
+
+<div class="table-footer">
+  <div id="info-data"></div>
+
+  <div class="pagination" id="pagination"></div>
+</div>
+
 @endsection
 
 @section('modal')
