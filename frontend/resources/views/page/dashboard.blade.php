@@ -20,7 +20,6 @@
             <div class="section-header">
                 <span class="section-title">Jadwal Pengambilan Sampah</span>
             </div>
-
             <div class="table-container">
                 <table>
                     <thead>
@@ -50,7 +49,6 @@
             <div class="section-header">
                 <span class="section-title">Keuntungan</span>
             </div>
-
             <div class="table-container">
                 <table>
                     <thead>
@@ -66,6 +64,35 @@
                         <tr>
                             <td colspan="5" style="text-align:center;">
                                 Memuat data keuntungan...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- ================= JADWAL MENUNGGU PERSETUJUAN ================= --}}
+        <div class="section-box">
+            <div class="section-header">
+                <span class="section-title">Menunggu Persetujuan</span>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Jalan</th>
+                            <th>Kecamatan</th>
+                            <th>Kota</th>
+                            <th>Kelurahan</th>
+                            <th>Provinsi</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingAreaTable">
+                        <tr>
+                            <td colspan="7" style="text-align:center;">
+                                Memuat data area...
                             </td>
                         </tr>
                     </tbody>
