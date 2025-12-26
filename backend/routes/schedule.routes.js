@@ -4,7 +4,7 @@ const scheduleController = require('../controllers/scheduleController');
 
 router.get('/', scheduleController.index);
 router.post('/', scheduleController.store);
-router.put('/:id', scheduleController.update); // Rute untuk update
+router.put('/:id', scheduleController.update); 
 router.delete('/:id', scheduleController.destroy);
 
 module.exports = router;
