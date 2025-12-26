@@ -12,7 +12,6 @@ class AdminNoteService {
     static async create(data) {
         const { kecamatan, kelurahan } = data;
         return new Promise((resolve, reject) => {
-            // UBAH: Sesuaikan kolom dengan tabel admin_notes (hanya id, kecamatan, kelurahan, created_at)
             const sql = "INSERT INTO admin_notes (kecamatan, kelurahan) VALUES (?, ?)";
             db.query(sql, [kecamatan, kelurahan], (err, res) => {
                 if (err) reject(err);

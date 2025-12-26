@@ -1,5 +1,5 @@
 const API_SCHEDULE = "http://localhost:3000/api/schedule";
- const API_AREA = "http://localhost:3000/api/areaRequests?status=pending"; // Endpoint area
+ const API_AREA = "http://localhost:3000/api/areaRequests?status=pending"; 
 const API_JENIS_SAMPAH = "http://localhost:3000/api/jenisSampah";
 
 let schedules = [];
@@ -20,9 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById("searchInput");
     const paginationEl = document.getElementById("pagination");
 
-    /* =========================
-       LOAD AREA
-    ========================= */
     async function loadAreas(selected = "") {
     const select = document.getElementById("alamat");
     if (!select) return;
@@ -37,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const areas = Array.isArray(json.data) ? json.data : [];
 
         areas.forEach(item => {
-            const a = item.area; // Ambil field area
+            const a = item.area; 
             if (a && a.jalan && a.kelurahan && a.kecamatan && a.kota && a.provinsi) {
                 const value = `${a.jalan}, ${a.kelurahan}, ${a.kecamatan}, ${a.kota}, ${a.provinsi}`;
                 const opt = document.createElement("option");
@@ -54,10 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 }
 
-
-    /* =========================
-       LOAD JENIS SAMPAH (FIXED)
-    ========================= */
     async function loadJenisSampah(selected = "") {
         const select = document.getElementById("waste_type");
         if (!select) return;
@@ -73,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             data.forEach(item => {
                 const opt = document.createElement("option");
-                opt.value = item.nama_jenis;          // 🔹 gunakan nama_jenis
+                opt.value = item.nama_jenis;         
                 opt.textContent = item.nama_jenis.toUpperCase();
 
                 if (item.nama_jenis === selected) {
@@ -87,9 +80,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    /* =========================
-       MODAL TAMBAH
-    ========================= */
     btnTambah.addEventListener("click", async () => {
         form.reset();
         document.getElementById("modalTitle").innerText = "Tambah Jadwal";
@@ -110,9 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btnClose.onclick = hideModal;
     btnBatal.onclick = hideModal;
 
-    /* =========================
-       LOAD SCHEDULE
-    ========================= */
+
     async function loadSchedules() {
         const tbody = document.getElementById("tableBody");
         if (!tbody) return;
@@ -165,9 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    /* =========================
-       PAGINATION
-    ========================= */
+
     function renderPagination() {
         paginationEl.innerHTML = "";
 
@@ -198,9 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loadSchedules();
     };
 
-    /* =========================
-       SEARCH
-    ========================= */
+  
     searchInput.addEventListener("keyup", (e) => {
         if (e.key === "Enter") {
             searchKeyword = e.target.value.trim();
@@ -209,9 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    /* =========================
-       SUBMIT
-    ========================= */
+
     let isSubmitting = false;
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -258,9 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    /* =========================
-       EDIT
-    ========================= */
+
     window.editData = async (id) => {
         const item = schedules.find(s => s.id == id);
         if (!item) return;
@@ -288,9 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.style.display = "flex";
     };
 
-    /* =========================
-       DELETE
-    ========================= */
+
     window.deleteData = async (id) => {
         const confirm = await Swal.fire({
             title: "Yakin ingin menghapus?",

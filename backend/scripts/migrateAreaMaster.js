@@ -1,7 +1,6 @@
-// scripts/migrateAreaMaster.js
-const db = require('../config/db');  // Pastikan path ke file db.js sudah benar
 
-// Query untuk membuat tabel dengan kolom tambahan 'jalan'
+const db = require('../config/db');  
+
 const sql = `
   CREATE TABLE IF NOT EXISTS area_terdaftar (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -14,7 +13,7 @@ const sql = `
   );
 `;
 
-// Jalankan migrasi
+
 db.query(sql, (err) => {
   if (err) {
     console.error("❌ migrate area_terdaftar failed:", err.message);
