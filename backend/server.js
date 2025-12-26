@@ -6,6 +6,8 @@ require("./scripts/migrateArtikel");
 require("./scripts/migrateJenisSampah");
 require("./scripts/migrateSchedule");
 require("./scripts/migrateAreaMaster");
+require("./routes/adminNote.routes")
+
 
 const express = require("express");
 const cors = require("cors");
@@ -28,6 +30,7 @@ app.use("/api/users", require("./routes/users.routes"));
 app.use("/api/schedule", require("./routes/schedule.routes"));
 app.use("/api/areaRequests", require("./routes/areaReq.routes"));
 app.use("/api/areaMaster", require("./routes/areaMaster.routes"));
+app.use("/api/adminNotes", require("./routes/adminNote.routes"));
 
 app.listen(3000, () => {
   console.log("Server running at http://localhost:3000");

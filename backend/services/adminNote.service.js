@@ -1,15 +1,14 @@
 const db = require('../config/db');
 
 class AdminNoteService {
-    static async getAll() {
-        return new Promise((resolve, reject) => {
-            db.query("SELECT * FROM admin_notes ORDER BY created_at DESC", (err, res) => {
-                if (err) reject(err);
-                resolve(res);
-            });
+  static async getAll() {
+    return new Promise((resolve, reject) => {
+        db.query("SELECT * FROM admin_notes ORDER BY created_at DESC LIMIT 10", (err, res) => {
+            if (err) reject(err);
+            resolve(res);
         });
-    }
-
+    });
+}
     static async create(data) {
         const { kecamatan, kelurahan } = data;
         return new Promise((resolve, reject) => {
