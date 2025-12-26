@@ -1,7 +1,12 @@
 const API_SCHEDULE = "http://localhost:3000/api/schedule";
 const API_AREA = "http://localhost:3000/api/areaMaster";
 
+
 let schedules = [];
+let currentPage = 1;
+let totalPage = 1;
+let searchKeyword = "";
+const LIMIT = 5;
 
 document.addEventListener("DOMContentLoaded", () => {
     const modal = document.getElementById("modalTambah");
@@ -12,13 +17,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const alamatInput = document.getElementById("alamat");
     const alamatList = document.getElementById("alamatList");
+    const searchInput = document.getElementById("searchInput");
+    const paginationEl = document.getElementById("pagination");
 
 
     async function loadAreas() {
         alamatList.innerHTML = "";
-        alamatInput.disabled = false;
-        alamatInput.readOnly = false;
-
         try {
             const res = await fetch(API_AREA);
             if (!res.ok) throw new Error("Gagal mengambil area");
@@ -38,12 +42,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    //modal
     btnTambah.addEventListener("click", async () => {
         form.reset();
         document.getElementById("modalTitle").innerText = "Tambah Jadwal";
         document.getElementById("scheduleId").value = "";
         document.getElementById("statusContainer").style.display = "none";
-
         await loadAreas();
         modal.style.display = "flex";
     });
@@ -56,26 +60,31 @@ document.addEventListener("DOMContentLoaded", () => {
     btnClose.onclick = hideModal;
     btnBatal.onclick = hideModal;
 
+    //load schedule untuk pagination
     async function loadSchedules() {
         const tbody = document.getElementById("tableBody");
         if (!tbody) return;
 
         try {
-            const res = await fetch(API_SCHEDULE);
+            const url = `${API_SCHEDULE}?page=${currentPage}&limit=${LIMIT}&search=${searchKeyword}`;
+            const res = await fetch(url);
             const json = await res.json();
-            schedules = Array.isArray(json) ? json : (json.data || []);
+
+            schedules = json.data || [];
+            totalPage = json.pagination?.totalPage || 1;
 
             tbody.innerHTML = "";
 
             if (schedules.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7">Tidak ada data</td></tr>`;
+                paginationEl.innerHTML = "";
                 return;
             }
 
             schedules.forEach((item, i) => {
                 tbody.insertAdjacentHTML("beforeend", `
                     <tr>
-                        <td>${i + 1}</td>
+                        <td>${(currentPage - 1) * LIMIT + i + 1}</td>
                         <td><strong>${item.courier_name}</strong></td>
                         <td style="text-align:left">${item.alamat}</td>
                         <td>${item.date}</td>
@@ -92,18 +101,63 @@ document.addEventListener("DOMContentLoaded", () => {
                     </tr>
                 `);
             });
+
+            renderPagination();
         } catch (err) {
             console.error("Load schedule error:", err);
         }
     }
 
-    loadSchedules();
+    //pagination
+    function renderPagination() {
+        paginationEl.innerHTML = "";
 
+        const createBtn = (label, page, disabled = false, active = false) => `
+            <li class="page-item ${disabled ? "disabled" : ""} ${active ? "active" : ""}">
+                <a class="page-link" href="#" onclick="changePage(${page})">${label}</a>
+            </li>
+        `;
+
+        paginationEl.insertAdjacentHTML(
+            "beforeend",
+            createBtn("Prev", currentPage - 1, currentPage === 1)
+        );
+
+        for (let i = 1; i <= totalPage; i++) {
+            paginationEl.insertAdjacentHTML(
+                "beforeend",
+                createBtn(i, i, false, i === currentPage)
+            );
+        }
+
+        paginationEl.insertAdjacentHTML(
+            "beforeend",
+            createBtn("Next", currentPage + 1, currentPage === totalPage)
+        );
+    }
+
+    window.changePage = function (page) {
+        if (page < 1 || page > totalPage) return;
+        currentPage = page;
+        loadSchedules();
+    };
+
+    //search
+    searchInput.addEventListener("keyup", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            searchKeyword = e.target.value.trim();
+            currentPage = 1;
+            loadSchedules();
+        }
+    });
+
+
+    //submit
     let isSubmitting = false;
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
-
-        if (isSubmitting) return; // 🔒 ANTI DUPLIKAT
+        if (isSubmitting) return;
         isSubmitting = true;
 
         const id = document.getElementById("scheduleId").value;
@@ -134,10 +188,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify(payload)
             });
 
-            const text = await res.text();
-            console.log("STATUS:", res.status);
-            console.log("RESPONSE:", text);
-
             if (!res.ok) {
                 alert("Gagal menyimpan data");
                 return;
@@ -147,9 +197,8 @@ document.addEventListener("DOMContentLoaded", () => {
             loadSchedules();
         } catch (err) {
             console.error(err);
-            alert("Terjadi kesalahan");
         } finally {
-            isSubmitting = false; // 🔓 buka lagi
+            isSubmitting = false;
         }
     });
 
@@ -166,7 +215,6 @@ document.addEventListener("DOMContentLoaded", () => {
         alamatInput.value = item.alamat;
         document.getElementById("date").value = item.date;
         document.getElementById("time").value = item.time;
-
         document.getElementById("statusContainer").style.display = "block";
         document.getElementById("status").value = item.status || "tersedia";
 
@@ -175,12 +223,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.deleteData = async (id) => {
         if (!confirm("Hapus jadwal ini?")) return;
-
-        try {
-            await fetch(`${API_SCHEDULE}/${id}`, { method: "DELETE" });
-            loadSchedules();
-        } catch (err) {
-            console.error("Delete error:", err);
-        }
+        await fetch(`${API_SCHEDULE}/${id}`, { method: "DELETE" });
+        loadSchedules();
     };
+
+
+    loadSchedules();
 });

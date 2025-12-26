@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const API_KEUNTUNGAN = "http://localhost:3000/api/keuntungan";
     const API_AREA = "http://localhost:3000/api/areaMaster"; // Endpoint area
 
-    const scheduleBody = document.getElementById("tableBody");
+    const scheduleBody = document.getElementById("schedule-body");
     const pendingBody = document.getElementById("pending-body");
     const areaBody = document.getElementById("area-body"); // <tbody> untuk daftar area
 
@@ -80,16 +80,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         <span class="badge-yellow">
                             ${(item.status || "tersedia").toUpperCase()}
                         </span>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button onclick="editData('${item.id}')" class="btn-action btn-edit-icon">
-                                <i class="bi bi-pencil"></i> Edit
-                            </button>
-                            <button onclick="deleteData('${item.id}')" class="btn-action btn-delete-icon">
-                                <i class="bi bi-trash"></i> Hapus
-                            </button>
-                        </div>
                     </td>
                 </tr>
             `;

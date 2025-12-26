@@ -4,65 +4,66 @@ const firebaseRepo = require("../repositories/scheduleFirebase.repository");
 
 function mapMysqlToFirebase(mysql) {
   return {
-    alamat: mysql.alamat || "",
+    alamat: mysql.alamat,
     courierName: mysql.courier_name || "",
-    date: mysql.date || "",
-    time: mysql.time || "",
-    wasterType: mysql.waste_type || "",
+    date: mysql.date,
+    time: mysql.time,
+    wasterType: mysql.waste_type || "campuran",
     status: mysql.status || "tersedia",
   };
 }
 
-exports.getAllSchedules = async () => {
-  return await mysqlRepo.getAll();
+//get all untuk mendukung fungsi pagination dan search
+exports.getAllSchedules = async ({ page, limit, search }) => {
+  const result = await mysqlRepo.getPaginated({
+    page,
+    limit,
+    search,
+  });
+
+  return {
+    data: result.data,
+    pagination: {
+      page,
+      limit,
+      total: result.total,
+      totalPage: Math.ceil(result.total / limit),
+    },
+  };
 };
 
+
 exports.createSchedule = async (data) => {
-  if (!data.courier_name || !data.alamat || !data.date || !data.time) {
-    throw new Error("Data tidak lengkap");
+  if (!data.waste_type) {
+    data.waste_type = "campuran";
   }
 
-  const payload = {
-    firebase_uid: data.firebase_uid || "ADMIN_MANUAL",
-    courier_name: data.courier_name,
-    alamat: data.alamat,
-    date: data.date,
-    time: data.time,
-    waste_type: data.waste_type || "campuran",
-    status: data.status || "tersedia",
-  };
-  const firebaseDocId = await firebaseRepo.create(
-    mapMysqlToFirebase(payload)
-  );
+  const firebaseData = mapMysqlToFirebase(data);
+  const firebaseDocId = await firebaseRepo.create(firebaseData);
+
   await mysqlRepo.insert({
-    ...payload,
+    ...data,
     firebase_doc_id: firebaseDocId,
   });
 };
+
 
 exports.updateSchedule = async (id, data) => {
   const existing = await mysqlRepo.findById(id);
   if (!existing) throw new Error("Data tidak ditemukan");
 
+  if (!data.waste_type) {
+    data.waste_type = existing.waste_type || "campuran";
+  }
 
-  const updateData = {
-    courier_name: data.courier_name ?? existing.courier_name,
-    alamat: data.alamat ?? existing.alamat,
-    date: data.date ?? existing.date,
-    time: data.time ?? existing.time,
-    waste_type: data.waste_type ?? existing.waste_type,
-    status: data.status ?? existing.status,
-
-    firebase_uid: existing.firebase_uid,
-  };
-
-  await mysqlRepo.update(id, updateData);
+  await mysqlRepo.update(id, data);
 
   await firebaseRepo.update(
     existing.firebase_doc_id,
-    mapMysqlToFirebase({ ...existing, ...updateData })
+    mapMysqlToFirebase({ ...existing, ...data })
   );
 };
+
 
 exports.deleteSchedule = async (id) => {
   const existing = await mysqlRepo.findById(id);
