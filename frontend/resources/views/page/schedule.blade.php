@@ -26,6 +26,7 @@
                         <th>No</th>
                         <th>Kurir</th>
                         <th style="text-align: left;">Alamat</th>
+                        <th>Jenis Sampah</th>
                         <th>Tanggal</th>
                         <th>Waktu</th>
                         <th>Status</th>
@@ -67,16 +68,18 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Alamat / Area</label>
-                    <input
-                        type="text"
-                        id="alamat"
-                        list="alamatList"
-                        placeholder="Pilih area atau ketik manual"
-                        required
-                    />
-                    <datalist id="alamatList"></datalist>
+                    <label >Alamat</label>
+                    <select id="alamat" required>
+                        <option value="">-- Pilih Alamat --</option>
+                    </select>
                 </div>
+                <div class="form-group">
+                    <label>Jenis Sampah</label>
+                    <select id="waste_type" required>
+                        <option value="">-- Pilih Jenis Sampah --</option>
+                    </select>
+                </div>
+
 
                 <div class="row">
                     <div class="col-md-6 form-group">
