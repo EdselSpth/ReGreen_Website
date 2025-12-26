@@ -8,11 +8,11 @@ Pendaftaran Area
 
 @section('content')
 <div style="margin-bottom: 20px;">
-    <button class="btn-tambah" onclick="openAddAreaModal()">+ Tambah Area</button>
+    <button class="btn-tambah" onclick="openAddAreaModal()">+ Tambah Area Baru</button>
 </div>
 
 <div class="table-container">
-    <h4 style="margin: 15px;">Menunggu Persetujuan</h4>
+    <h4 style="margin: 15px; color: #000000ff;">1. Menunggu Persetujuan (User Baru)</h4>
     <table>
         <thead>
             <tr>
@@ -22,15 +22,16 @@ Pendaftaran Area
                 <th>Kota</th>
                 <th>Kelurahan</th>
                 <th>Provinsi</th>
-                <th>Status</th>
+                <th>Aksi</th>
             </tr>
         </thead>
-        <tbody id="pendingAreaTable"></tbody>
+        <tbody id="pendingAreaTable">
+            </tbody>
     </table>
 </div>
 
 <div class="table-container" style="margin-top: 25px;">
-    <h4 style="margin: 15px;">Riwayat Area</h4>
+    <h4 style="margin: 15px; color: #000000ff;">2. Riwayat Seluruh Area Terdaftar</h4>
     <table>
         <thead>
             <tr>
@@ -43,12 +44,27 @@ Pendaftaran Area
                 <th>Status</th>
             </tr>
         </thead>
-        <tbody id="registeredAreaTable"></tbody>
+        <tbody id="registeredAreaTable">
+            </tbody>
     </table>
 </div>
 
-<!-- Modal Add Area -->
-<!-- Modal Add Area -->
+<div class="table-container" style="margin-top: 25px; border: 1px solid #27ae60;">
+    <h4 style="margin: 15px; color: #000000ff;">3. Catatan Area yang Anda Tambahkan</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Kecamatan</th>
+                <th>Kelurahan</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody id="adminSimpleTable">
+            </tbody>
+    </table>
+</div>
+
 <div id="addAreaModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -79,15 +95,13 @@ Pendaftaran Area
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-aksi btn-batal" onclick="closeAddAreaModal()">Batal</button>
-                    <button type="submit" class="btn-aksi btn-simpan">Simpan</button>
+                    <button type="submit" class="btn-aksi btn-simpan">Simpan Area</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<script src="{{ asset('js/daftarArea.js') }}"></script>
 
 @endsection
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{ asset('js/daftarArea.js') }}"></script>

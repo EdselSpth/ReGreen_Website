@@ -7,15 +7,16 @@ require("./scripts/migrateJenisSampah");
 require("./scripts/migrateSchedule");
 require("./scripts/migrateAreaMaster");
 
-
-
 const express = require("express");
 const cors = require("cors");
 
 const app = express();
 
+
 app.use(cors());
 app.use(express.json());
+
+
 
 app.use("/api/keuntungan", require("./routes/keuntungan.routes"));
 app.use("/api/bankSampah", require("./routes/bankSampah.routes"));
@@ -28,6 +29,6 @@ app.use("/api/schedule", require("./routes/schedule.routes"));
 app.use("/api/areaRequests", require("./routes/areaReq.routes"));
 app.use("/api/areaMaster", require("./routes/areaMaster.routes"));
 
-app.listen(3000 ,() => {
+app.listen(3000, () => {
   console.log("Server running at http://localhost:3000");
 });

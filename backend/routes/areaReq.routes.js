@@ -1,8 +1,8 @@
-// routes/areaReq.routes.js
-const router = require("express").Router();
-const c = require("../controllers/areaReq.controller");
+const express = require('express');
+const router = express.Router();
+const areaReqController = require('../controllers/areaReq.controller');
 
-router.get("/", c.list);
-router.put("/:uid", c.update);
+router.get('/', areaReqController.list);
+router.put("/:uid", areaReqController.update);
 
 module.exports = router;

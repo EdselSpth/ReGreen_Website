@@ -1,10 +1,9 @@
-// routes/areaMaster.routes.js
+
 const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/areaMaster.controller");
 
-// Route untuk meng-approve dan mencatat area
-router.post("/register", controller.create); // Fungsi create untuk mencatat area yang disetujui admin
+router.post("/register", controller.create); 
 router.get("/", controller.list);
 router.get("/:id", controller.getById);
 router.post("/", controller.create);

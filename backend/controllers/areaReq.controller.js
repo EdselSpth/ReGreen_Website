@@ -1,16 +1,19 @@
-// controllers/areaReq.controller.js
 const areaReqSvc = require("../services/areaReq.service");
 const areaMasterSvc = require("../services/areaMaster.service");
 
 exports.list = async (req, res) => {
-  try {
-    const status = req.query.status || "pending";
-    const data = await areaReqSvc.listAreaRequests(status);
-    res.status(200).json(data);
-  } catch (e) {
-    res.status(500).json({ message: e.message });
-  }
+    try {
+        const status = req.query.status || "pending";  // Default status 'pending'
+        const data = await areaReqSvc.listAreaRequests(status);
+        
+        // Mengirimkan data yang diambil dari Firebase ke frontend
+        res.status(200).json({ data });
+    } catch (error) {
+        console.error("Error in area request controller:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
 };
+
 
 exports.update = async (req, res) => {
   try {
@@ -28,7 +31,6 @@ exports.update = async (req, res) => {
       }
 
       try {
-        // Menambahkan area ke areaMaster setelah di-approve
         await areaMasterSvc.create({
           kecamatan: row.area.kecamatan ?? "",
           kelurahan: row.area.kelurahan ?? "",
@@ -37,7 +39,7 @@ exports.update = async (req, res) => {
           jalan: row.area.jalan ?? "",
         });
       } catch (err) {
-        if (err.statusCode !== 409) throw err; // Jika ada duplikat, biarkan
+        if (err.statusCode !== 409) throw err; 
       }
     }
 

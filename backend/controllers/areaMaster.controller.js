@@ -1,4 +1,4 @@
-// controllers/areaMaster.controller.js
+
 const service = require("../services/areaMaster.service");
 
 async function list(req, res, next) {
@@ -19,11 +19,10 @@ async function getById(req, res, next) {
   }
 }
 
-// Fungsi untuk mencatat area yang disetujui admin
 async function create(req, res, next) {
   try {
     const payload = req.body || {};
-    const row = await service.create(payload); // Pastikan ada nama jalan di payload
+    const row = await service.create(payload); 
     res.status(201).json(row);
   } catch (err) {
     next(err);
