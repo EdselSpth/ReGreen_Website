@@ -1,16 +1,18 @@
 const API_URL = "http://localhost:3000/api";
 
 document.addEventListener("DOMContentLoaded", () => {
-    loadPending();      // Tabel 1
-    loadRegistered();   // Tabel 2
-    renderAdminSimpleTable(); // Tabel 3
+    loadPending();      // Tabel 1 (Dari Database)
+    loadRegistered();   // Tabel 2 (Dari Database)
+    renderAdminSimpleTable(); // Tabel 3 (Hanya LocalStorage)
 });
 
+// TABEL 1: Menunggu Persetujuan
 async function loadPending() {
     try {
         const res = await fetch(`${API_URL}/areaRequests?status=pending`);
         const result = await res.json();
         const table = document.getElementById("pendingAreaTable");
+        if(!table) return;
         table.innerHTML = "";
 
         if (result.data && result.data.length > 0) {
@@ -35,11 +37,13 @@ async function loadPending() {
     } catch (e) { console.error("Error Tabel 1:", e); }
 }
 
+// TABEL 2: Riwayat Seluruh Area (Database Murni)
 async function loadRegistered() {
     try {
         const res = await fetch(`${API_URL}/areaMaster`);
         const data = await res.json();
         const table = document.getElementById("registeredAreaTable");
+        if(!table) return;
         table.innerHTML = "";
 
         if (data && data.length > 0) {
@@ -59,9 +63,10 @@ async function loadRegistered() {
     } catch (e) { console.error("Error Tabel 2:", e); }
 }
 
-
+// TABEL 3: Catatan Admin (Hanya di Browser)
 function renderAdminSimpleTable() {
     const table = document.getElementById("adminSimpleTable");
+    if(!table) return;
     const savedAreas = JSON.parse(localStorage.getItem("admin_areas_simple") || "[]");
 
     table.innerHTML = "";
@@ -77,43 +82,40 @@ function renderAdminSimpleTable() {
                 <td><strong>${area.kecamatan}</strong></td>
                 <td>${area.kelurahan}</td>
                 <td>
-                    <button onclick="deleteLocalArea(${i})" style="color:red; cursor:pointer; border:none; background:none;">Hapus</button>
+                    <button onclick="deleteLocalArea(${i})" style="color:red; cursor:pointer; border:none; background:none; font-weight:bold;">Hapus</button>
                 </td>
             </tr>`;
     });
 }
 
-
-document.getElementById("addAreaForm").onsubmit = async (e) => {
+// LOGIKA SIMPAN: Sekarang HANYA ke LocalStorage agar Tabel 2 tidak terisi data admin
+document.getElementById("addAreaForm").onsubmit = (e) => {
     e.preventDefault();
+    
+    // Ambil data input
     const payload = {
         kecamatan: document.getElementById("kecamatan").value,
-        kelurahan: document.getElementById("kelurahan").value,
-        kota: document.getElementById("kota").value,
-        provinsi: document.getElementById("provinsi").value,
-        jalan: document.getElementById("jalan").value,
+        kelurahan: document.getElementById("kelurahan").value
     };
 
-    const res = await fetch(`${API_URL}/areaMaster`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    });
+    // Simpan ke LocalStorage
+    let savedAreas = JSON.parse(localStorage.getItem("admin_areas_simple") || "[]");
+    savedAreas.unshift(payload);
+    localStorage.setItem("admin_areas_simple", JSON.stringify(savedAreas));
 
-    if (res.ok) {
-        
-        let savedAreas = JSON.parse(localStorage.getItem("admin_areas_simple") || "[]");
-        savedAreas.unshift(payload);
-        localStorage.setItem("admin_areas_simple", JSON.stringify(savedAreas));
-
-        alert("Berhasil Menambahkan Area!");
-        closeAddAreaModal();
-        renderAdminSimpleTable(); // Update Tabel 3
-        
-    }
+    alert("Berhasil disimpan ke Catatan Admin!");
+    
+    // Reset dan Tutup
+    document.getElementById("addAreaForm").reset();
+    closeAddAreaModal();
+    
+    // Render Tabel 3 saja
+    renderAdminSimpleTable(); 
+    
+    // CATATAN: loadRegistered() sengaja tidak dipanggil agar Tabel 2 tetap bersih dari data ini.
 };
 
-
+// PROSES APPROVE / REJECT
 async function processAction(uid, action) {
     if (!confirm(`Yakin ingin ${action}?`)) return;
     try {
@@ -125,18 +127,19 @@ async function processAction(uid, action) {
         if (res.ok) {
             alert("Status diperbarui!");
             loadPending();    
-            loadRegistered(); 
+            loadRegistered(); // Tabel 2 update jika ada data dari User yang di-approve
         }
     } catch (e) { alert("Gagal proses data"); }
 }
 
 function deleteLocalArea(index) {
+    if(!confirm("Hapus catatan ini?")) return;
     let savedAreas = JSON.parse(localStorage.getItem("admin_areas_simple") || "[]");
     savedAreas.splice(index, 1);
     localStorage.setItem("admin_areas_simple", JSON.stringify(savedAreas));
     renderAdminSimpleTable();
 }
 
-
+// MODAL CONTROLLER
 function openAddAreaModal() { document.getElementById("addAreaModal").classList.add("active"); }
 function closeAddAreaModal() { document.getElementById("addAreaModal").classList.remove("active"); }

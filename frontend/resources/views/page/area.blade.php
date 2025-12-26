@@ -81,18 +81,6 @@ Pendaftaran Area
                     <label>Kelurahan</label>
                     <input type="text" id="kelurahan" placeholder="Masukkan kelurahan" required>
                 </div>
-                <div class="form-group">
-                    <label>Kota</label>
-                    <input type="text" id="kota" placeholder="Masukkan kota" required>
-                </div>
-                <div class="form-group">
-                    <label>Provinsi</label>
-                    <input type="text" id="provinsi" placeholder="Masukkan provinsi" required>
-                </div>
-                <div class="form-group">
-                    <label>Jalan</label>
-                    <input type="text" id="jalan" placeholder="Masukkan nama jalan" required>
-                </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-aksi btn-batal" onclick="closeAddAreaModal()">Batal</button>
                     <button type="submit" class="btn-aksi btn-simpan">Simpan Area</button>
