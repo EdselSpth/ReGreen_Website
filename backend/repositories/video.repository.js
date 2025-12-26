@@ -1,10 +1,11 @@
 const db = require("../config/db");
 
 class VideoRepository {
-  static findAll() {
+  static findAll(limit = 10, offset = 0) {
     return new Promise((resolve, reject) => {
-      const sql = "SELECT * FROM video ORDER BY nama_video DESC";
-      db.query(sql, (err, rows) => {
+      const sql =
+        "SELECT * FROM video ORDER BY nama_video DESC LIMIT ? OFFSET ?";
+      db.query(sql, [limit, offset], (err, rows) => {
         if (err) reject(err);
         else resolve(rows);
       });
@@ -32,17 +33,21 @@ class VideoRepository {
       `;
       const searchKeyword = `%${keyword}%`;
 
-      db.query(sql, [searchKeyword, limit, offset], (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
+      // PERBAIKAN: Kirim searchKeyword DUA KALI karena ada 2 LIKE di SQL
+      db.query(
+        sql,
+        [searchKeyword, searchKeyword, limit, offset],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        }
+      );
     });
   }
 
   static countSearch(keyword) {
     return new Promise((resolve, reject) => {
-      const sql =
-        "SELECT COUNT(*) as total FROM video WHERE nama_video LIKE ?";
+      const sql = "SELECT COUNT(*) as total FROM video WHERE nama_video LIKE ?";
       const searchKeyword = `%${keyword}%`;
 
       db.query(sql, [searchKeyword], (err, rows) => {
