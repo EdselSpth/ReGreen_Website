@@ -1,15 +1,17 @@
 const db = require("../config/db");
 
 class ArtikelRepository {
-  static findAll() {
+  static findAll(limit = 10, offset = 0) {
     return new Promise((resolve, reject) => {
-      const sql = "SELECT * FROM artikel ORDER BY nama_artikel DESC";
-      db.query(sql, (err, rows) => {
+      const sql =
+        "SELECT * FROM artikel ORDER BY nama_artikel DESC LIMIT ? OFFSET ?";
+      db.query(sql, [limit, offset], (err, rows) => {
         if (err) reject(err);
         else resolve(rows);
       });
     });
   }
+  
   static countAll() {
     return new Promise((resolve, reject) => {
       const sql = "SELECT COUNT(*) as total FROM artikel";
@@ -22,8 +24,9 @@ class ArtikelRepository {
 
   static searchEngine(keyword, limit = 10, offset = 0) {
     return new Promise((resolve, reject) => {
+      // PERBAIKAN: Kolom diganti jadi milik artikel (bukan video)
       const sql = `
-        SELECT id, nama_video, link_youtube, deskripsi
+        SELECT id, nama_artikel, file_pdf
         FROM artikel
         WHERE nama_artikel LIKE ? OR file_pdf LIKE ?
         ORDER BY nama_artikel ASC
@@ -31,16 +34,22 @@ class ArtikelRepository {
       `;
       const searchKeyword = `%${keyword}%`;
 
-      db.query(sql, [searchKeyword, limit, offset], (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
+      // PERBAIKAN: Masukkan searchKeyword dua kali
+      db.query(
+        sql,
+        [searchKeyword, searchKeyword, limit, offset],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        }
+      );
     });
   }
 
   static countSearch(keyword) {
     return new Promise((resolve, reject) => {
-      const sql = "SELECT COUNT(*) as total FROM artikel WHERE nama_artikel LIKE ?";
+      const sql =
+        "SELECT COUNT(*) as total FROM artikel WHERE nama_artikel LIKE ?";
       const searchKeyword = `%${keyword}%`;
 
       db.query(sql, [searchKeyword], (err, rows) => {

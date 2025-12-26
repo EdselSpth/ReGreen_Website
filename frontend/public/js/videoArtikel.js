@@ -70,12 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function renderVideoPagination(pagination) {
-        if (!pagination) return;
-        videoPageInfo.innerText = `Total: ${pagination.totalItems}`;
-        videoPagination.innerHTML = "";
-    }
-
     function renderVideoTable(data, page) {
         videoBody.innerHTML = "";
         if (!data || data.length === 0) {
@@ -85,16 +79,16 @@ document.addEventListener("DOMContentLoaded", () => {
         data.forEach((item, index) => {
             const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td>${(page - 1) * ITEMS_PER_PAGE + index + 1}</td>
-                <td>${item.nama_video}</td>
-                <td><a href="${
-                    item.link_youtube
-                }" target="_blank">Lihat Video</a></td>
-                <td>${item.deskripsi || "-"}</td>
-                <td><button class="btn-aksi btn-hapus" data-id="${
-                    item.id
-                }">🗑️ Hapus</button></td>
-            `;
+            <td>${(page - 1) * ITEMS_PER_PAGE + index + 1}</td>
+            <td>${item.nama_video}</td>
+            <td><a href="${
+                item.link_youtube
+            }" target="_blank">Lihat Video</a></td>
+            <td>${item.deskripsi || "-"}</td>
+            <td><button class="btn-aksi btn-hapus" data-id="${
+                item.id
+            }">🗑️ Hapus</button></td>
+        `;
             videoBody.appendChild(tr);
         });
     }
@@ -102,6 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderVideoPagination(pagination) {
         if (!pagination) return;
         const { currentPage, totalPages, totalItems } = pagination;
+
         videoPageInfo.innerText = `Halaman ${currentPage} dari ${totalPages} (Total: ${totalItems})`;
         videoPagination.innerHTML = "";
 
@@ -109,16 +104,20 @@ document.addEventListener("DOMContentLoaded", () => {
         btnPrev.textContent = "Previous";
         btnPrev.disabled = currentPage === 1;
         btnPrev.onclick = () => {
-            videoPage--;
-            loadVideo();
+            if (currentPage > 1) {
+                videoPage = currentPage - 1; // <-- update page
+                loadVideo();
+            }
         };
 
         const btnNext = document.createElement("button");
         btnNext.textContent = "Next";
         btnNext.disabled = currentPage === totalPages || totalPages === 0;
         btnNext.onclick = () => {
-            videoPage++;
-            loadVideo();
+            if (currentPage < totalPages) {
+                videoPage = currentPage + 1; // <-- update page
+                loadVideo();
+            }
         };
 
         videoPagination.appendChild(btnPrev);

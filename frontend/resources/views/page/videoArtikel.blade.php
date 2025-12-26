@@ -11,7 +11,7 @@
         <div class="page-content">
 
             <!-- ================= VIDEO ================= -->
-            <div class="header-tools" style="display:flex; justify-content:space-between; margin-bottom:16px;">
+            <div class="header-tools">
                 <button class="btn-tambah" id="btnTambahVideo">+ Tambah Video</button>
                 <form id="form-search-video" class="search-box">
                     <input type="text" id="search-video-input" placeholder="Cari Video..." autocomplete="off">
@@ -45,8 +45,7 @@
             </div>
 
             <!-- ================= ARTIKEL ================= -->
-            <div class="header-tools"
-                style="display:flex; justify-content:space-between; margin-top:24px; margin-bottom:16px;">
+            <div class="header-tools" style="margin-top: 30px;">
                 <button class="btn-tambah" id="btnTambahArtikel">+ Tambah Artikel</button>
                 <form id="form-search-artikel" class="search-box">
                     <input type="text" id="search-artikel-input" placeholder="Cari Artikel..." autocomplete="off">
