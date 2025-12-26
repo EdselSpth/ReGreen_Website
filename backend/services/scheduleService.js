@@ -2,16 +2,17 @@ const mysqlRepo = require("../repositories/scheduleRepository");
 const firebaseRepo = require("../repositories/scheduleFirebase.repository");
 
 
-function mapMysqlToFirebase(mysql) {
+function mapMysqlToFirebase(data) {
   return {
-    alamat: mysql.alamat,
-    courierName: mysql.courier_name || "",
-    date: mysql.date,
-    time: mysql.time,
-    wasterType: mysql.waste_type || "campuran",
-    status: mysql.status || "tersedia",
+    alamat: data.alamat,
+    courier_name: data.courier_name || "",
+    date: data.date,
+    time: data.time,
+    waste_type: data.waste_type || "campuran",
+    status: data.status || "tersedia",
   };
 }
+
 
 //get all untuk mendukung fungsi pagination dan search
 exports.getAllSchedules = async ({ page, limit, search }) => {
@@ -34,35 +35,35 @@ exports.getAllSchedules = async ({ page, limit, search }) => {
 
 
 exports.createSchedule = async (data) => {
-  if (!data.waste_type) {
-    data.waste_type = "campuran";
-  }
+  if (!data.waste_type) data.waste_type = "campuran";
 
-  const firebaseData = mapMysqlToFirebase(data);
-  const firebaseDocId = await firebaseRepo.create(firebaseData);
+  const mysqlId = await mysqlRepo.insert(data);
 
-  await mysqlRepo.insert({
-    ...data,
-    firebase_doc_id: firebaseDocId,
-  });
+  const firebaseDocId = await firebaseRepo.create(
+    mapMysqlToFirebase(data)
+  );
+
+  await mysqlRepo.update(mysqlId, { firebase_doc_id: firebaseDocId });
 };
+
 
 
 exports.updateSchedule = async (id, data) => {
   const existing = await mysqlRepo.findById(id);
   if (!existing) throw new Error("Data tidak ditemukan");
 
-  if (!data.waste_type) {
-    data.waste_type = existing.waste_type || "campuran";
+  const merged = { ...existing, ...data };
+
+  await mysqlRepo.update(id, merged);
+
+  if (existing.firebase_doc_id) {
+    await firebaseRepo.update(
+      existing.firebase_doc_id,
+      mapMysqlToFirebase(merged)
+    );
   }
-
-  await mysqlRepo.update(id, data);
-
-  await firebaseRepo.update(
-    existing.firebase_doc_id,
-    mapMysqlToFirebase({ ...existing, ...data })
-  );
 };
+
 
 
 exports.deleteSchedule = async (id) => {
