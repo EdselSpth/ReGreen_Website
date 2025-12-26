@@ -137,7 +137,14 @@ td {
 
 .btn-simpan {
     background-color: var(--hijau-tua-regreen);
+    z-index: 10;
 }
+
+#pendingAreaTable {
+    position: relative;
+    z-index: 10;
+}
+
 
 .btn-batal {
     background-color: var(--merah-hapus);

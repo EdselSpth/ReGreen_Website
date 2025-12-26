@@ -12,7 +12,7 @@
         <img src="{{ asset('assets/logo-regreen-with-text.png') }}" alt="ReGreen Logo" class="logo">
         <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">Beranda</a>
         <a href="#" class="{{ request()->routeIs('pengambilanSampah') ? 'active' : '' }}">Pengambilan Sampah</a>
-        <a href="#" class="{{ request()->routeIs('pendaftaranArea') ? 'active' : '' }}">Pendaftaran Area</a>
+        <a href="{{ route('pendaftaranArea') }}" class="{{ request()->routeIs('pendaftaranArea') ? 'active' : '' }}">Pendaftaran Area</a>
         <a href="{{ route('keuntungan') }}" class="{{ request()->routeIs('keuntungan') ? 'active' : '' }}">Keuntungan</a>
         <a href="{{ route('bankSampah') }}" class="{{ request()->routeIs('bankSampah') ? 'active' : '' }}">Data Bank Sampah</a>
         <a href="{{ route('kelolaAkun') }}" class="{{ request()->routeIs('kelolaAkun') ? 'active' : '' }}">Kelola Akun</a>
@@ -34,7 +34,9 @@
         </div>
     </div>
 </div>
+
 @yield('modal')
+
 <script src="{{ asset('js/daftarArea.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
