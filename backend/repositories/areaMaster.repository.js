@@ -1,7 +1,7 @@
 const { query } = require("../utils/dbQuery");
 
 async function findAll() {
-  const rows = await query("SELECT * FROM area_terdaftar ORDER BY id DESC");
+  const rows = await query("SELECT * FROM area_terdaftar ORDER BY id DESC LIMIT 10");
   return rows;
 }
 
