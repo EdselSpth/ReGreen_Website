@@ -1,8 +1,33 @@
 const VideoRepository = require("../repositories/video.repository");
 
 class VideoService {
-  static async getAll() {
-    return await VideoRepository.findAll();
+  static async getAll(searchKeyword, page, limit) {
+    const currentPage = parseInt(page) || 1;
+    const itemsPerPage = parseInt(limit) || 10;
+    const offset = (currentPage - 1) * itemsPerPage;
+
+    let videos;
+    let totalItems;
+
+    if (searchKeyword) {
+      videos = await VideoRepository.searchEngine(searchKeyword, itemsPerPage, offset);
+      totalItems = await VideoRepository.countSearch(searchKeyword);
+    } else {
+      videos = await VideoRepository.findAll(itemsPerPage, offset);
+      totalItems = await VideoRepository.countAll();
+    }
+
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    return {
+      data: videos,
+      pagination: {
+        currentPage,
+        itemsPerPage,
+        totalItems,
+        totalPages,
+      },
+    };
   }
 
   static async getById(id) {

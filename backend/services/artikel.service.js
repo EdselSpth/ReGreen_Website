@@ -1,8 +1,33 @@
 const ArtikelRepository = require("../repositories/artikel.repository");
 
 class ArtikelService {
-  static async getAll() {
-    return await ArtikelRepository.findAll();
+  static async getAll(searchKeyword, page, limit) {
+    const currentPage = parseInt(page) || 1;
+    const itemsPerPage = parseInt(limit) || 10;
+    const offset = (currentPage - 1) * itemsPerPage;
+
+    let artikels;
+    let totalItems;
+
+    if (searchKeyword) {
+      artikels = await ArtikelRepository.searchEngine(searchKeyword, itemsPerPage, offset);
+      totalItems = await ArtikelRepository.countSearch(searchKeyword);
+    } else {
+      artikels = await ArtikelRepository.findAll(itemsPerPage, offset);
+      totalItems = await ArtikelRepository.countAll();
+    }
+
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    return {
+      data: artikels,
+      pagination: {
+        currentPage,
+        itemsPerPage,
+        totalItems,
+        totalPages,
+      },
+    };
   }
 
   static async getById(id) {

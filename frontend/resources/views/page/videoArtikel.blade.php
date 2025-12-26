@@ -38,18 +38,19 @@
                         </tr>
                     </tbody>
                 </table>
-                <div id="video-pagination" class="pagination"></div>
+                <!-- Page info -->
+                <div id="video-page-info" style="margin-top:8px; font-size:14px; color:#555;"></div>
+                <div id="video-pagination" class="pagination" style="margin-top:4px;"></div>
             </div>
 
-
             <!-- ================= ARTIKEL ================= -->
-
             <div class="header-tools"
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <button class="btn-tambah" id="btnTambahArtikel">+ Tambah Artikel</button>
 
-                <form id="form-search-video" class="search-box">
-                    <input type="text" id="search-video-input" placeholder="Cari Artikel..." autocomplete="off">
+                <!-- Form search untuk artikel harus unik -->
+                <form id="form-search-artikel" class="search-box">
+                    <input type="text" id="search-artikel-input" placeholder="Cari Artikel..." autocomplete="off">
                     <button type="submit">Cari</button>
                 </form>
             </div>
@@ -70,7 +71,9 @@
                         </tr>
                     </tbody>
                 </table>
-                <div id="artikel-pagination" class="pagination"></div>
+                <!-- Page info -->
+                <div id="artikel-page-info" style="margin-top:8px; font-size:14px; color:#555;"></div>
+                <div id="artikel-pagination" class="pagination" style="margin-top:4px;"></div>
             </div>
 
         </div>
@@ -135,7 +138,9 @@
             </div>
         </div>
     </div>
+@endsection
 
-    <script src="{{ asset('js/videoArtikel.js') }}"></script>
+@section('script')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('js/videoArtikel.js') }}"></script>
 @endsection
