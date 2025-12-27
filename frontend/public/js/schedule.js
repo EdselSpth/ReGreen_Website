@@ -123,7 +123,7 @@ async function loadAreas(selected = "") {
             tbody.innerHTML = "";
 
             if (schedules.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8">Tidak ada data</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center">Tidak ada data</td></tr>`;
                 paginationEl.innerHTML = "";
                 return;
             }
@@ -132,15 +132,15 @@ async function loadAreas(selected = "") {
                 tbody.insertAdjacentHTML("beforeend", `
                     <tr>
                         <td>${(currentPage - 1) * LIMIT + i + 1}</td>
-                        <td><strong>${item.courier_name}</strong></td>
-                        <td style="text-align:left">${item.alamat}</td>
-                        <td>${item.date}</td>
-                        <td><div class="time-box-ui">${item.time}</div></td>
+                        <td><strong>${item.courier_name || "-"}</strong></td>
+                        <td style="text-align:left">${item.alamat || "-"}</td>
                         <td>
                             <span class="badge-green">
                                 ${(item.waste_type || "campuran").toUpperCase()}
                             </span>
                         </td>
+                        <td>${item.date}</td>
+                        <td><div class="time-box-ui">${item.time}</div></td>
                         <td>
                             <span class="badge-yellow">
                                 ${(item.status || "tersedia").toUpperCase()}
