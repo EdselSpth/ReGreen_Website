@@ -6,6 +6,7 @@ require("./scripts/migrateArtikel");
 require("./scripts/migrateJenisSampah");
 require("./scripts/migrateSchedule");
 require("./scripts/migrateAreaMaster");
+require("./scripts/migrateAdminNotes")
 require("./routes/adminNote.routes")
 
 
