@@ -1,16 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
     const loading = document.getElementById("loading-overlay");
 
-    /* =====================
-        API
-    ====================== */
     const API_SCHEDULE = "http://localhost:3000/api/schedule";
     const API_KEUNTUNGAN = "http://localhost:3000/api/keuntungan";
-    const API_AREA = "http://localhost:3000/api/areaRequests?status=pending"; // Endpoint area
+    const API_AREA = "http://localhost:3000/api/areaRequests?status=pending";
 
     const scheduleBody = document.getElementById("schedule-body");
     const pendingBody = document.getElementById("pending-body");
-    const areaBody = document.getElementById("pendingAreaTable"); // <tbody> untuk daftar area
+    const areaBody = document.getElementById("pendingAreaTable"); 
 
     function showLoading() {
         loading?.classList.add("active");
@@ -20,16 +17,11 @@ document.addEventListener("DOMContentLoaded", () => {
         loading?.classList.remove("active");
     }
 
-    /* =====================
-        LOAD DATA
-    ====================== */
     loadSchedules();
     loadPending();
-    loadAreas(); // Load area saat halaman siap
+    loadAreas();
 
-    /* =====================
-        SCHEDULE
-    ====================== */
+
     async function loadSchedules() {
         if (!scheduleBody) return;
 
@@ -87,9 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* =====================
-        KEUNTUNGAN (PENDING)
-    ====================== */
     async function loadPending() {
         try {
             const res = await fetch(API_KEUNTUNGAN);
@@ -165,12 +154,8 @@ async function loadAreas() {
         console.error("Gagal load area:", err);
     }
 }
-    /* =====================
-        GLOBAL FUNCTIONS
-    ====================== */
     window.editData = (id) => {
         console.log("Edit schedule ID:", id);
-        // logic edit modal tetap pakai kode jadwal
     };
 
     window.deleteData = async (id) => {

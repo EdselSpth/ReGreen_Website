@@ -24,12 +24,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let dataKategori = [];
 
-    // ===================== LOADING =====================
+    //LOADING
     const loadingOverlay = document.getElementById("loading-overlay");
     const showLoading = () => loadingOverlay?.classList.add("active");
     const hideLoading = () => loadingOverlay?.classList.remove("active");
 
-    // ===================== SEARCH =====================
+    //SEARCH
     if (formSearch) {
         formSearch.addEventListener("submit", (e) => {
             e.preventDefault();
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ===================== LOAD DATA =====================
+    //LOAD DATA
     async function loadKategori() {
         try {
             showLoading();
@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ===================== PAGINATION =====================
+    //PAGINATION
     function renderPagination(pagination) {
         if (!pagination) return;
         const { currentPage, totalPages, totalItems } = pagination;
@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
         paginationContainer.appendChild(btnNext);
     }
 
-    // ===================== MODAL HANDLER =====================
+    //MODAL
     function openModal(modal) {
         modal.classList.add("active");
     }
@@ -140,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
             closeAllModals();
     });
 
-    // ===================== CREATE =====================
+    //CREATE
     formTambah?.addEventListener("submit", async (e) => {
         e.preventDefault();
         const namaBaru = document.getElementById("tambah-nama").value.trim();
@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("tambah-harga").value
         );
 
-        // ===== CEK DUPLIKAT =====
+        //DUPLIKAT
         const duplicate = dataKategori.find(
             (k) => k.nama_jenis.toLowerCase() === namaBaru.toLowerCase()
         );
@@ -171,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     });
 
-    // ===================== EDIT =====================
+    //EDIT
     tableBody.addEventListener("click", (e) => {
         const id = e.target.dataset.id;
         if (!id) return;
@@ -240,6 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    //DELETE
     async function deleteKategori(id) {
         const confirm = await Swal.fire({
             title: "Yakin?",
@@ -268,6 +269,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // INIT LOAD
+    //INIT
     loadKategori();
 });

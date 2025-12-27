@@ -5,13 +5,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const API_ARTIKEL = "http://localhost:3000/api/artikel";
     const ITEMS_PER_PAGE = 2;
 
-    // ===================== STATE =====================
+    //STATE
     let videoPage = 1;
     let artikelPage = 1;
     let videoSearch = "";
     let artikelSearch = "";
 
-    // ===================== ELEMENTS =====================
+    //ELEMEN
     const videoBody = document.getElementById("video-body");
     const artikelBody = document.getElementById("artikel-body");
 
@@ -26,16 +26,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalEditVideo = document.getElementById("modal-edit-video");
     const modalEditArtikel = document.getElementById("modal-edit-artikel");
 
-    // === FORM EDIT VIDEO ===
     const editNamaVideo = document.getElementById("edit-nama-video");
     const editLinkVideo = document.getElementById("edit-link-video");
     const editDeskripsi = document.getElementById("edit-deskripsi");
 
-    // === FORM EDIT ARTIKEL ===
     const editNamaArtikel = document.getElementById("edit-nama-artikel");
     const editLinkArtikel = document.getElementById("edit-link-artikel");
 
-    // ===================== MODAL =====================
+    //MODAL
     const openModal = (modal) => modal?.classList.add("active");
     const closeModal = (modal) => modal?.classList.remove("active");
 
@@ -56,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .getElementById("btnTambahArtikel")
         ?.addEventListener("click", () => openModal(modalTambahArtikel));
 
-    // ===================== LOAD VIDEO =====================
+    //LOAD VIDEO
     async function loadVideo() {
         const url = `${API_VIDEO}?page=${videoPage}&limit=${ITEMS_PER_PAGE}&search=${encodeURIComponent(
             videoSearch
@@ -133,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
         videoPagination.append(prev, next);
     }
 
-    // ===================== LOAD ARTIKEL =====================
+    //LOAD ARTIKEL
     async function loadArtikel() {
         const url = `${API_ARTIKEL}?page=${artikelPage}&limit=${ITEMS_PER_PAGE}&search=${encodeURIComponent(
             artikelSearch
@@ -208,7 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
         artikelPagination.append(prev, next);
     }
 
-    // ===================== SEARCH =====================
+    //SEARCH
     document
         .getElementById("form-search-video")
         ?.addEventListener("submit", (e) => {
@@ -231,7 +229,7 @@ document.addEventListener("DOMContentLoaded", () => {
             loadArtikel();
         });
 
-    // ===================== HANDLE REQUEST =====================
+    //REQ HANDLER
     async function handleRequest(
         url,
         method,
@@ -262,7 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ===================== ADD =====================
+    //CREATE
     document
         .getElementById("form-tambah-video")
         ?.addEventListener("submit", (e) => {
@@ -285,7 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 modalTambahVideo,
                 () => {
                     loadVideo();
-                    e.target.reset(); // reset form
+                    e.target.reset(); 
                 }
             );
         });
@@ -315,7 +313,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
         });
 
-    // ===================== EDIT =====================
+    //EDIT
     videoBody.addEventListener("click", (e) => {
         const btn = e.target.closest(".btn-edit-video");
         if (!btn) return;
@@ -380,7 +378,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
         });
 
-    // ===================== DELETE =====================
+    // DELETE
     videoBody.addEventListener("click", async (e) => {
         const btn = e.target.closest(".btn-hapus");
         if (!btn) return;
@@ -427,7 +425,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
     });
 
-    // ===================== INIT =====================
+    // INIT
     loadVideo();
     loadArtikel();
 });

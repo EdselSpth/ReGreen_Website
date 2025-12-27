@@ -33,7 +33,6 @@ class VideoRepository {
       `;
       const searchKeyword = `%${keyword}%`;
 
-      // PERBAIKAN: Kirim searchKeyword DUA KALI karena ada 2 LIKE di SQL
       db.query(
         sql,
         [searchKeyword, searchKeyword, limit, offset],

@@ -7,15 +7,11 @@
 @endsection
 
 @section('content')
-
-    {{-- ================= LOADING OVERLAY ================= --}}
     <div id="loading-overlay" class="loading-overlay">
         <div class="loader"></div>
     </div>
 
     <div class="dashboard-grid">
-
-        {{-- ================= JADWAL PENGAMBILAN ================= --}}
         <div class="section-box">
             <div class="section-header">
                 <span class="section-title">Jadwal Pengambilan Sampah</span>
@@ -44,7 +40,6 @@
             </div>
         </div>
 
-        {{-- ================= KEUNTUNGAN ================= --}}
         <div class="section-box">
             <div class="section-header">
                 <span class="section-title">Keuntungan</span>
@@ -71,7 +66,6 @@
             </div>
         </div>
 
-        {{-- ================= JADWAL MENUNGGU PERSETUJUAN ================= --}}
         <div class="section-box">
             <div class="section-header">
                 <span class="section-title">Menunggu Persetujuan</span>
@@ -102,7 +96,6 @@
 
     </div>
 
-    {{-- ================= SCRIPT ================= --}}
     <script src="{{ asset('js/dashboard.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

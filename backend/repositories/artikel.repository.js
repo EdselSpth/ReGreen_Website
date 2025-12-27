@@ -24,7 +24,6 @@ class ArtikelRepository {
 
   static searchEngine(keyword, limit = 10, offset = 0) {
     return new Promise((resolve, reject) => {
-      // PERBAIKAN: Kolom diganti jadi milik artikel (bukan video)
       const sql = `
         SELECT id, nama_artikel, file_pdf
         FROM artikel
@@ -34,7 +33,6 @@ class ArtikelRepository {
       `;
       const searchKeyword = `%${keyword}%`;
 
-      // PERBAIKAN: Masukkan searchKeyword dua kali
       db.query(
         sql,
         [searchKeyword, searchKeyword, limit, offset],
