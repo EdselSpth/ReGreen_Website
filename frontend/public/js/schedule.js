@@ -1,5 +1,5 @@
 const API_SCHEDULE = "http://localhost:3000/api/schedule";
- const API_AREA = "http://localhost:3000/api/areaRequests?status=pending"; 
+const API_AREA = "http://localhost:3000/api/areaMaster";
 const API_JENIS_SAMPAH = "http://localhost:3000/api/jenisSampah";
 
 let schedules = [];
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById("searchInput");
     const paginationEl = document.getElementById("pagination");
 
-    async function loadAreas(selected = "") {
+async function loadAreas(selected = "") {
     const select = document.getElementById("alamat");
     if (!select) return;
 
@@ -30,19 +30,26 @@ document.addEventListener("DOMContentLoaded", () => {
         const res = await fetch(API_AREA);
         if (!res.ok) throw new Error("Gagal mengambil area");
 
-        const json = await res.json();
-        const areas = Array.isArray(json.data) ? json.data : [];
+        const data = await res.json();
+        
+        // Memastikan data adalah array (MySQL areaMaster biasanya return array langsung)
+        const areas = Array.isArray(data) ? data : (data.data || []);
 
         areas.forEach(item => {
-            const a = item.area; 
-            if (a && a.jalan && a.kelurahan && a.kecamatan && a.kota && a.provinsi) {
-                const value = `${a.jalan}, ${a.kelurahan}, ${a.kecamatan}, ${a.kota}, ${a.provinsi}`;
+            // Cek struktur MySQL (item.jalan) atau Firebase (item.area.jalan)
+            const jalan = item.jalan || item.area?.jalan || "";
+            const kelurahan = item.kelurahan || item.area?.kelurahan || "";
+            const kecamatan = item.kecamatan || item.area?.kecamatan || "";
+            const kota = item.kota || item.area?.kota || "";
+            const provinsi = item.provinsi || item.area?.provinsi || "";
+
+            if (jalan && kecamatan) {
+                const fullAlamat = `${jalan}, ${kelurahan}, ${kecamatan}, ${kota}, ${provinsi}`;
                 const opt = document.createElement("option");
-                opt.value = value;
-                opt.textContent = value;
+                opt.value = fullAlamat;
+                opt.textContent = fullAlamat;
 
-                if (value === selected) opt.selected = true;
-
+                if (fullAlamat === selected) opt.selected = true;
                 select.appendChild(opt);
             }
         });
@@ -205,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const payload = {
             firebase_uid: "ADMIN_MANUAL",
             courier_name: document.getElementById("courier_name").value.trim(),
-            alamat: alamatInput.value.trim(),
+            alamat: document.getElementById("alamat").value,
             date: document.getElementById("date").value,
             time: document.getElementById("time").value,
             waste_type: document.getElementById("waste_type").value,
