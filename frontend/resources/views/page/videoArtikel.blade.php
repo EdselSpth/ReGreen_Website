@@ -9,8 +9,7 @@
 @section('content')
     <div class="main-content">
         <div class="page-content">
-
-            <!-- ================= VIDEO ================= -->
+            <!-- VIDEO -->
             <div class="header-tools">
                 <button class="btn-tambah" id="btnTambahVideo">+ Tambah Video</button>
                 <form id="form-search-video" class="search-box">
@@ -38,13 +37,12 @@
                 </table>
             </div>
 
-            <!-- Pagination & Info di luar table -->
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
                 <div id="video-page-info" style="font-size:14px; color:#555;"></div>
                 <div id="video-pagination" class="pagination" style="display:flex; gap:4px;"></div>
             </div>
 
-            <!-- ================= ARTIKEL ================= -->
+            <!-- ARTIKEL -->
             <div class="header-tools" style="margin-top: 30px;">
                 <button class="btn-tambah" id="btnTambahArtikel">+ Tambah Artikel</button>
                 <form id="form-search-artikel" class="search-box">
@@ -71,7 +69,6 @@
                 </table>
             </div>
 
-            <!-- Pagination & Info Artikel di luar table -->
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
                 <div id="artikel-page-info" style="font-size:14px; color:#555;"></div>
                 <div id="artikel-pagination" class="pagination" style="display:flex; gap:4px;"></div>
@@ -80,7 +77,6 @@
         @endsection
 
         @section('modal')
-            <!-- ================= MODAL TAMBAH VIDEO ================= -->
             <div class="modal" id="modal-tambah-video">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -110,7 +106,6 @@
                 </div>
             </div>
 
-            <!-- ================= MODAL TAMBAH ARTIKEL ================= -->
             <div class="modal" id="modal-tambah-artikel">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -138,7 +133,6 @@
                 </div>
             </div>
 
-            <!-- ================= MODAL EDIT VIDEO ================= -->
             <div class="modal" id="modal-edit-video">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -173,7 +167,6 @@
                 </div>
             </div>
 
-            <!-- ================= MODAL EDIT ARTIKEL ================= -->
             <div class="modal" id="modal-edit-artikel">
                 <div class="modal-content">
                     <div class="modal-header">

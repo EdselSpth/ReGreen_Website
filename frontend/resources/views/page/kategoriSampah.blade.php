@@ -7,14 +7,8 @@
 @endsection
 
 @section('content')
-
-    <!-- ================= SEARCH & ADD ================= -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-
-        <!-- tombol tambah sekarang di kiri -->
         <button class="btn-tambah" id="btnTambah">+ Tambah Kategori</button>
-
-        <!-- search bar sekarang di kanan -->
         <form id="form-search" style="display:flex; gap:8px;">
             <input type="text" id="search-input" placeholder="Cari kategori sampah..."
                 style="padding:8px; border-radius:4px; border:1px solid #ccc;">
@@ -23,8 +17,6 @@
 
     </div>
 
-
-    <!-- ================= TABLE ================= -->
     <div class="table-container">
         <table>
             <thead>
@@ -36,12 +28,10 @@
                 </tr>
             </thead>
             <tbody id="data-body">
-                <!-- diisi JS -->
             </tbody>
         </table>
     </div>
 
-    <!-- ================= PAGINATION ================= -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
         <div id="page-info" style="font-size:14px; color:#555;"></div>
         <div id="pagination-container" style="display:flex; gap:6px;"></div>
@@ -50,7 +40,6 @@
 @endsection
 
 @section('modal')
-    <!-- ================= MODAL TAMBAH ================= -->
     <div class="modal" id="modal-tambah">
         <div class="modal-content">
             <div class="modal-header">
@@ -79,7 +68,6 @@
         </div>
     </div>
 
-    <!-- ================= MODAL EDIT ================= -->
     <div class="modal" id="modal-edit">
         <div class="modal-content">
             <div class="modal-header">

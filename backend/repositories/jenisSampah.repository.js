@@ -44,7 +44,7 @@ class JenisSampahRepository {
       const sql = "SELECT COUNT(*) as total FROM jenis_sampah WHERE nama_jenis LIKE ?";
       const searchKeyword = `%${keyword}%`;
 
-      db.query(sql, [searchKeyword], (err, rows) => { // ✅ hanya 1 parameter
+      db.query(sql, [searchKeyword], (err, rows) => { 
         if (err) reject(err);
         else resolve(rows[0].total);
       });
