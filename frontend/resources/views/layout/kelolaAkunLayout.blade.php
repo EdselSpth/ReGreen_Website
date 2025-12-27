@@ -15,15 +15,13 @@
         <nav class="sidebar">
             <img src="{{ asset('assets/logo-regreen-with-text.png') }}" alt="ReGreen Logo" class="logo">
             
-
-            
             <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 Beranda
             </a>
             
-            <a href="#" class="{{ request()->routeIs('pengambilanSampah') ? 'active' : '' }}">
-                Pengambilan Sampah
-            </a>
+            <a href="{{ route('schedule')}}" class="{{ request()->routeIs('pengambilanSampah') ? 'active' : '' }}">
+      Pengambilan Sampah
+    </a>
             
             <a href="#" class="{{ request()->routeIs('pendaftaranArea') ? 'active' : '' }}">
                 Pendaftaran Area

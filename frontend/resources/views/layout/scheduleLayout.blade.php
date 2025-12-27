@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,17 +10,23 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
+
 <body>
     <div class="app-wrapper">
         <nav class="sidebar">
             <div class="sidebar-logo">
                 <img src="{{ asset('assets/logo-regreen-with-text.png') }}" alt="ReGreen Logo">
             </div>
-            
+
             <div class="sidebar-menu">
                 <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">Beranda</a>
-                <a href="{{ route('schedule') }}" class="{{ request()->routeIs('schedule') ? 'active' : '' }}">Pengambilan Sampah</a>
-                <a href="#" class="{{ request()->routeIs('pendaftaranArea') ? 'active' : '' }}">Pendaftaran Area</a>
+                <a href="{{ route('schedule')}}" class="{{ request()->routeIs('pengambilanSampah') ? 'active' : '' }}">
+                    Pengambilan Sampah
+                </a>
+
+                <a href="{{ route('pendaftaranArea') }}" class="{{ request()->routeIs('pendaftaranArea') ? 'active' : '' }}">
+                    Pendaftaran Area
+                </a>
                 <a href="{{ route('keuntungan') }}" class="{{ request()->routeIs('keuntungan') ? 'active' : '' }}">Keuntungan</a>
                 <a href="{{ route('bankSampah') }}" class="{{ request()->routeIs('bankSampah') ? 'active' : '' }}">Data Bank Sampah</a>
                 <a href="{{ route('kelolaAkun') }}" class="{{ request()->routeIs('kelolaAkun') ? 'active' : '' }}">Kelola Akun</a>
@@ -52,4 +59,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/schedule.js') }}"></script>
 </body>
+
 </html>

@@ -92,6 +92,6 @@ Pendaftaran Area
     </div>
 </div>
 
-<script src="{{ asset('js/daftarArea.js') }}"></script>
+
 
 @endsection
