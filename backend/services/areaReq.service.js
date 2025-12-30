@@ -42,18 +42,25 @@ async function listAreaRequests(status = "pending") {
   return results;
 }
 
-async function updateAreaRequest(uid, action) {
+async function updateAreaRequest(uid, action, reason = "") {
   const userRef = db.collection("users").doc(String(uid));
   const userDoc = await userRef.get();
 
   if (!userDoc.exists) throw new Error("User tidak ditemukan");
 
   if (action === "approve") {
-    await userRef.update({ areaStatus: "approved" });
+    await userRef.update({ 
+      areaStatus: "approved",
+      rejectionReason: "" 
+    });
     return { uid, status: "approved" };
   } else if (action === "reject") {
-    await userRef.update({ areaStatus: "notRegistered", areaId: null });
-    return { uid, status: "notRegistered" };
+    await userRef.update({ 
+      areaStatus: "notRegistered", 
+      areaId: null,
+      rejectionReason: reason 
+    });
+    return { uid, status: "notRegistered", reason };
   }
   throw new Error("Action invalid");
 }

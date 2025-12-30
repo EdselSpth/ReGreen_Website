@@ -2,28 +2,25 @@ const areaReqSvc = require("../services/areaReq.service");
 const areaMasterSvc = require("../services/areaMaster.service");
 
 exports.list = async (req, res) => {
-    try {
-        const status = req.query.status || "pending";  
-        const data = await areaReqSvc.listAreaRequests(status);
-        
-        
-        res.status(200).json({ data });
-    } catch (error) {
-        console.error("Error in area request controller:", error);
-        res.status(500).json({ message: "Internal server error" });
-    }
+  try {
+    const status = req.query.status || "pending";
+    const data = await areaReqSvc.listAreaRequests(status);
+    res.status(200).json({ data });
+  } catch (error) {
+    console.error("Error in area request controller:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
-
 
 exports.update = async (req, res) => {
   try {
     const { uid } = req.params;
-    const { action } = req.body; 
+    const { action, reason } = req.body; 
 
-    const result = await areaReqSvc.updateAreaRequest(uid, action);
+
+    const result = await areaReqSvc.updateAreaRequest(uid, action, reason);
 
     if (action === "approve") {
-      // Ambil data request yang baru saja diupdate (Bojongsoang)
       const requests = await areaReqSvc.listAreaRequests("approved");
       const row = requests.find((x) => String(x.uid) === String(uid));
 
@@ -38,7 +35,12 @@ exports.update = async (req, res) => {
       }
     }
 
-    res.status(200).json({ ok: true, message: `Status berhasil diubah ke ${action}` });
+    res.status(200).json({ 
+      ok: true, 
+      message: `Status berhasil diubah ke ${action}`,
+      result 
+    });
+
   } catch (e) {
     console.error("Gagal update area:", e);
     res.status(e.statusCode || 500).json({ message: e.message });
