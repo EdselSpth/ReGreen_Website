@@ -52,10 +52,10 @@ static findByUser(uid, limit = 10, offset = 0) {
     });
   }
 
-  static updateStatus(id, status) {
+  static updateStatus(id, status, alasan = null) {
     return new Promise((resolve, reject) => {
-      const sql = "UPDATE penarikan_keuntungan SET status = ? WHERE id = ?";
-      db.query(sql, [status, id], err => {
+      const sql = "UPDATE penarikan_keuntungan SET status = ?, alasan_tolak = ? WHERE id = ?";
+      db.query(sql, [status, alasan, id], err => {
         if (err) reject(err);
         else resolve();
       });

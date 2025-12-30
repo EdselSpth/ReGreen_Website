@@ -10,10 +10,10 @@ class KeuntunganService {
     return await KeuntunganRepository.findHistory();
   }
 
-static async getByUser(uid, page = 1, limit = 10) {
+  static async getByUser(uid, page = 1, limit = 10) {
     if (!uid) throw new Error("UID wajib diisi");
     
-    const offset = (page - 1) * limit; // Hitung mulai dari baris ke berapa
+    const offset = (page - 1) * limit; 
     return await KeuntunganRepository.findByUser(uid, limit, offset);
   }
 
@@ -22,16 +22,15 @@ static async getByUser(uid, page = 1, limit = 10) {
     await KeuntunganRepository.create(data);
   }
 
-static async updateStatus(id, status) {
+  static async updateStatus(id, status, alasan = null) {
     const allowedStatus = ["pending", "diterima", "ditolak"];
     if (!allowedStatus.includes(status)) throw new Error("Status tidak valid");
 
-    // 1. Ambil data penarikan dari MySQL terlebih dahulu
+    // 1. Ambil data penarikan dari MySQL
     const penarikan = await KeuntunganRepository.findById(id);
     if (!penarikan) throw new Error("Data penarikan tidak ditemukan");
 
-    // 2. CEK: Apakah ini data Admin atau data User asli?
-    // Jika statusnya 'diterima' DAN firebase_uid TIDAK mengandung kata 'ADMIN'
+    // 2. Jika status DITERIMA dan bukan Admin, potong saldo Firestore
     if (status === "diterima" && !penarikan.firebase_uid.includes("ADMIN")) {
       
       const userRef = db.collection('users').doc(penarikan.firebase_uid);
@@ -44,18 +43,18 @@ static async updateStatus(id, status) {
         const nominalTarik = Number(penarikan.nominal);
 
         if (currentBalance < nominalTarik) {
-          throw new Error("Saldo user tidak mencukupi");
+          throw new Error("Saldo user tidak mencukupi di Firestore");
         }
 
         const newBalance = currentBalance - nominalTarik;
 
-        // Potong saldo di Firestore
+        // Update Saldo User
         t.update(userRef, { 
           balance: newBalance,
           updatedAt: admin.firestore.FieldValue.serverTimestamp()
         });
 
-        // Simpan history transaksi di Firestore
+        // Catat History Transaksi di Firestore
         const transRef = db.collection('transactions').doc();
         t.set(transRef, {
           userId: penarikan.firebase_uid,
@@ -68,10 +67,10 @@ static async updateStatus(id, status) {
         });
       });
     } 
-    // Jika firebase_uid mengandung kata 'ADMIN', blok kode di atas akan dilewati (skip).
 
-    // 3. Apapun jenis datanya (Admin/User), status di MySQL tetap harus diupdate
-    await KeuntunganRepository.updateStatus(id, status);
+    // 3. Simpan status dan alasan ke database MySQL
+    // Kita mengirimkan parameter 'alasan' (bisa null jika diterima)
+    await KeuntunganRepository.updateStatus(id, status, alasan);
   }
 
   static async delete(id) {
