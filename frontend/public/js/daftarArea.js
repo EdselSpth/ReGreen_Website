@@ -115,26 +115,26 @@ document.getElementById("addAreaForm").onsubmit = async (e) => {
             Swal.fire({
                 icon: 'success',
                 title: 'Tersimpan!',
-                text: 'Area berhasil disimpan ke Database MySQL.',
+                text: 'Area berhasil disimpan',
                 timer: 2000,
                 showConfirmButton: false
             });
 
             document.getElementById("addAreaForm").reset();
             closeAddAreaModal();
-            renderAdminSimpleTable(); // Refresh tabel 3
+            renderAdminSimpleTable();
         } else {
             throw new Error("Gagal simpan");
         }
     } catch (e) {
-        Swal.fire('Error', 'Gagal menyimpan ke database.', 'error');
+        Swal.fire('Error', 'Gagal menyimpan data.', 'error');
     }
 };
 
 async function deleteDBArea(id) {
     Swal.fire({
         title: 'Hapus Catatan?',
-        text: "Data akan dihapus permanen dari Database MySQL.",
+        text: "Data akan dihapus permanen.",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
@@ -155,7 +155,7 @@ async function deleteDBArea(id) {
                         timer: 1000,
                         showConfirmButton: false
                     });
-                    renderAdminSimpleTable(); // Refresh tabel 3
+                    renderAdminSimpleTable(); 
                 }
             } catch (e) {
                 Swal.fire('Error!', 'Gagal menghapus data dari server.', 'error');
@@ -165,46 +165,75 @@ async function deleteDBArea(id) {
 }
 
 async function processAction(uid, action) {
-    const actionText = action === 'approve' ? 'menyetujui' : 'menolak';
-    const actionColor = action === 'approve' ? '#28a745' : '#dc3545';
+    if (action === 'reject') {
+        const { value: reason, isConfirmed } = await Swal.fire({
+            title: 'Tolak Pendaftaran?',
+            text: "Berikan alasan mengapa pendaftaran ini ditolak:",
+            input: 'textarea',
+            inputPlaceholder: 'Contoh: Area belum terjangkau kurir kami...',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6e7881',
+            confirmButtonText: 'Ya, Tolak!',
+            cancelButtonText: 'Batal',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Alasan harus diisi agar user tahu kesalahannya!';
+                }
+            }
+        });
+
+        if (!isConfirmed) return;
+
+ 
+        return executeApiCall(uid, action, reason);
+    }
 
     Swal.fire({
-        title: 'Konfirmasi Tindakan',
-        text: `Apakah Anda yakin ingin ${actionText} pendaftaran ini?`,
-        icon: 'warning',
+        title: 'Konfirmasi Approve',
+        text: `Apakah Anda yakin ingin menyetujui pendaftaran ini?`,
+        icon: 'question',
         showCancelButton: true,
-        confirmButtonColor: actionColor,
+        confirmButtonColor: '#28a745',
         cancelButtonColor: '#6e7881',
-        confirmButtonText: action === 'approve' ? 'Ya, Approve!' : 'Ya, Reject!',
+        confirmButtonText: 'Ya, Approve!',
         cancelButtonText: 'Batal'
     }).then(async (result) => {
         if (result.isConfirmed) {
-            try {
-                const res = await fetch(`${API_URL}/areaRequests/${uid.trim()}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: action, alsoRegister: true })
-                });
-
-                if (res.ok) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: `Status pendaftaran berhasil di-${action}.`,
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                    loadPending();    
-                    loadRegistered(); 
-                } else {
-                    Swal.fire('Gagal!', 'Terjadi kesalahan pada server.', 'error');
-                }
-            } catch (e) { 
-                Swal.fire('Error!', 'Gagal menghubungi server.', 'error');
-            }
+            executeApiCall(uid, action);
         }
     });
 }
 
+async function executeApiCall(uid, action, reason = "") {
+    try {
+        const res = await fetch(`${API_URL}/areaRequests/${uid.trim()}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                action: action, 
+                alsoRegister: action === 'approve',
+                reason: reason 
+            })
+        });
+
+        if (res.ok) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: `Pendaftaran berhasil di-${action}.`,
+                timer: 1500,
+                showConfirmButton: false
+            });
+            loadPending();    
+            loadRegistered(); 
+        } else {
+            Swal.fire('Gagal!', 'Terjadi kesalahan pada server.', 'error');
+        }
+    } catch (e) { 
+        Swal.fire('Error!', 'Gagal menghubungi server.', 'error');
+    }
+}
 function openAddAreaModal() { document.getElementById("addAreaModal").classList.add("active"); }
 function closeAddAreaModal() { document.getElementById("addAreaModal").classList.remove("active"); }
