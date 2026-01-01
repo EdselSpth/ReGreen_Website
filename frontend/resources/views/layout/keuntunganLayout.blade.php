@@ -16,9 +16,9 @@
             <a href="{{ route('schedule')}}" class="{{ request()->routeIs('pengambilanSampah') ? 'active' : '' }}">
                 Pengambilan Sampah
             </a>
-             <a href="{{ route('pendaftaranArea') }}" class="{{ request()->routeIs('pendaftaranArea') ? 'active' : '' }}">
-  Pendaftaran Area
-</a>
+            <a href="{{ route('pendaftaranArea') }}" class="{{ request()->routeIs('pendaftaranArea') ? 'active' : '' }}">
+                Pendaftaran Area
+            </a>
             <a href="{{ route('keuntungan') }}" class="{{ request()->routeIs('keuntungan') ? 'active' : '' }}">Keuntungan</a>
             <a href="{{ route('bankSampah') }}" class="{{ request()->routeIs('bankSampah') ? 'active' : '' }}">Data Bank Sampah</a>
             <a href="{{ route('kelolaAkun') }}" class="{{ request()->routeIs('kelolaAkun') ? 'active' : '' }}">Kelola Akun</a>

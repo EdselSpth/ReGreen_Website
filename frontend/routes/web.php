@@ -1,11 +1,12 @@
-<?php 
+<?php
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AreaAdminController;
-// 1. Import Controller yang baru dibuat
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\userController;
+
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -16,20 +17,20 @@ Route::get('/', function () {
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']); 
+    Route::post('/login', [AuthController::class, 'login']);
 });
 
 Route::middleware('auth')->group(function () {
-    
+
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    
+
     Route::get('/dashboard', function () {
         return view('page.dashboard');
     })->name('dashboard');
 
     Route::get('/videoArtikel', function () {
         return view('page.videoArtikel');
-    })->name('videoArtikel'); 
+    })->name('videoArtikel');
 
     Route::get('/keuntungan', function () {
         return view('page.keuntungan');
@@ -59,5 +60,12 @@ Route::middleware('auth')->group(function () {
         $areaRequests = AreaRequest::where('status', 'pending')->get();
         return response()->json(['data' => $areaRequests]);
     });
-});
 
+    Route::prefix('users')->group(function () {
+        Route::get('/', [userController::class, 'index']);
+        Route::post('/', [userController::class, 'store']);
+        Route::put('/{id}', [userController::class, 'update']);
+        Route::delete('/{id}', [userController::class, 'destroy']);
+        Route::patch('/{id}/password', [userController::class, 'changePassword']);
+    });
+});

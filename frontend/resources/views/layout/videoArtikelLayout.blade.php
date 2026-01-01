@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Video & Artikel')</title>
+    <title>@yield('title', 'Vide    o & Artikel')</title>
 
     <link rel="stylesheet" href="{{ asset('css/videoArtikel.css') }}">
 </head>
