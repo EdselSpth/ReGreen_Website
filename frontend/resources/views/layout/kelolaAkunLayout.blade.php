@@ -24,9 +24,9 @@
                 Pengambilan Sampah
             </a>
 
- <a href="{{ route('pendaftaranArea') }}" class="{{ request()->routeIs('pendaftaranArea') ? 'active' : '' }}">
-        Pendaftaran Area
-      </a>
+            <a href="{{ route('pendaftaranArea') }}" class="{{ request()->routeIs('pendaftaranArea') ? 'active' : '' }}">
+                Pendaftaran Area
+            </a>
 
 
             <a href="{{ route('keuntungan') }}" class="{{ request()->routeIs('keuntungan') ? 'active' : '' }}">
