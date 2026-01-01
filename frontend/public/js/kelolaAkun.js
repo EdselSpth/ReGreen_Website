@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     console.log("kelolaAkun.js loaded");
 
-    const API_BASE_URL = "/users"; 
+    const API_BASE_URL = "/users";
 
     const csrfToken = document
         .querySelector('meta[name="csrf-token"]')
@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .then((res) => res.json())
             .then((response) => {
                 tblUsers.innerHTML = "";
-                
+
                 if (response.data) {
                     const userData = response.data.data;
                     const paginationData = response.data.pagination;
@@ -100,15 +100,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderPagination(pagination) {
         if (!pagination) return;
+
         const { current_page, total_page, total_data } = pagination;
+        const pageInfo = document.querySelector("#page-info");
+        const container = document.querySelector("#pagination-container");
 
         pageInfo.innerText = `Halaman ${current_page} dari ${total_page} (Total: ${total_data} users)`;
-        paginationContainer.innerHTML = "";
+
+        container.innerHTML = "";
+
+        if (total_page <= 1) return;
 
         const btnPrev = document.createElement("button");
-        btnPrev.innerHTML = '<i class="fas fa-chevron-left"></i> Previous';
+        btnPrev.innerHTML = '&laquo; Prev';
         btnPrev.className = "btn-pagination";
-        btnPrev.style.marginRight = "5px";
         btnPrev.disabled = current_page === 1;
         btnPrev.onclick = () => {
             if (current_page > 1) {
@@ -116,23 +121,80 @@ document.addEventListener("DOMContentLoaded", () => {
                 loadUsers();
             }
         };
-        paginationContainer.appendChild(btnPrev);
+        container.appendChild(btnPrev);
+
+        let startPage, endPage;
+
+        if (total_page <= 7) {
+            startPage = 1;
+            endPage = total_page;
+        } else {
+            if (current_page <= 4) {
+                startPage = 1;
+                endPage = 5;
+            } else if (current_page + 3 >= total_page) {
+                startPage = total_page - 4;
+                endPage = total_page;
+            } else {
+                startPage = current_page - 2;
+                endPage = current_page + 2;
+            }
+        }
+
+        if (startPage > 1) {
+            addPageButton(1, container, current_page);
+            if (startPage > 2) {
+                const dots = document.createElement("span");
+                dots.innerText = "...";
+                dots.style.padding = "5px";
+                container.appendChild(dots);
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            addPageButton(i, container, current_page);
+        }
+
+        if (endPage < total_page) {
+            if (endPage < total_page - 1) {
+                const dots = document.createElement("span");
+                dots.innerText = "...";
+                dots.style.padding = "5px";
+                container.appendChild(dots);
+            }
+            addPageButton(total_page, container, current_page);
+        }
 
         const btnNext = document.createElement("button");
-        btnNext.innerHTML = 'Next <i class="fas fa-chevron-right"></i>';
+btnNext.innerHTML = 'Next &raquo;';
         btnNext.className = "btn-pagination";
-        btnNext.disabled = current_page === total_page || total_page === 0;
+        btnNext.disabled = current_page === total_page;
         btnNext.onclick = () => {
             if (current_page < total_page) {
                 currentPage++;
                 loadUsers();
             }
         };
-        paginationContainer.appendChild(btnNext);
+        container.appendChild(btnNext);
+    }
+
+    function addPageButton(pageNumber, container, current_page) {
+        const btn = document.createElement("button");
+        btn.innerText = pageNumber;
+        btn.className = "btn-pagination";
+
+        if (pageNumber === current_page) {
+            btn.classList.add("active");
+        }
+
+        btn.onclick = () => {
+            currentPage = pageNumber;
+            loadUsers();
+        };
+        container.appendChild(btn);
     }
 
     window.reloadUserData = loadUsers;
-
 
     if (formTambah) {
         formTambah.addEventListener("submit", async (e) => {
@@ -143,7 +205,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 role: document.getElementById("tambah-role").value,
                 password: document.getElementById("tambah-password").value,
             };
-            await handleRequest(API_BASE_URL, "POST", data, "Menambah User...", "User berhasil ditambahkan", "modal-tambah");
+            await handleRequest(
+                API_BASE_URL,
+                "POST",
+                data,
+                "Menambah User...",
+                "User berhasil ditambahkan",
+                "modal-tambah"
+            );
         });
     }
 
@@ -156,7 +225,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 email: document.getElementById("edit-email").value,
                 role: document.getElementById("edit-role").value,
             };
-            await handleRequest(`${API_BASE_URL}/${id}`, "PUT", data, "Mengupdate User...", "User berhasil diupdate", "modal-edit");
+            await handleRequest(
+                `${API_BASE_URL}/${id}`,
+                "PUT",
+                data,
+                "Mengupdate User...",
+                "User berhasil diupdate",
+                "modal-edit"
+            );
         });
     }
 
@@ -165,17 +241,33 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             const id = document.getElementById("password-user-id").value;
             const passBaru = document.getElementById("password-baru").value;
-            const passKonfirm = document.getElementById("password-konfirmasi").value;
+            const passKonfirm = document.getElementById(
+                "password-konfirmasi"
+            ).value;
 
             if (passBaru !== passKonfirm) {
                 Swal.fire("Error", "Konfirmasi password tidak cocok!", "error");
                 return;
             }
-            await handleRequest(`${API_BASE_URL}/${id}/password`, "PATCH", { password: passBaru }, "Mengubah Password...", "Password berhasil diubah", "modal-password");
+            await handleRequest(
+                `${API_BASE_URL}/${id}/password`,
+                "PATCH",
+                { password: passBaru },
+                "Mengubah Password...",
+                "Password berhasil diubah",
+                "modal-password"
+            );
         });
     }
 
-    async function handleRequest(url, method, data, loadingText, successText, modalIdToClose) {
+    async function handleRequest(
+        url,
+        method,
+        data,
+        loadingText,
+        successText,
+        modalIdToClose
+    ) {
         try {
             Swal.fire({
                 title: loadingText,
@@ -187,20 +279,32 @@ document.addEventListener("DOMContentLoaded", () => {
                 method: method,
                 headers: {
                     "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": csrfToken, 
+                    "X-CSRF-TOKEN": csrfToken,
                 },
                 body: JSON.stringify(data),
             });
             const result = await response.json();
 
             if (response.ok) {
-                await Swal.fire({ icon: "success", title: "Berhasil!", text: successText, timer: 1500, showConfirmButton: false });
+                await Swal.fire({
+                    icon: "success",
+                    title: "Berhasil!",
+                    text: successText,
+                    timer: 1500,
+                    showConfirmButton: false,
+                });
                 if (modalIdToClose) closeModal(modalIdToClose);
-                if (method === "POST") document.getElementById("form-tambah").reset();
-                if (method === "PATCH") document.getElementById("form-password").reset();
+                if (method === "POST")
+                    document.getElementById("form-tambah").reset();
+                if (method === "PATCH")
+                    document.getElementById("form-password").reset();
                 loadUsers();
             } else {
-                Swal.fire("Gagal!", result.message || "Terjadi kesalahan", "error");
+                Swal.fire(
+                    "Gagal!",
+                    result.message || "Terjadi kesalahan",
+                    "error"
+                );
             }
         } catch (error) {
             console.error(error);
@@ -208,7 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    window.deleteUser = async function(id, username) {
+    window.deleteUser = async function (id, username) {
         const confirm = await Swal.fire({
             title: `Hapus ${username}?`,
             text: "Data tidak bisa dikembalikan!",
@@ -220,19 +324,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (confirm.isConfirmed) {
             try {
-                Swal.fire({ title: "Menghapus...", didOpen: () => Swal.showLoading() });
-                
+                Swal.fire({
+                    title: "Menghapus...",
+                    didOpen: () => Swal.showLoading(),
+                });
+
                 const res = await fetch(`${API_BASE_URL}/${id}`, {
                     method: "DELETE",
                     headers: {
-                        "X-CSRF-TOKEN": csrfToken
-                    }
+                        "X-CSRF-TOKEN": csrfToken,
+                    },
                 });
                 const result = await res.json();
 
                 if (res.ok) {
                     Swal.fire("Terhapus!", "Data berhasil dihapus.", "success");
-                    loadUsers(); 
+                    loadUsers();
                 } else {
                     Swal.fire("Gagal!", result.message, "error");
                 }
@@ -240,7 +347,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 Swal.fire("Error!", "Gagal koneksi server", "error");
             }
         }
-    }
+    };
 });
 
 function openModal(modalId) {
