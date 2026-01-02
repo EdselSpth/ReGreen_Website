@@ -22,7 +22,7 @@ class ArtikelRepository {
     });
   }
 
-  static searchEngine(keyword, limit = 10, offset = 0) {
+  static searchEngine(keyword, limit = 20, offset = 0) {
     return new Promise((resolve, reject) => {
       const sql = `
         SELECT id, nama_artikel, file_pdf
