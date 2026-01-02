@@ -10,11 +10,11 @@ async function findById(id) {
   return rows[0] || null;
 }
 
-async function findByUnique({ kecamatan, kelurahan, kota, provinsi }) {
+async function findByAddress({ kecamatan, kelurahan, kota, provinsi, jalan }) {
   const rows = await query(
-    `SELECT * FROM area_terdaftar
-     WHERE kecamatan=? AND kelurahan=? AND kota=? AND provinsi=?`,
-    [kecamatan, kelurahan, kota, provinsi]
+    `SELECT * FROM area_terdaftar 
+     WHERE kecamatan=? AND kelurahan=? AND kota=? AND provinsi=? AND jalan=?`,
+    [kecamatan, kelurahan, kota, provinsi, jalan]
   );
   return rows[0] || null;
 }
@@ -43,4 +43,4 @@ async function remove(id) {
   return true;
 }
 
-module.exports = { findAll, findById, findByUnique, create, update, remove };
+module.exports = { findAll, findById, findByAddress, create, update, remove };

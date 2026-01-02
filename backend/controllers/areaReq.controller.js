@@ -16,9 +16,8 @@ exports.update = async (req, res) => {
   try {
     const { uid } = req.params;
     const { action, reason } = req.body; 
-
-
     const result = await areaReqSvc.updateAreaRequest(uid, action, reason);
+
 
     if (action === "approve") {
       const requests = await areaReqSvc.listAreaRequests("approved");

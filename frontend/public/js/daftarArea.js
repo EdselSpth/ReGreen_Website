@@ -42,25 +42,61 @@ async function loadRegistered() {
     try {
         const res = await fetch(`${API_URL}/areaMaster`);
         const data = await res.json();
+        
         const table = document.getElementById("registeredAreaTable");
         if(!table) return;
         table.innerHTML = "";
-
         if (data && data.length > 0) {
             data.forEach((item, i) => {
                 table.innerHTML += `
                     <tr>
                         <td>${i + 1}</td>
-                        <td>${item.jalan}</td>
-                        <td>${item.kecamatan}</td>
-                        <td>${item.kota}</td>
-                        <td>${item.kelurahan}</td>
-                        <td>${item.provinsi}</td>
+                        <td>${item.jalan || "-"}</td>
+                        <td>${item.kecamatan || "-"}</td>
+                        <td>${item.kota || "-"}</td>
+                        <td>${item.kelurahan || "-"}</td>
+                        <td>${item.provinsi || "-"}</td>
                         <td><span class="status-text accepted">Registered</span></td>
                     </tr>`;
             });
+        } else {
+            table.innerHTML = "<tr><td colspan='7' align='center'>Belum ada area yang terdaftar secara resmi</td></tr>";
         }
-    } catch (e) { console.error("Error Tabel 2:", e); }
+    } catch (e) { 
+        console.error("Error Tabel 2:", e); 
+    }
+}
+async function executeApiCall(uid, action, reason = "") {
+    try {
+        console.log(`Mengirim aksi ${action} untuk UID: ${uid}`); 
+
+        const res = await fetch(`${API_URL}/areaRequests/${uid.trim()}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                action: action, 
+                reason: reason
+            })
+        });
+
+        if (res.ok) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: `Pendaftaran berhasil di-${action}.`,
+                timer: 1500,
+                showConfirmButton: false
+            });
+            loadPending();    
+            loadRegistered(); 
+        } else {
+            const errorData = await res.json();
+            Swal.fire('Gagal!', errorData.message || 'Terjadi kesalahan pada server.', 'error');
+        }
+    } catch (e) { 
+        console.error("Fetch Error:", e);
+        Swal.fire('Error!', 'Gagal menghubungi server.', 'error');
+    }
 }
 
 
