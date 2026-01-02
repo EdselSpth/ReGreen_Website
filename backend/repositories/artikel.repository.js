@@ -1,7 +1,7 @@
 const db = require("../config/db");
 
 class ArtikelRepository {
-  static findAll(limit = 10, offset = 0) {
+  static findAll(limit = 20, offset = 0) {
     return new Promise((resolve, reject) => {
       const sql =
         "SELECT * FROM artikel ORDER BY nama_artikel DESC LIMIT ? OFFSET ?";

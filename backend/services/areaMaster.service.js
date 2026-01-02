@@ -1,6 +1,5 @@
 const repo = require("../repositories/areaMaster.repository");
 
-
 function validatePayload(payload) {
   const kecamatan = payload.kecamatan?.trim();
   const kelurahan = payload.kelurahan?.trim() || "-";
@@ -16,15 +15,20 @@ function validatePayload(payload) {
   return { kecamatan, kelurahan, kota, provinsi, jalan };
 }
 
-
 async function create(payload) {
   const clean = validatePayload(payload);
+
+  const existing = await repo.findByAddress(clean);
+  if (existing) {
+    console.log("Area sudah terdaftar:");
+    return existing;
+  }
+
   return repo.create(clean);
 }
 
 async function list() {
-  const allData = await repo.findAll();
-  return allData.slice(0, 10); 
+  return await repo.findAll();
 }
 
 module.exports = { create, list };

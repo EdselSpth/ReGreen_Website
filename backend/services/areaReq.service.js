@@ -36,6 +36,7 @@ async function listAreaRequests(status = "pending") {
       phone: u.phone ?? u.noHp ?? null,
       areaStatus: u.areaStatus ?? null,
       areaId: areaId ?? null,
+      areaRejectionReason: u.areaRejectionReason ?? "", 
       area: area || {}, 
     });
   }
@@ -51,14 +52,14 @@ async function updateAreaRequest(uid, action, reason = "") {
   if (action === "approve") {
     await userRef.update({ 
       areaStatus: "approved",
-      rejectionReason: "" 
+      areaRejectionReason: "" 
     });
     return { uid, status: "approved" };
   } else if (action === "reject") {
     await userRef.update({ 
       areaStatus: "notRegistered", 
       areaId: null,
-      rejectionReason: reason 
+      areaRejectionReason: reason
     });
     return { uid, status: "notRegistered", reason };
   }
