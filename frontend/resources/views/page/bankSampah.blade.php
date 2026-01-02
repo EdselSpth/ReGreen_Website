@@ -10,11 +10,10 @@ DATA BANK SAMPAH
 <div class="table-header">
   <button class="btn-tambah">+ Tambah Data</button>
 
-  <input 
-    type="text" 
-    id="search-bank" 
-    placeholder="Cari bank sampah..."
-  />
+  <input
+    type="text"
+    id="search-bank"
+    placeholder="Cari bank sampah..." />
 </div>
 
 
@@ -25,6 +24,8 @@ DATA BANK SAMPAH
         <th>Nama Bank Sampah</th>
         <th>Alamat</th>
         <th>Melayani Sampah</th>
+        <th>Jam Operational</th>
+        <th>No. Telepon</th>
         <th>Status</th>
         <th>Aksi</th>
       </tr>
@@ -65,9 +66,27 @@ DATA BANK SAMPAH
         </div>
 
         <div class="form-group">
-          <label>Melayani Sampah</label>
-          <input type="text" id="tambah-jenis" required>
+          <label>Kategori Sampah</label>
+          <div id="tambah-selected" class="selected-tags"></div>
+          <select id="tambah-kategori"></select>
         </div>
+
+        <th>Operasional</th> ```
+
+        <div class="form-group">
+          <label>Jam Operasional</label>
+          <div style="display: flex; gap: 10px;">
+            <input type="time" id="tambah-jam-buka">
+            <span>sampai</span>
+            <input type="time" id="tambah-jam-tutup">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>No Telepon</label>
+          <input type="text" id="tambah-telepon">
+        </div>
+
 
         <div class="form-group">
           <label>Status</label>
@@ -109,8 +128,23 @@ DATA BANK SAMPAH
         </div>
 
         <div class="form-group">
-          <label>Melayani Sampah</label>
-          <input type="text" id="edit-jenis" required>
+          <label>Kategori Sampah</label>
+          <div id="edit-selected" class="selected-tags"></div>
+          <select id="edit-kategori"></select> 
+        </div>
+
+        <div class="form-group">
+          <label>Jam Operasional</label>
+          <div style="display: flex; gap: 10px;">
+            <input type="time" id="edit-jam-buka">
+            <span>sampai</span>
+            <input type="time" id="edit-jam-tutup">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>No Telepon</label>
+          <input type="text" id="edit-telepon">
         </div>
 
         <div class="form-group">

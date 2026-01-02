@@ -361,3 +361,42 @@ body {
     color: #842029;
     border: 1px solid #f5c2c7;
 }
+.multi-select {
+  height: 120px;
+  background-color: var(--hijau-muda-regreen);
+  border: 1px solid var(--hijau-tua-regreen);
+}
+
+.multi-select option {
+  padding: 6px;
+}
+
+.multi-select option:checked {
+  background-color: var(--hijau-tua-regreen);
+  color: white;
+}
+.selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.tag {
+  background: #4caf50;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tag button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
