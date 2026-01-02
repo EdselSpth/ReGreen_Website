@@ -1,83 +1,259 @@
 const db = require("../config/db");
 
+/* =========================
+   GET ALL
+========================= */
 exports.getAll = (req, res) => {
-  const sql = "SELECT * FROM bank_sampah ORDER BY id DESC";
-  db.query(sql, (err, results) => {
+  const sql = `
+    SELECT 
+      bs.*,
+      GROUP_CONCAT(js.nama_jenis SEPARATOR ', ') AS kategori,
+      GROUP_CONCAT(js.id) AS kategori_ids
+    FROM bank_sampah bs
+    LEFT JOIN bank_sampah_jenis_sampah bjs 
+      ON bjs.bank_sampah_id = bs.id
+    LEFT JOIN jenis_sampah js 
+      ON js.id = bjs.jenis_sampah_id
+    GROUP BY bs.id
+    ORDER BY bs.id DESC
+  `;
+
+  db.query(sql, (err, rows) => {
     if (err) {
-      return res.status(500).json({ message: "Gagal ambil data", error: err });
+      console.error("GET ALL ERROR:", err);
+      return res.status(500).json({ message: err.message });
     }
-    res.json(results);
+
+    res.json(
+      rows.map(r => ({
+        ...r,
+        kategori_ids: r.kategori_ids
+          ? r.kategori_ids.split(",").map(Number)
+          : []
+      }))
+    );
   });
 };
 
+/* =========================
+   GET BY ID
+========================= */
 exports.getById = (req, res) => {
   const sql = "SELECT * FROM bank_sampah WHERE id = ?";
+
   db.query(sql, [req.params.id], (err, results) => {
     if (err) {
-      return res.status(500).json({ message: "Query error", error: err });
+      console.error("GET BY ID ERROR:", err);
+      return res.status(500).json({ message: err.message });
     }
+
     if (results.length === 0) {
       return res.status(404).json({ message: "Data tidak ditemukan" });
     }
+
     res.json(results[0]);
   });
 };
 
+/* =========================
+   CREATE
+========================= */
 exports.create = (req, res) => {
-  const { nama, alamat, jenis, status } = req.body;
+  console.log("CREATE BODY:", req.body);
 
-  const sql = `
-    INSERT INTO bank_sampah (nama, alamat, jenis, status)
-    VALUES (?, ?, ?, ?)
-  `;
+  const {
+    nama,
+    alamat,
+    status,
+    jam_buka,
+    jam_tutup,
+    telepon,
+    jenis_sampah_ids
+  } = req.body;
 
-  db.query(sql, [nama, alamat, jenis, status], (err, result) => {
+  // 🔒 VALIDASI STATUS (ENUM CASE-SENSITIVE)
+  const validStatus = ["Aktif", "Nonaktif"];
+  if (!validStatus.includes(status)) {
+    return res.status(400).json({
+      message: "Status tidak valid",
+      received: status
+    });
+  }
+
+  db.beginTransaction(err => {
     if (err) {
-      return res.status(500).json({ message: "Gagal tambah data", error: err });
+      console.error("BEGIN TX ERROR:", err);
+      return res.status(500).json({ message: err.message });
     }
 
-    res.status(201).json({
-      id: result.insertId,
-      nama,
-      alamat,
-      jenis,
-      status
-    });
+    const sqlBank = `
+      INSERT INTO bank_sampah 
+      (nama, alamat, status, jam_buka, jam_tutup, telepon)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(
+      sqlBank,
+      [nama, alamat, status, jam_buka || null, jam_tutup || null, telepon || null],
+      (err, result) => {
+        if (err) {
+          console.error("INSERT bank_sampah ERROR:", err);
+          return db.rollback(() =>
+            res.status(500).json({ message: err.message })
+          );
+        }
+
+        const bankId = result.insertId;
+
+        // kalau tidak ada kategori
+        if (!Array.isArray(jenis_sampah_ids) || jenis_sampah_ids.length === 0) {
+          return db.commit(() =>
+            res.json({ message: "Data berhasil ditambahkan", id: bankId })
+          );
+        }
+
+        // 🔒 FILTER ID AMAN
+        const pivot = jenis_sampah_ids
+          .filter(id => Number.isInteger(id))
+          .map(id => [bankId, id]);
+
+        if (pivot.length === 0) {
+          return db.commit(() =>
+            res.json({ message: "Data berhasil ditambahkan", id: bankId })
+          );
+        }
+
+        db.query(
+          "INSERT INTO bank_sampah_jenis_sampah (bank_sampah_id, jenis_sampah_id) VALUES ?",
+          [pivot],
+          err => {
+            if (err) {
+              console.error("INSERT PIVOT ERROR:", err);
+              return db.rollback(() =>
+                res.status(500).json({ message: err.message })
+              );
+            }
+
+            db.commit(() =>
+              res.json({ message: "Data berhasil ditambahkan", id: bankId })
+            );
+          }
+        );
+      }
+    );
   });
 };
 
+/* =========================
+   UPDATE
+========================= */
 exports.update = (req, res) => {
-  const { nama, alamat, jenis, status } = req.body;
+  console.log("UPDATE BODY:", req.body);
 
-  const sql = `
-    UPDATE bank_sampah
-    SET nama = ?, alamat = ?, jenis = ?, status = ?
-    WHERE id = ?
-  `;
+  const {
+    nama,
+    alamat,
+    status,
+    jam_buka,
+    jam_tutup,
+    telepon,
+    jenis_sampah_ids
+  } = req.body;
 
-  db.query(
-    sql,
-    [nama, alamat, jenis, status, req.params.id],
-    (err, result) => {
-      if (err) {
-        return res.status(500).json({ message: "Gagal update data", error: err });
-      }
+  const bankId = req.params.id;
 
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: "Data tidak ditemukan" });
-      }
+  // 🔒 VALIDASI STATUS
+  const validStatus = ["Aktif", "Nonaktif"];
+  if (!validStatus.includes(status)) {
+    return res.status(400).json({
+      message: "Status tidak valid",
+      received: status
+    });
+  }
 
-      res.json({ message: "Data berhasil diupdate" });
+  db.beginTransaction(err => {
+    if (err) {
+      console.error("BEGIN TX ERROR:", err);
+      return res.status(500).json({ message: err.message });
     }
-  );
+
+    const sqlUpdate = `
+      UPDATE bank_sampah
+      SET nama = ?, alamat = ?, status = ?, jam_buka = ?, jam_tutup = ?, telepon = ?
+      WHERE id = ?
+    `;
+
+    db.query(
+      sqlUpdate,
+      [nama, alamat, status, jam_buka || null, jam_tutup || null, telepon || null, bankId],
+      err => {
+        if (err) {
+          console.error("UPDATE bank_sampah ERROR:", err);
+          return db.rollback(() =>
+            res.status(500).json({ message: err.message })
+          );
+        }
+
+        db.query(
+          "DELETE FROM bank_sampah_jenis_sampah WHERE bank_sampah_id = ?",
+          [bankId],
+          err => {
+            if (err) {
+              console.error("DELETE PIVOT ERROR:", err);
+              return db.rollback(() =>
+                res.status(500).json({ message: err.message })
+              );
+            }
+
+            if (!Array.isArray(jenis_sampah_ids) || jenis_sampah_ids.length === 0) {
+              return db.commit(() =>
+                res.json({ message: "Data berhasil diperbarui" })
+              );
+            }
+
+            const pivot = jenis_sampah_ids
+              .filter(id => Number.isInteger(id))
+              .map(id => [bankId, id]);
+
+            if (pivot.length === 0) {
+              return db.commit(() =>
+                res.json({ message: "Data berhasil diperbarui" })
+              );
+            }
+
+            db.query(
+              "INSERT INTO bank_sampah_jenis_sampah (bank_sampah_id, jenis_sampah_id) VALUES ?",
+              [pivot],
+              err => {
+                if (err) {
+                  console.error("INSERT PIVOT ERROR:", err);
+                  return db.rollback(() =>
+                    res.status(500).json({ message: err.message })
+                  );
+                }
+
+                db.commit(() =>
+                  res.json({ message: "Data berhasil diperbarui" })
+                );
+              }
+            );
+          }
+        );
+      }
+    );
+  });
 };
 
+/* =========================
+   DELETE
+========================= */
 exports.delete = (req, res) => {
   const sql = "DELETE FROM bank_sampah WHERE id = ?";
 
   db.query(sql, [req.params.id], (err, result) => {
     if (err) {
-      return res.status(500).json({ message: "Gagal hapus data", error: err });
+      console.error("DELETE ERROR:", err);
+      return res.status(500).json({ message: err.message });
     }
 
     if (result.affectedRows === 0) {
