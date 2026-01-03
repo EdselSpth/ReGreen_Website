@@ -1,11 +1,26 @@
 const db = require('../config/db');
 
 class AdminNoteService {
-  static async getAll() {
+static async getAll(page = 1, limit = 10) {
+    const offset = (page - 1) * limit;
     return new Promise((resolve, reject) => {
-        db.query("SELECT * FROM admin_notes ORDER BY created_at DESC LIMIT 10", (err, res) => {
-            if (err) reject(err);
-            resolve(res);
+        const sql = "SELECT * FROM admin_notes ORDER BY created_at DESC LIMIT ? OFFSET ?";
+        db.query(sql, [limit, offset], (err, res) => {
+            if (err) return reject(err);
+            db.query("SELECT COUNT(*) as total FROM admin_notes", (errCount, resCount) => {
+                if (errCount) return reject(errCount);
+                const totalData = resCount[0].total;
+                const totalPages = Math.ceil(totalData / limit);
+                
+                resolve({
+                    data: res,
+                    pagination: {
+                        currentPage: parseInt(page),
+                        totalPages: totalPages,
+                        totalData: totalData
+                    }
+                });
+            });
         });
     });
 }

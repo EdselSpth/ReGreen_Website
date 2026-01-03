@@ -1,12 +1,13 @@
 const API_URL = "http://localhost:3000/api";
+let currentNotePage = 1;
 
 document.addEventListener("DOMContentLoaded", () => {
     loadPending();      // Tabel 1 (Database: areaRequests)
     loadRegistered();   // Tabel 2 (Database: areaMaster)
-    renderAdminSimpleTable(); // Tabel 3 (Database: adminNotes)
+    renderAdminSimpleTable(1); // Tabel 3 (Dimulai dari halaman 1)
 });
 
-// TABEL 1: Menunggu Persetujuan
+
 async function loadPending() {
     try {
         const res = await fetch(`${API_URL}/areaRequests?status=pending`);
@@ -37,7 +38,6 @@ async function loadPending() {
     } catch (e) { console.error("Error Tabel 1:", e); }
 }
 
-// TABEL 2: Area Terdaftar (Riwayat Resmi)
 async function loadRegistered() {
     try {
         const res = await fetch(`${API_URL}/areaMaster`);
@@ -66,59 +66,29 @@ async function loadRegistered() {
         console.error("Error Tabel 2:", e); 
     }
 }
-async function executeApiCall(uid, action, reason = "") {
-    try {
-        console.log(`Mengirim aksi ${action} untuk UID: ${uid}`); 
 
-        const res = await fetch(`${API_URL}/areaRequests/${uid.trim()}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                action: action, 
-                reason: reason
-            })
-        });
-
-        if (res.ok) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: `Pendaftaran berhasil di-${action}.`,
-                timer: 1500,
-                showConfirmButton: false
-            });
-            loadPending();    
-            loadRegistered(); 
-        } else {
-            const errorData = await res.json();
-            Swal.fire('Gagal!', errorData.message || 'Terjadi kesalahan pada server.', 'error');
-        }
-    } catch (e) { 
-        console.error("Fetch Error:", e);
-        Swal.fire('Error!', 'Gagal menghubungi server.', 'error');
-    }
-}
-
-
-async function renderAdminSimpleTable() {
+async function renderAdminSimpleTable(page = 1) {
     const table = document.getElementById("adminSimpleTable");
     if(!table) return;
 
     try {
-        // Ambil data dari endpoint API baru
-        const res = await fetch(`${API_URL}/adminNotes`);
-        const data = await res.json();
+        currentNotePage = page; 
+        const res = await fetch(`${API_URL}/adminNotes?page=${page}`);
+        const result = await res.json();
+
+        const { data, pagination } = result;
 
         table.innerHTML = "";
         if (!data || data.length === 0) {
-            table.innerHTML = "<tr><td colspan='4' align='center' style='color:#888'>Belum ada area ditambahkan ke database</td></tr>";
+            table.innerHTML = "<tr><td colspan='4' align='center' style='color:#888'>Belum ada catatan di halaman ini</td></tr>";
             return;
         }
 
         data.forEach((area, i) => {
+            const rowNumber = ((page - 1) * 10) + (i + 1);
             table.innerHTML += `
                 <tr style="background-color: #f0fff4;">
-                    <td>${i + 1}</td>
+                    <td>${rowNumber}</td>
                     <td><strong>${area.kecamatan}</strong></td>
                     <td>${area.kelurahan}</td>
                     <td>
@@ -126,10 +96,35 @@ async function renderAdminSimpleTable() {
                     </td>
                 </tr>`;
         });
+
+
+        renderPaginationControls(pagination);
+        
     } catch (e) { 
         console.error("Error Tabel 3:", e);
         table.innerHTML = "<tr><td colspan='4' align='center' style='color:red'>Gagal memuat data dari database</td></tr>";
     }
+}
+
+
+function renderPaginationControls(pagination) {
+    const container = document.getElementById("notePagination");
+    if (!container) return;
+
+    container.innerHTML = `
+    <div class="pagination-wrapper">
+        <span class="pagination-info">Menampilkan hal. <b>${pagination.currentPage}</b> dari <b>${pagination.totalPages}</b></span>
+        <div class="pagination-buttons">
+            <button ${pagination.currentPage === 1 ? 'disabled' : ''} 
+                onclick="renderAdminSimpleTable(${pagination.currentPage - 1})"
+                class="btn-pagination">Prev</button>
+            
+            <button ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''} 
+                onclick="renderAdminSimpleTable(${pagination.currentPage + 1})"
+                class="btn-pagination">Next</button>
+        </div>
+    </div>
+    `;
 }
 
 document.getElementById("addAreaForm").onsubmit = async (e) => {
@@ -158,7 +153,7 @@ document.getElementById("addAreaForm").onsubmit = async (e) => {
 
             document.getElementById("addAreaForm").reset();
             closeAddAreaModal();
-            renderAdminSimpleTable();
+            renderAdminSimpleTable(1); 
         } else {
             throw new Error("Gagal simpan");
         }
@@ -191,7 +186,7 @@ async function deleteDBArea(id) {
                         timer: 1000,
                         showConfirmButton: false
                     });
-                    renderAdminSimpleTable(); 
+                    renderAdminSimpleTable(currentNotePage); 
                 }
             } catch (e) {
                 Swal.fire('Error!', 'Gagal menghapus data dari server.', 'error');
@@ -221,8 +216,6 @@ async function processAction(uid, action) {
         });
 
         if (!isConfirmed) return;
-
- 
         return executeApiCall(uid, action, reason);
     }
 

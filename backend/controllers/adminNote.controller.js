@@ -2,8 +2,10 @@ const AdminNoteService = require('../services/adminNote.service');
 
 const getAllNotes = async (req, res) => {
     try {
-        const data = await AdminNoteService.getAll();
-        res.status(200).json(data);
+        const page = req.query.page || 1;
+        const limit = 10;
+        const result = await AdminNoteService.getAll(page, limit);
+        res.status(200).json(result);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
