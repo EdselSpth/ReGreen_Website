@@ -31,9 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     //SEARCH
     if (formSearch) {
-        formSearch.addEventListener("submit", (e) => {
-            e.preventDefault();
-            currentSearch = document.getElementById("search-input").value;
+        const searchInput = document.getElementById("search-input");
+
+        searchInput.addEventListener("input", () => {
+            currentSearch = searchInput.value;
             currentPage = 1;
             loadKategori();
         });
@@ -94,30 +95,100 @@ document.addEventListener("DOMContentLoaded", () => {
     //PAGINATION
     function renderPagination(pagination) {
         if (!pagination) return;
-        const { currentPage, totalPages, totalItems } = pagination;
-        pageInfo.innerText = `Halaman ${currentPage} dari ${totalPages} (Total: ${totalItems})`;
+
+        const {
+            currentPage: apiCurrentPage,
+            totalPages,
+            totalItems,
+        } = pagination;
+
+        pageInfo.innerText = `Halaman ${apiCurrentPage} dari ${totalPages} (Total: ${totalItems})`;
         paginationContainer.innerHTML = "";
 
+        if (totalPages <= 1) return;
+
+        // === PREV ===
         const btnPrev = document.createElement("button");
+        btnPrev.innerHTML = "&laquo; Prev";
         btnPrev.className = "btn-pagination";
-        btnPrev.textContent = "Previous";
-        btnPrev.disabled = currentPage === 1;
+        btnPrev.disabled = apiCurrentPage === 1;
         btnPrev.onclick = () => {
-            currentPage--;
-            loadKategori();
+            if (currentPage > 1) {
+                currentPage--;
+                loadKategori();
+            }
         };
-
-        const btnNext = document.createElement("button");
-        btnNext.className = "btn-pagination";
-        btnNext.textContent = "Next";
-        btnNext.disabled = currentPage === totalPages || totalPages === 0;
-        btnNext.onclick = () => {
-            currentPage++;
-            loadKategori();
-        };
-
         paginationContainer.appendChild(btnPrev);
+
+        let startPage, endPage;
+
+        if (totalPages <= 7) {
+            startPage = 1;
+            endPage = totalPages;
+        } else {
+            if (apiCurrentPage <= 4) {
+                startPage = 1;
+                endPage = 5;
+            } else if (apiCurrentPage + 3 >= totalPages) {
+                startPage = totalPages - 4;
+                endPage = totalPages;
+            } else {
+                startPage = apiCurrentPage - 2;
+                endPage = apiCurrentPage + 2;
+            }
+        }
+
+        if (startPage > 1) {
+            addPageButton(1, apiCurrentPage);
+            if (startPage > 2) paginationContainer.appendChild(createDots());
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            addPageButton(i, apiCurrentPage);
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1)
+                paginationContainer.appendChild(createDots());
+            addPageButton(totalPages, apiCurrentPage);
+        }
+
+        // === NEXT ===
+        const btnNext = document.createElement("button");
+        btnNext.innerHTML = "Next &raquo;";
+        btnNext.className = "btn-pagination";
+        btnNext.disabled = apiCurrentPage === totalPages;
+        btnNext.onclick = () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadKategori();
+            }
+        };
         paginationContainer.appendChild(btnNext);
+    }
+
+    function addPageButton(pageNumber, currentPage) {
+        const btn = document.createElement("button");
+        btn.innerText = pageNumber;
+        btn.className = "btn-pagination";
+
+        if (pageNumber === currentPage) {
+            btn.classList.add("active");
+        }
+
+        btn.onclick = () => {
+            currentPage = pageNumber;
+            loadKategori();
+        };
+
+        paginationContainer.appendChild(btn);
+    }
+
+    function createDots() {
+        const span = document.createElement("span");
+        span.innerText = "...";
+        span.style.padding = "6px";
+        return span;
     }
 
     //MODAL
@@ -191,13 +262,34 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    //UPDATE
     formEdit?.addEventListener("submit", async (e) => {
         e.preventDefault();
+
         const id = document.getElementById("edit-id").value;
+        const namaBaru = document.getElementById("edit-nama").value.trim();
+        const hargaBaru = parseInt(document.getElementById("edit-harga").value);
+
+        const duplicate = dataKategori.find(
+            (k) =>
+                k.nama_jenis.toLowerCase() === namaBaru.toLowerCase() &&
+                k.id != id
+        );
+
+        if (duplicate) {
+            Swal.fire(
+                "Gagal!",
+                "Nama kategori sudah digunakan oleh kategori lain",
+                "warning"
+            );
+            return;
+        }
+
         const data = {
-            nama_jenis: document.getElementById("edit-nama").value,
-            harga_per_kg: parseInt(document.getElementById("edit-harga").value),
+            nama_jenis: namaBaru,
+            harga_per_kg: hargaBaru,
         };
+
         await handleRequest(
             `${API_BASE_URL}/${id}`,
             "PUT",
@@ -207,38 +299,6 @@ document.addEventListener("DOMContentLoaded", () => {
             modalEdit
         );
     });
-
-    async function handleRequest(
-        url,
-        method,
-        data,
-        loadingText,
-        successText,
-        modal
-    ) {
-        try {
-            Swal.fire({
-                title: loadingText,
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading(),
-            });
-            const res = await fetch(url, {
-                method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
-            const result = await res.json();
-            if (res.ok) {
-                Swal.fire("Berhasil!", successText, "success");
-                closeAllModals();
-                loadKategori();
-            } else {
-                Swal.fire("Gagal!", result.message, "error");
-            }
-        } catch (err) {
-            Swal.fire("Error!", "Gagal koneksi ke server", "error");
-        }
-    }
 
     //DELETE
     async function deleteKategori(id) {
@@ -269,6 +329,45 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    //HANDLE REQUEST (CREATE & UPDATE)
+    async function handleRequest(
+        url,
+        method,
+        data,
+        loadingText,
+        successText,
+        modal
+    ) {
+        try {
+            Swal.fire({
+                title: loadingText,
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading(),
+            });
+
+            const res = await fetch(url, {
+                method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });
+
+            const result = await res.json();
+
+            if (res.ok) {
+                Swal.fire("Berhasil!", successText, "success");
+                closeAllModals();
+                loadKategori();
+            } else {
+                Swal.fire(
+                    "Gagal!",
+                    result.message || "Terjadi kesalahan",
+                    "error"
+                );
+            }
+        } catch (err) {
+            Swal.fire("Error!", "Gagal koneksi ke server", "error");
+        }
+    }
     //INIT
     loadKategori();
 });

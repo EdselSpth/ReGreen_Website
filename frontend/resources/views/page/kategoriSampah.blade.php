@@ -8,12 +8,20 @@
 
 @section('content')
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-        <button class="btn-tambah" id="btnTambah">+ Tambah Kategori</button>
-        <form id="form-search" style="display:flex; gap:8px;">
-            <input type="text" id="search-input" placeholder="Cari kategori sampah..."
-                style="padding:8px; border-radius:4px; border:1px solid #ccc;">
-            <button type="submit" class="btn-aksi btn-simpan">Cari</button>
-        </form>
+        <div class="header-tools">
+            <div class="left-section">
+                <button class="btn-tambah" id="btnTambah">
+                    + Tambah Kategori
+                </button>
+            </div>
+
+            <div class="right-section">
+                <form id="form-search" class="search-box">
+                    <input type="text" id="search-input" placeholder="Cari kategori sampah..." autocomplete="off">
+                </form>
+            </div>
+        </div>
+
 
     </div>
 
