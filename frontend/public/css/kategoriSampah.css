@@ -189,6 +189,35 @@ body {
     margin-top: 20px;
 }
 
+/* ===== SEARCH BAR ===== */
+.header-tools {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 5px 5px 5px 15px;
+    width: 300px;
+}
+
+.search-box input {
+    border: none;
+    outline: none;
+    background: transparent;
+    flex-grow: 1;
+    padding: 6px;
+    font-size: 14px;
+    color: #555;
+}
+
 .pagination button {
     background-color: #f0f0f0;
     border: 1px solid #ddd;
