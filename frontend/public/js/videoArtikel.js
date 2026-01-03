@@ -108,27 +108,102 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function renderVideoPagination({ currentPage, totalPages, totalItems }) {
-        videoPageInfo.innerText = `Halaman ${currentPage} dari ${totalPages} (Total: ${totalItems})`;
+    function renderVideoPagination(pagination) {
+        if (!pagination) return;
+
+        const {
+            currentPage: apiCurrentPage,
+            totalPages,
+            totalItems,
+        } = pagination;
+
+        videoPageInfo.innerText = `Halaman ${apiCurrentPage} dari ${totalPages} (Total: ${totalItems})`;
         videoPagination.innerHTML = "";
 
-        const prev = document.createElement("button");
-        prev.textContent = "Previous";
-        prev.disabled = currentPage === 1;
-        prev.onclick = () => {
-            videoPage--;
+        if (totalPages <= 1) return;
+
+        // PREV
+        const btnPrev = document.createElement("button");
+        btnPrev.innerHTML = "&laquo; Prev";
+        btnPrev.className = "btn-pagination";
+        btnPrev.disabled = apiCurrentPage === 1;
+        btnPrev.onclick = () => {
+            if (videoPage > 1) {
+                videoPage--;
+                loadVideo();
+            }
+        };
+        videoPagination.appendChild(btnPrev);
+
+        let startPage, endPage;
+
+        if (totalPages <= 7) {
+            startPage = 1;
+            endPage = totalPages;
+        } else {
+            if (apiCurrentPage <= 4) {
+                startPage = 1;
+                endPage = 5;
+            } else if (apiCurrentPage + 3 >= totalPages) {
+                startPage = totalPages - 4;
+                endPage = totalPages;
+            } else {
+                startPage = apiCurrentPage - 2;
+                endPage = apiCurrentPage + 2;
+            }
+        }
+
+        if (startPage > 1) {
+            addVideoPageButton(1, apiCurrentPage);
+            if (startPage > 2) videoPagination.appendChild(createDots());
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            addVideoPageButton(i, apiCurrentPage);
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1)
+                videoPagination.appendChild(createDots());
+            addVideoPageButton(totalPages, apiCurrentPage);
+        }
+
+        // NEXT
+        const btnNext = document.createElement("button");
+        btnNext.innerHTML = "Next &raquo;";
+        btnNext.className = "btn-pagination";
+        btnNext.disabled = apiCurrentPage === totalPages;
+        btnNext.onclick = () => {
+            if (videoPage < totalPages) {
+                videoPage++;
+                loadVideo();
+            }
+        };
+        videoPagination.appendChild(btnNext);
+    }
+
+    function addVideoPageButton(pageNumber, currentPage) {
+        const btn = document.createElement("button");
+        btn.innerText = pageNumber;
+        btn.className = "btn-pagination";
+
+        if (pageNumber === currentPage) {
+            btn.classList.add("active");
+        }
+
+        btn.onclick = () => {
+            videoPage = pageNumber;
             loadVideo();
         };
 
-        const next = document.createElement("button");
-        next.textContent = "Next";
-        next.disabled = currentPage === totalPages;
-        next.onclick = () => {
-            videoPage++;
-            loadVideo();
-        };
+        videoPagination.appendChild(btn);
+    }
 
-        videoPagination.append(prev, next);
+    function createDots() {
+        const span = document.createElement("span");
+        span.innerText = "...";
+        span.style.padding = "6px";
+        return span;
     }
 
     //LOAD ARTIKEL
@@ -183,51 +258,122 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function renderArtikelPagination({ currentPage, totalPages, totalItems }) {
-        artikelPageInfo.innerText = `Halaman ${currentPage} dari ${totalPages} (Total: ${totalItems})`;
+    function renderArtikelPagination(pagination) {
+        if (!pagination) return;
+
+        const {
+            currentPage: apiCurrentPage,
+            totalPages,
+            totalItems,
+        } = pagination;
+
+        artikelPageInfo.innerText = `Halaman ${apiCurrentPage} dari ${totalPages} (Total: ${totalItems})`;
         artikelPagination.innerHTML = "";
 
-        const prev = document.createElement("button");
-        prev.textContent = "Previous";
-        prev.disabled = currentPage === 1;
-        prev.onclick = () => {
-            artikelPage--;
+        if (totalPages <= 1) return;
+
+        // === PREV ===
+        const btnPrev = document.createElement("button");
+        btnPrev.innerHTML = "&laquo; Prev";
+        btnPrev.className = "btn-pagination";
+        btnPrev.disabled = apiCurrentPage === 1;
+        btnPrev.onclick = () => {
+            if (artikelPage > 1) {
+                artikelPage--;
+                loadArtikel();
+            }
+        };
+        artikelPagination.appendChild(btnPrev);
+
+        let startPage, endPage;
+
+        if (totalPages <= 7) {
+            startPage = 1;
+            endPage = totalPages;
+        } else {
+            if (apiCurrentPage <= 4) {
+                startPage = 1;
+                endPage = 5;
+            } else if (apiCurrentPage + 3 >= totalPages) {
+                startPage = totalPages - 4;
+                endPage = totalPages;
+            } else {
+                startPage = apiCurrentPage - 2;
+                endPage = apiCurrentPage + 2;
+            }
+        }
+
+        if (startPage > 1) {
+            addArtikelPageButton(1, apiCurrentPage);
+            if (startPage > 2) artikelPagination.appendChild(createDots());
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            addArtikelPageButton(i, apiCurrentPage);
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1)
+                artikelPagination.appendChild(createDots());
+            addArtikelPageButton(totalPages, apiCurrentPage);
+        }
+
+        // === NEXT ===
+        const btnNext = document.createElement("button");
+        btnNext.innerHTML = "Next &raquo;";
+        btnNext.className = "btn-pagination";
+        btnNext.disabled = apiCurrentPage === totalPages;
+        btnNext.onclick = () => {
+            if (artikelPage < totalPages) {
+                artikelPage++;
+                loadArtikel();
+            }
+        };
+        artikelPagination.appendChild(btnNext);
+    }
+
+    function addArtikelPageButton(pageNumber, currentPage) {
+        const btn = document.createElement("button");
+        btn.innerText = pageNumber;
+        btn.className = "btn-pagination";
+
+        if (pageNumber === currentPage) {
+            btn.classList.add("active");
+        }
+
+        btn.onclick = () => {
+            artikelPage = pageNumber;
             loadArtikel();
         };
 
-        const next = document.createElement("button");
-        next.textContent = "Next";
-        next.disabled = currentPage === totalPages;
-        next.onclick = () => {
-            artikelPage++;
-            loadArtikel();
-        };
+        artikelPagination.appendChild(btn);
+    }
 
-        artikelPagination.append(prev, next);
+    function createDots() {
+        const span = document.createElement("span");
+        span.innerText = "...";
+        span.style.padding = "6px";
+        return span;
     }
 
     //SEARCH
-    document
-        .getElementById("form-search-video")
-        ?.addEventListener("submit", (e) => {
-            e.preventDefault();
-            videoSearch = document
-                .getElementById("search-video-input")
-                .value.trim();
+    const searchVideoInput = document.getElementById("search-video-input");
+    if (searchVideoInput) {
+        searchVideoInput.addEventListener("input", () => {
+            videoSearch = searchVideoInput.value;
             videoPage = 1;
             loadVideo();
         });
+    }
 
-    document
-        .getElementById("form-search-artikel")
-        ?.addEventListener("submit", (e) => {
-            e.preventDefault();
-            artikelSearch = document
-                .getElementById("search-artikel-input")
-                .value.trim();
+    const searchArtikelInput = document.getElementById("search-artikel-input");
+    if (searchArtikelInput) {
+        searchArtikelInput.addEventListener("input", () => {
+            artikelSearch = searchArtikelInput.value;
             artikelPage = 1;
             loadArtikel();
         });
+    }
 
     //REQ HANDLER
     async function handleRequest(
@@ -283,7 +429,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 modalTambahVideo,
                 () => {
                     loadVideo();
-                    e.target.reset(); 
+                    e.target.reset();
                 }
             );
         });
