@@ -71,16 +71,23 @@ DATA BANK SAMPAH
           <select id="tambah-kategori"></select>
         </div>
 
-        <th>Operasional</th> ```
-
         <div class="form-group">
           <label>Jam Operasional</label>
-          <div style="display: flex; gap: 10px;">
-            <input type="time" id="tambah-jam-buka">
-            <span>sampai</span>
-            <input type="time" id="tambah-jam-tutup">
+          <div class="jam-operasional">
+            <div class="jam-field">
+              <span class="jam-label">Buka</span>
+              <input type="time" id="tambah-jam-buka">
+            </div>
+
+            <span class="jam-separator">—</span>
+
+            <div class="jam-field">
+              <span class="jam-label">Tutup</span>
+              <input type="time" id="tambah-jam-tutup">
+            </div>
           </div>
         </div>
+
 
         <div class="form-group">
           <label>No Telepon</label>
@@ -130,17 +137,26 @@ DATA BANK SAMPAH
         <div class="form-group">
           <label>Kategori Sampah</label>
           <div id="edit-selected" class="selected-tags"></div>
-          <select id="edit-kategori"></select> 
+          <select id="edit-kategori"></select>
         </div>
 
         <div class="form-group">
           <label>Jam Operasional</label>
-          <div style="display: flex; gap: 10px;">
-            <input type="time" id="edit-jam-buka">
-            <span>sampai</span>
-            <input type="time" id="edit-jam-tutup">
+          <div class="jam-operasional">
+            <div class="jam-field">
+              <span class="jam-label">Buka</span>
+              <input type="time" id="edit-jam-buka">
+            </div>
+
+            <span class="jam-separator">—</span>
+
+            <div class="jam-field">
+              <span class="jam-label">Tutup</span>
+              <input type="time" id="edit-jam-tutup">
+            </div>
           </div>
         </div>
+
 
         <div class="form-group">
           <label>No Telepon</label>

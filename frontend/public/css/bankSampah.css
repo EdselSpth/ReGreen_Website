@@ -190,6 +190,16 @@ body {
     margin-top: 20px;
 }
 
+.pagination {
+    display: flex;
+    align-items: center;
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .pagination button {
     background-color: #f0f0f0;
     border: 1px solid #ddd;
@@ -399,4 +409,38 @@ body {
   color: white;
   cursor: pointer;
   font-weight: bold;
+}
+/* ===== Jam Operasional ===== */
+.jam-operasional {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.jam-field {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.jam-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #355e2b;
+  margin-bottom: 4px;
+}
+
+.jam-operasional input[type="time"] {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--hijau-tua-regreen);
+  background-color: var(--hijau-muda-regreen);
+  font-size: 14px;
+}
+
+.jam-separator {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--hijau-tua-regreen);
+  margin-top: 16px;
 }

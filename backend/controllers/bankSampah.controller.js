@@ -1,8 +1,5 @@
 const db = require("../config/db");
 
-/* =========================
-   GET ALL
-========================= */
 exports.getAll = (req, res) => {
   const sql = `
     SELECT 
@@ -35,9 +32,6 @@ exports.getAll = (req, res) => {
   });
 };
 
-/* =========================
-   GET BY ID
-========================= */
 exports.getById = (req, res) => {
   const sql = "SELECT * FROM bank_sampah WHERE id = ?";
 
@@ -55,9 +49,6 @@ exports.getById = (req, res) => {
   });
 };
 
-/* =========================
-   CREATE
-========================= */
 exports.create = (req, res) => {
   console.log("CREATE BODY:", req.body);
 
@@ -112,7 +103,7 @@ exports.create = (req, res) => {
           );
         }
 
-        // 🔒 FILTER ID AMAN
+        
         const pivot = jenis_sampah_ids
           .filter(id => Number.isInteger(id))
           .map(id => [bankId, id]);
@@ -144,9 +135,6 @@ exports.create = (req, res) => {
   });
 };
 
-/* =========================
-   UPDATE
-========================= */
 exports.update = (req, res) => {
   console.log("UPDATE BODY:", req.body);
 
@@ -162,7 +150,6 @@ exports.update = (req, res) => {
 
   const bankId = req.params.id;
 
-  // 🔒 VALIDASI STATUS
   const validStatus = ["Aktif", "Nonaktif"];
   if (!validStatus.includes(status)) {
     return res.status(400).json({
@@ -244,9 +231,6 @@ exports.update = (req, res) => {
   });
 };
 
-/* =========================
-   DELETE
-========================= */
 exports.delete = (req, res) => {
   const sql = "DELETE FROM bank_sampah WHERE id = ?";
 

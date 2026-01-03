@@ -24,12 +24,31 @@ document.addEventListener("DOMContentLoaded", () => {
     let tambahKategoriIds = [];
     let editKategoriIds = [];
 
-    // --- 1. LOAD KATEGORI (Dropdown) ---
+    function showFieldError(message) {
+        Swal.fire({
+            icon: "warning",
+            title: "Periksa input",
+            text: message,
+        });
+    }
+
+    function isEmpty(val) {
+        return !val || val.trim() === "";
+    }
+
+    function isValidJam(buka, tutup) {
+        if (!buka || !tutup) return true; // optional
+        return buka < tutup;
+    }
+
+    function isValidPhone(phone) {
+        return !phone || /^[0-9]{9,15}$/.test(phone);
+    }
+
     async function loadKategori() {
         try {
             const res = await fetch(`${API_JENIS}?limit=100`);
             const responseJson = await res.json();
-            // Sesuai struktur backend: responseJson.data.data
             const list = responseJson.data.data || [];
 
             const dropdowns = [
@@ -53,14 +72,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- 2. TAGS SYSTEM ---
     function renderTags(containerId, selectedIds, source) {
         const container = document.getElementById(containerId);
         if (!container) return;
         container.innerHTML = "";
 
         selectedIds.forEach((id) => {
-            // Cari text dari dropdown
             const selectEl = document.getElementById(`${source}-kategori`);
             const opt = Array.from(selectEl.options).find((o) => o.value == id);
             const text = opt ? opt.textContent : "Kategori " + id;
@@ -102,13 +119,11 @@ document.addEventListener("DOMContentLoaded", () => {
         e.target.value = "";
     });
 
-    // --- 3. MAIN DATA ---
     async function loadData() {
         try {
             showLoading();
             const res = await fetch(API_URL);
             const result = await res.json();
-            // Backend bankSampah ngirim array langsung
             dataBank = Array.isArray(result) ? result : [];
             filteredData = [...dataBank];
             renderTabel();
@@ -161,22 +176,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderPagination() {
         paginationEl.innerHTML = "";
+
         const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+
         infoData.innerText = `Menampilkan ${pageDataCount()} dari ${
             filteredData.length
         } data`;
 
         if (totalPages <= 1) return;
-        for (let i = 1; i <= totalPages; i++) {
-            const btn = document.createElement("button");
-            btn.innerText = i;
-            btn.classList.toggle("active", i === currentPage);
-            btn.onclick = () => {
-                currentPage = i;
+
+        const prevBtn = document.createElement("button");
+        prevBtn.innerText = "← Sebelumnya";
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.onclick = () => {
+            if (currentPage > 1) {
+                currentPage--;
                 renderTabel();
-            };
-            paginationEl.appendChild(btn);
-        }
+            }
+        };
+
+        const nextBtn = document.createElement("button");
+        nextBtn.innerText = "Selanjutnya →";
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.onclick = () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTabel();
+            }
+        };
+
+        const pageInfo = document.createElement("span");
+        pageInfo.style.margin = "0 12px";
+        pageInfo.innerText = `Halaman ${currentPage} / ${totalPages}`;
+
+        paginationEl.appendChild(prevBtn);
+        paginationEl.appendChild(pageInfo);
+        paginationEl.appendChild(nextBtn);
     }
 
     const pageDataCount = () =>
@@ -185,12 +220,10 @@ document.addEventListener("DOMContentLoaded", () => {
             filteredData.length - (currentPage - 1) * rowsPerPage
         );
 
-    // --- TOMBOL BUKA MODAL ---
-    const tombolTambah = document.querySelector(".btn-tambah"); // Ambil tombol dari HTML
+    const tombolTambah = document.querySelector(".btn-tambah");
 
     if (tombolTambah) {
         tombolTambah.onclick = () => {
-            // Reset form dan kategori sebelum buka
             formTambah.reset();
             tambahKategoriIds = [];
             document.getElementById("tambah-selected").innerHTML = "";
@@ -198,7 +231,6 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    // --- 4. CRUD ACTIONS ---
     formTambah.onsubmit = async (e) => {
         e.preventDefault();
 
@@ -213,30 +245,57 @@ document.addEventListener("DOMContentLoaded", () => {
             jenis_sampah_ids: tambahKategoriIds,
         };
 
+        if (isEmpty(payload.nama)) {
+            return showFieldError("Nama bank sampah wajib diisi");
+        }
+
+        if (isEmpty(payload.alamat)) {
+            return showFieldError("Alamat wajib diisi");
+        }
+
+        if (!isValidJam(payload.jam_buka, payload.jam_tutup)) {
+            return showFieldError("Jam tutup harus lebih besar dari jam buka");
+        }
+
+        if (!isValidPhone(payload.telepon)) {
+            return showFieldError(
+                "Nomor telepon hanya boleh angka (9-15 digit)"
+            );
+        }
+
         try {
             showLoading();
 
-            // ✅ SIMPAN RESPONSE KE VARIABLE
             const res = await fetch(API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
 
-            // ✅ CEK RESPONSE BENERAN
             if (!res.ok) {
                 const text = await res.text();
                 throw new Error(text);
             }
 
-            Swal.fire("Berhasil", "Data ditambahkan", "success");
+            Swal.fire({
+                icon: "success",
+                title: "Berhasil",
+                text: "Data bank sampah berhasil ditambahkan",
+                timer: 1500,
+                showConfirmButton: false,
+            });
+
             modalTambah.classList.remove("active");
             formTambah.reset();
             tambahKategoriIds = [];
             loadData();
         } catch (err) {
             console.error("CREATE ERROR:", err);
-            Swal.fire("Gagal", "Error simpan data", "error");
+            Swal.fire(
+                "Gagal",
+                "Gagal menyimpan data. Coba lagi atau periksa koneksi.",
+                "error"
+            );
         } finally {
             hideLoading();
         }
@@ -290,6 +349,21 @@ document.addEventListener("DOMContentLoaded", () => {
             jenis_sampah_ids: editKategoriIds,
         };
 
+        if (isEmpty(payload.nama)) {
+            hideLoading();
+            return showFieldError("Nama bank sampah wajib diisi");
+        }
+
+        if (isEmpty(payload.alamat)) {
+            hideLoading();
+            return showFieldError("Alamat wajib diisi");
+        }
+
+        if (!isValidJam(payload.jam_buka, payload.jam_tutup)) {
+            hideLoading();
+            return showFieldError("Jam tutup harus lebih besar dari jam buka");
+        }
+
         try {
             showLoading();
             const response = await fetch(`${API_URL}/${id}`, {
@@ -320,7 +394,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // Close Modal Events
     document.querySelectorAll(".btn-tutup, .btn-batal").forEach((b) => {
         b.onclick = () => {
             modalTambah.classList.remove("active");
@@ -328,7 +401,6 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     });
 
-    // Search
     searchInput.oninput = () => {
         const k = searchInput.value.toLowerCase();
         filteredData = dataBank.filter(
@@ -340,7 +412,6 @@ document.addEventListener("DOMContentLoaded", () => {
         renderTabel();
     };
 
-    // Init
     (async () => {
         await loadKategori();
         loadData();
