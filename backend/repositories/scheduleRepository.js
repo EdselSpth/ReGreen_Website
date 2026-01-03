@@ -53,12 +53,13 @@ exports.getPaginated = ({ page, limit, search }) => {
 
 exports.insert = (data) => {
   return new Promise((resolve, reject) => {
-    db.query("INSERT INTO jadwal SET ?", data, (err, res) => {
-      if (err) reject(err);
-      resolve(res.insertId);
+    db.query("INSERT INTO jadwal SET ?", data, (err, result) => {
+      if (err) return reject(err);
+      resolve(result?.insertId || null);
     });
   });
 };
+
 
 exports.update = (id, data) => {
   return new Promise((resolve, reject) => {

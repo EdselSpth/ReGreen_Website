@@ -9,85 +9,63 @@ let searchKeyword = "";
 const LIMIT = 5;
 
 document.addEventListener("DOMContentLoaded", () => {
+
     const modal = document.getElementById("modalTambah");
     const btnTambah = document.getElementById("btnTambah");
     const btnClose = document.getElementById("btnClose");
     const btnBatal = document.getElementById("btnBatal");
     const form = document.getElementById("formSchedule");
 
-    const alamatInput = document.getElementById("alamat");
-    const alamatList = document.getElementById("alamatList");
     const searchInput = document.getElementById("searchInput");
     const paginationEl = document.getElementById("pagination");
 
-async function loadAreas(selected = "") {
-    const select = document.getElementById("alamat");
-    if (!select) return;
 
-    select.innerHTML = `<option value="">-- Pilih Alamat --</option>`;
+    function isDuplicateSchedule(payload, currentId = null) {
+        return schedules.some(item =>
+            item.alamat === payload.alamat &&
+            item.date === payload.date &&
+            item.time === payload.time &&
+            item.waste_type === payload.waste_type &&
+            String(item.id) !== String(currentId)
+        );
+    }
 
-    try {
+    async function loadAreas(selected = "") {
+        const select = document.getElementById("alamat");
+        select.innerHTML = `<option value="">-- Pilih Alamat --</option>`;
+
         const res = await fetch(API_AREA);
-        if (!res.ok) throw new Error("Gagal mengambil area");
-
-        const data = await res.json();
-        
-        // Memastikan data adalah array (MySQL areaMaster biasanya return array langsung)
-        const areas = Array.isArray(data) ? data : (data.data || []);
+        const json = await res.json();
+        const areas = Array.isArray(json) ? json : json.data || [];
 
         areas.forEach(item => {
-            // Cek struktur MySQL (item.jalan) atau Firebase (item.area.jalan)
-            const jalan = item.jalan || item.area?.jalan || "";
-            const kelurahan = item.kelurahan || item.area?.kelurahan || "";
-            const kecamatan = item.kecamatan || item.area?.kecamatan || "";
-            const kota = item.kota || item.area?.kota || "";
-            const provinsi = item.provinsi || item.area?.provinsi || "";
-
-            if (jalan && kecamatan) {
-                const fullAlamat = `${jalan}, ${kelurahan}, ${kecamatan}, ${kota}, ${provinsi}`;
-                const opt = document.createElement("option");
-                opt.value = fullAlamat;
-                opt.textContent = fullAlamat;
-
-                if (fullAlamat === selected) opt.selected = true;
-                select.appendChild(opt);
-            }
+            const alamat = `${item.jalan}, ${item.kelurahan}, ${item.kecamatan}, ${item.kota}, ${item.provinsi}`;
+            const opt = document.createElement("option");
+            opt.value = alamat;
+            opt.textContent = alamat;
+            if (alamat === selected) opt.selected = true;
+            select.appendChild(opt);
         });
-    } catch (err) {
-        console.error("Load area error:", err);
     }
-}
 
     async function loadJenisSampah(selected = "") {
         const select = document.getElementById("waste_type");
-        if (!select) return;
-
         select.innerHTML = `<option value="">-- Pilih Jenis Sampah --</option>`;
 
-        try {
-            const res = await fetch(API_JENIS_SAMPAH);
-            if (!res.ok) throw new Error("Gagal mengambil jenis sampah");
+        const res = await fetch(API_JENIS_SAMPAH);
+        const json = await res.json();
+        const data = json.data?.data || [];
 
-            const json = await res.json();
-            const data = Array.isArray(json.data?.data) ? json.data.data : [];
-
-            data.forEach(item => {
-                const opt = document.createElement("option");
-                opt.value = item.nama_jenis;         
-                opt.textContent = item.nama_jenis.toUpperCase();
-
-                if (item.nama_jenis === selected) {
-                    opt.selected = true;
-                }
-
-                select.appendChild(opt);
-            });
-        } catch (err) {
-            console.error("Load jenis sampah error:", err);
-        }
+        data.forEach(item => {
+            const opt = document.createElement("option");
+            opt.value = item.nama_jenis;
+            opt.textContent = item.nama_jenis.toUpperCase();
+            if (item.nama_jenis === selected) opt.selected = true;
+            select.appendChild(opt);
+        });
     }
 
-    btnTambah.addEventListener("click", async () => {
+    btnTambah.onclick = async () => {
         form.reset();
         document.getElementById("modalTitle").innerText = "Tambah Jadwal";
         document.getElementById("scheduleId").value = "";
@@ -97,7 +75,7 @@ async function loadAreas(selected = "") {
         await loadJenisSampah();
 
         modal.style.display = "flex";
-    });
+    };
 
     function hideModal() {
         modal.style.display = "none";
@@ -107,178 +85,186 @@ async function loadAreas(selected = "") {
     btnClose.onclick = hideModal;
     btnBatal.onclick = hideModal;
 
-
     async function loadSchedules() {
         const tbody = document.getElementById("tableBody");
-        if (!tbody) return;
+        const res = await fetch(`${API_SCHEDULE}?page=${currentPage}&limit=${LIMIT}&search=${searchKeyword}`);
+        const json = await res.json();
 
-        try {
-            const url = `${API_SCHEDULE}?page=${currentPage}&limit=${LIMIT}&search=${searchKeyword}`;
-            const res = await fetch(url);
-            const json = await res.json();
+        schedules = json.data || [];
+        totalPage = json.pagination?.totalPage || 1;
+        tbody.innerHTML = "";
 
-            schedules = json.data || [];
-            totalPage = json.pagination?.totalPage || 1;
+        if (!schedules.length) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center">Tidak ada data</td></tr>`;
+            paginationEl.innerHTML = "";
+            return;
+        }
 
-            tbody.innerHTML = "";
+        schedules.forEach((item, i) => {
+            tbody.insertAdjacentHTML("beforeend", `
+                <tr>
+                    <td>${(currentPage - 1) * LIMIT + i + 1}</td>
+                    <td><strong>${item.courier_name}</strong></td>
+                    <td>${item.alamat}</td>
+                    <td><span class="badge-green">${item.waste_type.toUpperCase()}</span></td>
+                    <td>${item.date}</td>
+                    <td>${item.time}</td>
+                    <td><span class="badge-yellow">${item.status}</span></td>
+                    <td>
+                        <button class="btn-action btn-edit-icon" onclick="editData('${item.id}')">Edit</button>
+                        <button class="btn-action btn-delete-icon" onclick="deleteData('${item.id}')">Hapus</button>
+                    </td>
+                </tr>
+            `);
+        });
 
-            if (schedules.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center">Tidak ada data</td></tr>`;
-                paginationEl.innerHTML = "";
-                return;
+        renderPagination();
+    }
+
+function renderPagination() {
+    paginationEl.innerHTML = "";
+
+    const prevLi = document.createElement("li");
+    prevLi.classList.add("page-item");
+    if (currentPage === 1) prevLi.classList.add("disabled");
+
+    const prevA = document.createElement("a");
+    prevA.href = "#";
+    prevA.textContent = "Prev";
+
+    prevA.addEventListener("click", e => {
+        e.preventDefault();
+        if (currentPage > 1) {
+            currentPage--;
+            loadSchedules();
+        }
+    });
+
+    prevLi.appendChild(prevA);
+    paginationEl.appendChild(prevLi);
+
+    //nomor
+    for (let i = 1; i <= totalPage; i++) {
+        const li = document.createElement("li");
+        if (i === currentPage) li.classList.add("active");
+
+        const a = document.createElement("a");
+        a.href = "#";
+        a.textContent = i;
+
+        a.addEventListener("click", e => {
+            e.preventDefault();
+            if (currentPage !== i) {
+                currentPage = i;
+                loadSchedules();
             }
+        });
 
-            schedules.forEach((item, i) => {
-                tbody.insertAdjacentHTML("beforeend", `
-                    <tr>
-                        <td>${(currentPage - 1) * LIMIT + i + 1}</td>
-                        <td><strong>${item.courier_name || "-"}</strong></td>
-                        <td style="text-align:left">${item.alamat || "-"}</td>
-                        <td>
-                            <span class="badge-green">
-                                ${(item.waste_type || "campuran").toUpperCase()}
-                            </span>
-                        </td>
-                        <td>${item.date}</td>
-                        <td><div class="time-box-ui">${item.time}</div></td>
-                        <td>
-                            <span class="badge-yellow">
-                                ${(item.status || "tersedia").toUpperCase()}
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn-action btn-edit-icon" onclick="editData('${item.id}')">Edit</button>
-                            <button class="btn-action btn-delete-icon" onclick="deleteData('${item.id}')">Hapus</button>
-                        </td>
-                    </tr>
-                `);
-            });
-
-            renderPagination();
-        } catch (err) {
-            console.error("Load schedule error:", err);
-        }
+        li.appendChild(a);
+        paginationEl.appendChild(li);
     }
 
+    const nextLi = document.createElement("li");
+    nextLi.classList.add("page-item");
+    if (currentPage === totalPage) nextLi.classList.add("disabled");
 
-    function renderPagination() {
-        paginationEl.innerHTML = "";
+    const nextA = document.createElement("a");
+    nextA.href = "#";
+    nextA.textContent = "Next";
 
-        const createBtn = (label, page, disabled = false, active = false) => `
-            <li class="page-item ${disabled ? "disabled" : ""} ${active ? "active" : ""}">
-                <a class="page-link" href="#" onclick="changePage(${page})">${label}</a>
-            </li>
-        `;
-
-        paginationEl.insertAdjacentHTML("beforeend",
-            createBtn("Prev", currentPage - 1, currentPage === 1)
-        );
-
-        for (let i = 1; i <= totalPage; i++) {
-            paginationEl.insertAdjacentHTML("beforeend",
-                createBtn(i, i, false, i === currentPage)
-            );
+    nextA.addEventListener("click", e => {
+        e.preventDefault();
+        if (currentPage < totalPage) {
+            currentPage++;
+            loadSchedules();
         }
+    });
 
-        paginationEl.insertAdjacentHTML("beforeend",
-            createBtn("Next", currentPage + 1, currentPage === totalPage)
-        );
-    }
+    nextLi.appendChild(nextA);
+    paginationEl.appendChild(nextLi);
+}
 
-    window.changePage = function (page) {
-        if (page < 1 || page > totalPage) return;
+
+    window.changePage = page => {
         currentPage = page;
         loadSchedules();
     };
 
-  
-    searchInput.addEventListener("keyup", (e) => {
+    searchInput.onkeyup = e => {
         if (e.key === "Enter") {
-            searchKeyword = e.target.value.trim();
+            searchKeyword = e.target.value;
             currentPage = 1;
             loadSchedules();
         }
-    });
-
-
-    let isSubmitting = false;
-    form.addEventListener("submit", async (e) => {
+    };
+    //form sybmit
+    form.onsubmit = async e => {
         e.preventDefault();
-        if (isSubmitting) return;
-        isSubmitting = true;
 
         const id = document.getElementById("scheduleId").value;
+        const timeStart = document.getElementById("time_start").value;
+        const timeEnd = document.getElementById("time_end").value;
+
+        if (!timeStart || !timeEnd) {
+            Swal.fire("Error", "Waktu mulai & selesai wajib diisi", "warning");
+            return;
+        }
 
         const payload = {
             firebase_uid: "ADMIN_MANUAL",
-            courier_name: document.getElementById("courier_name").value.trim(),
+            courier_name: document.getElementById("courier_name").value,
             alamat: document.getElementById("alamat").value,
             date: document.getElementById("date").value,
-            time: document.getElementById("time").value,
+            time: `${timeStart} - ${timeEnd}`,
             waste_type: document.getElementById("waste_type").value,
             status: document.getElementById("status")?.value || "tersedia"
         };
 
-        const url = id ? `${API_SCHEDULE}/${id}` : API_SCHEDULE;
-        const method = id ? "PUT" : "POST";
-
-        try {
-            const res = await fetch(url, {
-                method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-
-            if (!res.ok) throw new Error();
-
-            hideModal();
-            loadSchedules();
-
-            Swal.fire({
-                icon: "success",
-                title: "Berhasil",
-                timer: 1500,
-                showConfirmButton: false
-            });
-        } catch {
-            Swal.fire("Gagal", "Data gagal disimpan", "error");
-        } finally {
-            isSubmitting = false;
+        if (isDuplicateSchedule(payload, id)) {
+            Swal.fire("Duplikasi", "Jadwal sudah ada", "warning");
+            return;
         }
-    });
 
+        const res = await fetch(id ? `${API_SCHEDULE}/${id}` : API_SCHEDULE, {
+            method: id ? "PUT" : "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
 
-    window.editData = async (id) => {
+        if (!res.ok) {
+            Swal.fire("Gagal", "Data gagal disimpan", "error");
+            return;
+        }
+
+        hideModal();
+        loadSchedules();
+        Swal.fire("Berhasil", "Data tersimpan", "success");
+    };
+    //delete dan edit
+    window.editData = async id => {
         const item = schedules.find(s => s.id == id);
         if (!item) return;
 
-        const confirm = await Swal.fire({
-            title: "Edit Jadwal?",
-            icon: "question",
-            showCancelButton: true
-        });
-
-        if (!confirm.isConfirmed) return;
-
-        await loadAreas();
+        await loadAreas(item.alamat);
         await loadJenisSampah(item.waste_type);
+
+        const [start, end] = item.time.split(" - ");
 
         document.getElementById("modalTitle").innerText = "Edit Jadwal";
         document.getElementById("scheduleId").value = item.id;
         document.getElementById("courier_name").value = item.courier_name;
-        alamatInput.value = item.alamat;
         document.getElementById("date").value = item.date;
-        document.getElementById("time").value = item.time;
+        document.getElementById("time_start").value = start;
+        document.getElementById("time_end").value = end;
         document.getElementById("statusContainer").style.display = "block";
         document.getElementById("status").value = item.status;
 
         modal.style.display = "flex";
     };
 
-
-    window.deleteData = async (id) => {
+    window.deleteData = async id => {
         const confirm = await Swal.fire({
-            title: "Yakin ingin menghapus?",
+            title: "Hapus data?",
             icon: "warning",
             showCancelButton: true
         });
@@ -286,6 +272,9 @@ async function loadAreas(selected = "") {
         if (!confirm.isConfirmed) return;
 
         await fetch(`${API_SCHEDULE}/${id}`, { method: "DELETE" });
+        if (schedules.length === 1 && currentPage > 1) {
+            currentPage--;
+        }
         loadSchedules();
     };
 
