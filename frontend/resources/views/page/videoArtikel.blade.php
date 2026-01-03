@@ -11,11 +11,17 @@
         <div class="page-content">
             <!-- VIDEO -->
             <div class="header-tools">
-                <button class="btn-tambah" id="btnTambahVideo">+ Tambah Video</button>
-                <form id="form-search-video" class="search-box">
-                    <input type="text" id="search-video-input" placeholder="Cari Video..." autocomplete="off">
-                    <button type="submit">Cari</button>
-                </form>
+                <div class="left-section">
+                    <button class="btn-tambah" id="btnTambahVideo">
+                        + Tambah Video
+                    </button>
+                </div>
+
+                <div class="right-section">
+                    <form id="form-search-video" class="search-box">
+                        <input type="text" id="search-video-input" placeholder="Cari Video..." autocomplete="off">
+                    </form>
+                </div>
             </div>
 
             <div class="table-container">
@@ -44,11 +50,17 @@
 
             <!-- ARTIKEL -->
             <div class="header-tools" style="margin-top: 30px;">
-                <button class="btn-tambah" id="btnTambahArtikel">+ Tambah Artikel</button>
-                <form id="form-search-artikel" class="search-box">
-                    <input type="text" id="search-artikel-input" placeholder="Cari Artikel..." autocomplete="off">
-                    <button type="submit">Cari</button>
-                </form>
+                <div class="left-section">
+                    <button class="btn-tambah" id="btnTambahArtikel">
+                        + Tambah Artikel
+                    </button>
+                </div>
+
+                <div class="right-section">
+                    <form id="form-search-artikel" class="search-box">
+                        <input type="text" id="search-artikel-input" placeholder="Cari Artikel..." autocomplete="off">
+                    </form>
+                </div>
             </div>
 
             <div class="table-container">
