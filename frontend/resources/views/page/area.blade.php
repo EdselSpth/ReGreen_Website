@@ -65,6 +65,7 @@ Pendaftaran Area
         <tbody id="adminSimpleTable">
             </tbody>
     </table>
+    <div id="notePagination"></div>
 </div>
 
 <div id="addAreaModal" class="modal">

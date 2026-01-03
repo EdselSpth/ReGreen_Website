@@ -151,7 +151,7 @@ td {
 }
 
 .modal {
-    display: none; /* Menyembunyikan modal saat tidak aktif */
+    display: none; 
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -161,7 +161,7 @@ td {
     background-color: rgba(0, 0, 0, 0.6);
     align-items: center;
     justify-content: center;
-    opacity: 0; /* Modal disembunyikan */
+    opacity: 0; 
     transition: 0.3s;
 }
 
@@ -242,4 +242,49 @@ td {
 .status-text.rejected {
     color: var(--merah-hapus);
     font-weight: bold;
+}
+
+.pagination-wrapper {
+    display: flex;
+    justify-content: flex-end; 
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
+    padding-bottom: 15px;
+    padding-right: 20px; 
+}
+
+.pagination-info {
+    font-size: 14px;
+    color: #558B3E;
+    font-weight: 500;
+}
+
+.pagination-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+
+.btn-pagination {
+    background-color: #558B3E;
+    color: white;
+    border: none;
+    padding: 6px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.btn-pagination:hover:not(:disabled) {
+    background-color: #558B3E;
+    transform: translateY(-1px); 
+}
+
+.btn-pagination:disabled {
+    background-color: #adc178; 
+    opacity: 0.6;
+    cursor: not-allowed;
 }
