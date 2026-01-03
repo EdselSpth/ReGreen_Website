@@ -87,8 +87,13 @@
                         <input type="date" id="date" required>
                     </div>
                     <div class="col-md-6 form-group">
-                        <label>Waktu</label>
-                        <input type="text" id="time" placeholder="09:00 - 10:00" required>
+                        <label>Waktu Mulai</label>
+                        <input type="time" id="time_start" required>
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <label>Waktu Selesai</label>
+                        <input type="time" id="time_end" required>
                     </div>
                 </div>
 

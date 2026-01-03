@@ -141,3 +141,46 @@
     border: none;
     cursor: pointer;
 }
+.swal2-container {
+    z-index: 99999 !important;
+}
+
+
+#pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    gap: 6px;
+    padding-left: 0;
+}
+
+#pagination li {
+    border-radius: 6px;
+}
+
+#pagination li a {
+    display: block;
+    padding: 6px 12px;
+    border: 1px solid #5d8736;
+    color: #5d8736;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+#pagination li a:hover {
+    background-color: #5d8736;
+    color: #fff;
+}
+
+#pagination li.active a {
+    background-color: #5d8736;
+    color: white;
+}
+
+#pagination li.disabled a {
+    opacity: 0.5;
+    pointer-events: none;
+}
