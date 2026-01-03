@@ -10,6 +10,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let artikelPage = 1;
     let videoSearch = "";
     let artikelSearch = "";
+    let videoData = [];
+    let artikelData = [];
+    let allVideoData = [];
+    let allArtikelData = [];
 
     //ELEMEN
     const videoBody = document.getElementById("video-body");
@@ -54,6 +58,38 @@ document.addEventListener("DOMContentLoaded", () => {
         .getElementById("btnTambahArtikel")
         ?.addEventListener("click", () => openModal(modalTambahArtikel));
 
+    //DUPLIKAT
+    function isDuplicate(
+        dataList,
+        namaKey,
+        linkKey,
+        nama,
+        link,
+        excludeId = null
+    ) {
+        return dataList.some((item) => {
+            if (excludeId && item.id == excludeId) return false;
+
+            return (
+                item[namaKey].trim().toLowerCase() ===
+                    nama.trim().toLowerCase() &&
+                item[linkKey].trim().toLowerCase() === link.trim().toLowerCase()
+            );
+        });
+    }
+
+    async function loadAllVideo() {
+        const res = await fetch(`${API_VIDEO}?limit=10000`);
+        const result = await res.json();
+        allVideoData = result.data?.data || [];
+    }
+
+    async function loadAllArtikel() {
+        const res = await fetch(`${API_ARTIKEL}?limit=10000`);
+        const result = await res.json();
+        allArtikelData = result.data?.data || [];
+    }
+
     //LOAD VIDEO
     async function loadVideo() {
         const url = `${API_VIDEO}?page=${videoPage}&limit=${ITEMS_PER_PAGE}&search=${encodeURIComponent(
@@ -64,6 +100,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const result = await res.json();
 
         const data = result.data?.data || [];
+        videoData = data;
+
         const pagination = result.data?.pagination || {
             currentPage: 1,
             totalPages: 1,
@@ -216,6 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const result = await res.json();
 
         const data = result.data?.data || [];
+        artikelData = data;
         const pagination = result.data?.pagination || {
             currentPage: 1,
             totalPages: 1,
@@ -383,7 +422,8 @@ document.addEventListener("DOMContentLoaded", () => {
         loading,
         success,
         modal,
-        reload
+        reload,
+        refreshAll
     ) {
         Swal.fire({
             title: loading,
@@ -401,6 +441,7 @@ document.addEventListener("DOMContentLoaded", () => {
             Swal.fire("Berhasil", success, "success");
             closeModal(modal);
             reload();
+            refreshAll && refreshAll();
         } else {
             Swal.fire("Gagal", "Terjadi kesalahan", "error");
         }
@@ -416,13 +457,30 @@ document.addEventListener("DOMContentLoaded", () => {
             const link = document.getElementById("tambah-link-video").value;
             const deskripsi = document.getElementById("tambah-deskripsi").value;
 
+            if (
+                isDuplicate(
+                    allVideoData,
+                    "nama_video",
+                    "link_youtube",
+                    nama,
+                    link
+                )
+            ) {
+                Swal.fire(
+                    "Gagal",
+                    "Video dengan nama dan link yang sama sudah ada",
+                    "warning"
+                );
+                return;
+            }
+
             handleRequest(
                 API_VIDEO,
                 "POST",
                 {
                     nama_video: nama,
                     link_youtube: link,
-                    deskripsi: deskripsi,
+                    deskripsi,
                 },
                 "Menyimpan Video...",
                 "Video berhasil ditambahkan",
@@ -430,7 +488,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 () => {
                     loadVideo();
                     e.target.reset();
-                }
+                },
+                loadAllVideo
             );
         });
 
@@ -441,6 +500,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const nama = document.getElementById("tambah-nama-artikel").value;
             const link = document.getElementById("tambah-link-artikel").value;
+
+            if (
+                isDuplicate(
+                    allArtikelData,
+                    "nama_artikel",
+                    "file_pdf",
+                    nama,
+                    link
+                )
+            ) {
+                Swal.fire(
+                    "Gagal",
+                    "Artikel dengan nama dan file yang sama sudah ada",
+                    "warning"
+                );
+                return;
+            }
 
             handleRequest(
                 API_ARTIKEL,
@@ -455,7 +531,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 () => {
                     loadArtikel();
                     e.target.reset();
-                }
+                },
+                loadAllArtikel
             );
         });
 
@@ -489,6 +566,24 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             const id = document.getElementById("edit-video-id").value;
 
+            if (
+                isDuplicate(
+                    allVideoData,
+                    "nama_video",
+                    "link_youtube",
+                    editNamaVideo.value,
+                    editLinkVideo.value,
+                    id
+                )
+            ) {
+                Swal.fire(
+                    "Gagal",
+                    "Video dengan nama dan link tersebut sudah ada",
+                    "warning"
+                );
+                return;
+            }
+
             handleRequest(
                 `${API_VIDEO}/${id}`,
                 "PUT",
@@ -500,7 +595,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 "Memperbarui Video...",
                 "Video berhasil diperbarui",
                 modalEditVideo,
-                loadVideo
+                loadVideo,
+                loadAllVideo
             );
         });
 
@@ -509,6 +605,24 @@ document.addEventListener("DOMContentLoaded", () => {
         ?.addEventListener("submit", (e) => {
             e.preventDefault();
             const id = document.getElementById("edit-artikel-id").value;
+
+            if (
+                isDuplicate(
+                    allArtikelData,
+                    "nama_artikel",
+                    "file_pdf",
+                    editNamaArtikel.value,
+                    editLinkArtikel.value,
+                    id
+                )
+            ) {
+                Swal.fire(
+                    "Gagal",
+                    "Artikel dengan nama dan file tersebut sudah ada",
+                    "warning"
+                );
+                return;
+            }
 
             handleRequest(
                 `${API_ARTIKEL}/${id}`,
@@ -520,7 +634,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 "Memperbarui Artikel...",
                 "Artikel berhasil diperbarui",
                 modalEditArtikel,
-                loadArtikel
+                loadArtikel,
+                loadAllArtikel
             );
         });
 
@@ -544,7 +659,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 "Menghapus...",
                 "Berhasil",
                 null,
-                loadVideo
+                loadVideo,
+                loadAllVideo
             );
     });
 
@@ -567,11 +683,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 "Menghapus...",
                 "Berhasil",
                 null,
-                loadArtikel
+                loadArtikel,
+                loadAllArtikel
             );
     });
 
     // INIT
     loadVideo();
     loadArtikel();
+    loadAllVideo();
+    loadAllArtikel();
 });
