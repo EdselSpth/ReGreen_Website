@@ -1,7 +1,6 @@
 const db = require("../config/db");
 
 const queries = [
-  // Di scripts/migrasi lu, pastikan strukturnya lengkap:
 `CREATE TABLE IF NOT EXISTS bank_sampah (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nama VARCHAR(100) NOT NULL,
