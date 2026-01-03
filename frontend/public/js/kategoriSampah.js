@@ -109,12 +109,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // === PREV ===
         const btnPrev = document.createElement("button");
+        btnPrev.type = "button";
         btnPrev.innerHTML = "&laquo; Prev";
         btnPrev.className = "btn-pagination";
         btnPrev.disabled = apiCurrentPage === 1;
         btnPrev.onclick = () => {
-            if (currentPage > 1) {
-                currentPage--;
+            if (apiCurrentPage > 1) {
+                currentPage = apiCurrentPage - 1;
                 loadKategori();
             }
         };
@@ -155,24 +156,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // === NEXT ===
         const btnNext = document.createElement("button");
+        btnNext.type = "button";
         btnNext.innerHTML = "Next &raquo;";
         btnNext.className = "btn-pagination";
         btnNext.disabled = apiCurrentPage === totalPages;
         btnNext.onclick = () => {
-            if (currentPage < totalPages) {
-                currentPage++;
+            if (apiCurrentPage < totalPages) {
+                currentPage = apiCurrentPage + 1;
                 loadKategori();
             }
         };
         paginationContainer.appendChild(btnNext);
     }
 
-    function addPageButton(pageNumber, currentPage) {
+    function addPageButton(pageNumber, currentPageApi) {
         const btn = document.createElement("button");
+        btn.type = "button";
         btn.innerText = pageNumber;
         btn.className = "btn-pagination";
 
-        if (pageNumber === currentPage) {
+        if (pageNumber === currentPageApi) {
             btn.classList.add("active");
         }
 
