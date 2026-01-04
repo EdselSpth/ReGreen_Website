@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\userController;
+use App\Http\Controllers\KeuntunganController;
 
 
 Route::get('/', function () {
@@ -58,6 +59,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/areaRequests', function () {
         $areaRequests = AreaRequest::where('status', 'pending')->get();
         return response()->json(['data' => $areaRequests]);
+    });
+
+    Route::prefix('proxy-keuntungan')->group(function () {
+        Route::get('/', [KeuntunganController::class, 'index']);
+        Route::get('/history', [KeuntunganController::class, 'history']);
+        Route::post('/', [KeuntunganController::class, 'store']);
+        Route::put('/{id}', [KeuntunganController::class, 'update']);
+        Route::delete('/{id}', [KeuntunganController::class, 'destroy']);
+        Route::get('/export', [KeuntunganController::class, 'export'])->name('keuntungan.export');
     });
 
     Route::prefix('users')->group(function () {

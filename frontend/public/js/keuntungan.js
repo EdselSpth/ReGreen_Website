@@ -15,12 +15,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const infoPending = document.querySelector("#pending-page-info");
     const infoHistory = document.querySelector("#history-page-info");
 
+    // Ambil Token CSRF dari meta tag
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+    // Inisialisasi Load Data
     loadPending();
     loadHistory();
 
+    // --- 1. FUNGSI LOAD DATA (READ) ---
     async function loadPending() {
         try {
-            const res = await fetch("http://localhost:3000/api/keuntungan");
+            const res = await fetch("/proxy-keuntungan");
             const response = await res.json();
             pendingData = response.data || [];
             displayTable(pendingData, tblPending, pagPendingWrapper, currentPendingPage, 'pending', infoPending);
@@ -29,13 +34,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function loadHistory() {
         try {
-            const res = await fetch("http://localhost:3000/api/keuntungan/history");
+            const res = await fetch("/proxy-keuntungan/history");
             const response = await res.json();
             historyData = response.data || [];
             displayTable(historyData, tblHistory, pagHistoryWrapper, currentHistoryPage, 'history', infoHistory);
         } catch (err) { console.error("Error history:", err); }
     }
 
+    // --- 2. FUNGSI SIMPAN DATA (CREATE) ---
+    const formTambah = document.querySelector("#formTambah");
+    if (formTambah) {
+        formTambah.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const data = {
+                nama_pengguna: document.getElementById("nama_pengguna").value,
+                nominal: parseInt(document.getElementById("nominal").value),
+                rekening: document.getElementById("rekening").value,
+                metode: document.getElementById("metode").value,
+                firebase_uid: "ADMIN-WEB" // Penanda jika ditambah lewat web
+            };
+
+            try {
+                const response = await fetch("/proxy-keuntungan", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": csrfToken
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    Swal.fire('Berhasil', 'Penarikan berhasil diajukan', 'success')
+                        .then(() => {
+                            closeModal();
+                            loadPending(); // Refresh tabel tanpa reload halaman
+                            formTambah.reset();
+                        });
+                } else {
+                    const err = await response.json();
+                    Swal.fire('Gagal', err.message || 'Gagal menyimpan data', 'error');
+                }
+            } catch (e) {
+                console.error("Error Store:", e);
+                Swal.fire('Error', 'Gagal menghubungi server', 'error');
+            }
+        });
+    }
+
+    // --- 3. LOGIKA TAMPILAN TABEL & PAGINATION (TIDAK BERUBAH DESAINNYA) ---
     function displayTable(data, table, paginationWrapper, page, type, infoElement) {
         table.innerHTML = "";
         let start = (page - 1) * rowsPerPage;
@@ -95,10 +143,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const totalItems = data.length;
         const totalPages = Math.ceil(totalItems / rowsPerPage);
 
-        // Update Info Halaman (Kiri)
         infoElement.innerText = `Halaman ${currentPage} dari ${totalPages} (Total: ${totalItems})`;
 
-        // Tombol Previous
         const btnPrev = document.createElement("button");
         btnPrev.innerText = "Sebelumnya";
         btnPrev.disabled = currentPage === 1;
@@ -108,7 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         wrapper.appendChild(btnPrev);
 
-        // Tombol Next
         const btnNext = document.createElement("button");
         btnNext.innerText = "Selanjutnya";
         btnNext.disabled = currentPage === totalPages;
@@ -126,19 +171,22 @@ document.addEventListener("DOMContentLoaded", () => {
             displayTable(historyData, tblHistory, pagHistoryWrapper, currentHistoryPage, 'history', infoHistory);
         }
     }
-
-    // Fungsi Global Lainnya (lihatAlasan, updateStatus, exportData, dll tetap sama)
 });
 
-// Fungsi global dipindah keluar DOMContentLoaded agar bisa diakses onclick HTML
+// --- 4. FUNGSI GLOBAL (DILUAR DOMCONTENTLOADED) ---
+
 function lihatAlasan(teks) {
     Swal.fire({ title: 'Alasan Penolakan', text: teks, icon: 'info', confirmButtonColor: '#558B3E' });
 }
 
-function exportData() { window.location.href = "http://localhost:3000/api/keuntungan/export"; }
+function exportData() { 
+    window.location.href = "/proxy-keuntungan/export"; 
+}
 
 async function updateStatus(id, s) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     let alasan = null;
+
     if (s === 'ditolak') {
         const { value: text, isConfirmed } = await Swal.fire({
             title: 'Alasan Penolakan',
@@ -153,10 +201,14 @@ async function updateStatus(id, s) {
         const res = await Swal.fire({ title: 'Konfirmasi', text: 'Terima pengajuan ini?', showCancelButton: true });
         if (!res.isConfirmed) return;
     }
+
     try {
-        const response = await fetch(`http://localhost:3000/api/keuntungan/${id}`, {
+        const response = await fetch(`/proxy-keuntungan/${id}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrfToken 
+            },
             body: JSON.stringify({ status: s, alasan: alasan })
         });
         if (response.ok) location.reload();
@@ -164,12 +216,23 @@ async function updateStatus(id, s) {
 }
 
 async function deleteData(id) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     const res = await Swal.fire({ title: 'Hapus data?', icon: 'warning', showCancelButton: true });
     if (res.isConfirmed) {
-        await fetch(`http://localhost:3000/api/keuntungan/${id}`, { method: "DELETE" });
+        await fetch(`/proxy-keuntungan/${id}`, { 
+            method: "DELETE",
+            headers: { "X-CSRF-TOKEN": csrfToken }
+        });
         location.reload();
     }
 }
 
-function openModal() { document.getElementById("modalTambah").classList.add("active"); document.getElementById("modalTambah").style.display = "flex"; }
-function closeModal() { document.getElementById("modalTambah").classList.remove("active"); setTimeout(()=>document.getElementById("modalTambah").style.display="none", 300); }
+function openModal() { 
+    document.getElementById("modalTambah").classList.add("active"); 
+    document.getElementById("modalTambah").style.display = "flex"; 
+}
+
+function closeModal() { 
+    document.getElementById("modalTambah").classList.remove("active"); 
+    setTimeout(() => document.getElementById("modalTambah").style.display = "none", 300); 
+}
