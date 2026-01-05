@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (total_page <= 1) return;
 
         const btnPrev = document.createElement("button");
-        btnPrev.innerHTML = '&laquo; Prev';
+        btnPrev.innerHTML = "&laquo; Prev";
         btnPrev.className = "btn-pagination";
         btnPrev.disabled = current_page === 1;
         btnPrev.onclick = () => {
@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const btnNext = document.createElement("button");
-btnNext.innerHTML = 'Next &raquo;';
+        btnNext.innerHTML = "Next &raquo;";
         btnNext.className = "btn-pagination";
         btnNext.disabled = current_page === total_page;
         btnNext.onclick = () => {
@@ -300,11 +300,14 @@ btnNext.innerHTML = 'Next &raquo;';
                     document.getElementById("form-password").reset();
                 loadUsers();
             } else {
-                Swal.fire(
-                    "Gagal!",
-                    result.message || "Terjadi kesalahan",
-                    "error"
-                );
+                let pesanError = result.message || "Terjadi kesalahan";
+
+                if (pesanError.includes("Duplicate entry")) {
+                    pesanError =
+                        "Username atau Email sudah digunakan! Silakan ganti yang lain.";
+                }
+
+                Swal.fire("Gagal!", pesanError, "error");
             }
         } catch (error) {
             console.error(error);

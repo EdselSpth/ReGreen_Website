@@ -49,12 +49,9 @@ class User extends Authenticatable
 
     public function getAuthPassword()
     {
-        // Ambil password asli dari database
         $password = $this->attributes['password'];
 
-        // Cek apakah depannya $2b$ (Khas Node.js)
         if (strpos($password, '$2b$') === 0) {
-            // Kalau iya, ganti depannya jadi $2y$ biar Laravel mau baca
             return str_replace('$2b$', '$2y$', $password);
         }
 
